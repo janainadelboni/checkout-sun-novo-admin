@@ -423,7 +423,7 @@ export default function PaginaRastreamento({
 
           return (
             <div className="flex flex-col gap-4">
-              <div className="max-h-[400px] overflow-y-auto">
+              <div className="h-[400px] overflow-y-auto">
                 <Timeline
                   className="!mt-6"
                   items={paginados.map((h) => ({
