@@ -1,0 +1,830 @@
+import { useState } from 'react'
+import {
+  Modal,
+  Button,
+  Input,
+  Radio,
+  Select,
+  Switch,
+  Checkbox,
+  Typography,
+  Divider,
+  Tag,
+  Alert,
+  Tooltip,
+} from 'antd'
+import {
+  LeftOutlined,
+  SearchOutlined,
+  QuestionCircleOutlined,
+} from '@ant-design/icons'
+
+const { Title, Text } = Typography
+
+/* ─── tipos de pixel disponíveis (RN01) ─── */
+export type PixelProvider = 'meta' | 'ga4' | 'google_ads' | 'gtm'
+
+type PixelOption = {
+  key: PixelProvider
+  label: string
+  logo: string
+  idPlaceholder: string
+  idLabel: string
+}
+
+const PIXEL_OPTIONS: PixelOption[] = [
+  {
+    key: 'meta',
+    label: 'Meta (Facebook)',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Facebook_Logo_%282019%29.png/600px-Facebook_Logo_%282019%29.png',
+    idPlaceholder: 'Ex: 123456789012345',
+    idLabel: 'ID do Pixel do Facebook',
+  },
+  {
+    key: 'ga4',
+    label: 'Google Analytics 4',
+    logo: 'https://www.gstatic.com/analytics-suite/header/suite/v2/ic_analytics.svg',
+    idPlaceholder: 'Ex: G-XXXXXXXXXX',
+    idLabel: 'ID de medição do GA4',
+  },
+  {
+    key: 'google_ads',
+    label: 'Google Ads',
+    logo: 'https://www.gstatic.com/adx/doubleclick.ico',
+    idPlaceholder: 'Ex: AW-123456789',
+    idLabel: 'ID de conversão do Google Ads',
+  },
+  {
+    key: 'gtm',
+    label: 'Google Tag Manager',
+    logo: 'https://www.gstatic.com/analytics-suite/header/suite/v2/ic_tag_manager.svg',
+    idPlaceholder: 'Ex: GTM-XXXXXXX',
+    idLabel: 'ID do contêiner GTM',
+  },
+]
+
+/* ─── Eventos disponíveis (RF03) ─── */
+type EventOption = {
+  key: string
+  label: string
+  description: string
+}
+
+const EVENTS: EventOption[] = [
+  { key: 'PageView', label: 'PageView', description: 'Quando o comprador acessa a página do checkout' },
+  { key: 'FormInteraction', label: 'FormInteraction', description: 'Ao preencher nome, e-mail ou outro campo inicial' },
+  { key: 'Lead', label: 'Lead', description: 'Ao preencher nome, email e telefone' },
+  { key: 'AddPaymentInfo', label: 'AddPaymentInfo', description: 'Ao interagir com formas de pagamento' },
+  { key: 'Purchase', label: 'Purchase', description: 'Quando o pagamento é confirmado' },
+  { key: 'ViewBoleto', label: 'Visualização de boleto', description: 'Quando o boleto gerado for visualizado' },
+]
+
+/* ─── Produtos mock ─── */
+type ProdutoBusca = {
+  id: number
+  nome: string
+  isPai: boolean
+}
+
+const PRODUTOS_DISPONIVEIS: ProdutoBusca[] = [
+  { id: 2704934, nome: 'A Nova Escola De Vendas', isPai: true },
+  { id: 2704935, nome: 'Plano Black Monstro 40% OFF', isPai: true },
+  { id: 2411153, nome: 'A sabedoria do grande sábio do marketing digital', isPai: true },
+  { id: 2030747, nome: 'Academia 360', isPai: true },
+  { id: 2576289, nome: 'Animação AI Aprendendo a ilustre CSAT', isPai: true },
+  { id: 2073333, nome: 'Apresentação Pesquisa Unity', isPai: true },
+  { id: 9104452, nome: 'Planilha de vendas', isPai: true },
+  { id: 2073334, nome: 'Curso de Marketing Digital', isPai: true },
+  { id: 9999901, nome: 'Módulo Bônus (produto filho)', isPai: false },
+]
+
+/* ─── Steps ─── */
+type Step = 'select_provider' | 'configure'
+
+/* ─── Modos de abertura do modal ─── */
+export type ModalMode =
+  | { type: 'new' }                                         // Configurar novo pixel (fluxo completo com seleção de provider)
+  | { type: 'configure'; provider: PixelProvider }           // Modal Configurar (pula seleção de provider, produtos livres)
+  | { type: 'bulk'; produtoIds: number[]; produtoNomes: Record<number, string>; provider?: PixelProvider }  // Configurar e vincular produtos (produtos pré-selecionados)
+  | { type: 'edit'; produtoId: number; produtoNome: string; existing?: PixelConfig; provider?: PixelProvider } // Editar/criar por produto específico
+
+/* ─── Props ─── */
+interface ConfigurarPixelModalProps {
+  open: boolean
+  onClose: () => void
+  onSave?: (config: PixelConfig) => void
+  mode?: ModalMode
+}
+
+export interface PixelConfig {
+  provider: PixelProvider
+  nomePixel: string
+  pixelId: string
+  events: string[]
+  apiConversao: boolean
+  tokenApi: string
+  produtos: number[]
+  diferenciarBoleto: boolean
+  valorCustomizado: 'nunca' | 'customizado' | 'sempre'
+}
+
+export default function ConfigurarPixelModal({
+  open,
+  onClose,
+  onSave,
+  mode = { type: 'new' },
+}: ConfigurarPixelModalProps) {
+  const [step, setStep] = useState<Step>('select_provider')
+  const [selectedProvider, setSelectedProvider] = useState<PixelProvider | null>(null)
+
+  // Configuração
+  const [nomePixel, setNomePixel] = useState('')
+  const [pixelId, setPixelId] = useState('')
+  const [selectedEvents, setSelectedEvents] = useState<string[]>([])
+  const [apiConversao, setApiConversao] = useState(false)
+  const [tokenApi, setTokenApi] = useState('')
+  const [selectedProdutos, setSelectedProdutos] = useState<number[]>([])
+  const [produtoSearch, setProdutoSearch] = useState('')
+  const [receberEvento, setReceberEvento] = useState<'imediatos' | 'nao_imediato' | 'todos'>('imediatos')
+  const [diferenciarBoleto, setDiferenciarBoleto] = useState(false)
+  const [valorCustomizado, setValorCustomizado] = useState<'nunca' | 'customizado' | 'sempre'>('nunca')
+
+  // Erros de validação
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // Determina se os produtos são fixos (apenas edit com existing)
+  const isProductsLocked = mode.type === 'edit'
+  const isBulk = mode.type === 'bulk'
+  const isEdit = mode.type === 'edit'
+  const [produtosExpanded, setProdutosExpanded] = useState(false)
+
+  // Inicializa o modal com base no modo ao abrir
+  const initFromMode = () => {
+    if (mode.type === 'configure') {
+      setSelectedProvider(mode.provider)
+      const info = PIXEL_OPTIONS.find((p) => p.key === mode.provider)
+      if (info) setNomePixel(`${info.label} - Principal`)
+      setStep('configure')
+    } else if (mode.type === 'bulk') {
+      setSelectedProdutos(mode.produtoIds)
+      if (mode.provider) {
+        setSelectedProvider(mode.provider)
+        const info = PIXEL_OPTIONS.find((p) => p.key === mode.provider)
+        if (info) setNomePixel(`${info.label} - Principal`)
+        setPixelId('7644657994596') // ID já configurado
+        setStep('configure')
+      } else {
+        setStep('select_provider')
+      }
+    } else if (mode.type === 'edit') {
+      setSelectedProdutos([mode.produtoId])
+      if (mode.existing) {
+        // Modo edição com dados existentes
+        setSelectedProvider(mode.existing.provider)
+        setNomePixel(mode.existing.nomePixel || '')
+        setPixelId(mode.existing.pixelId)
+        setSelectedEvents(mode.existing.events)
+        setApiConversao(mode.existing.apiConversao)
+        setTokenApi(mode.existing.tokenApi)
+        setDiferenciarBoleto(mode.existing.diferenciarBoleto)
+        setValorCustomizado(mode.existing.valorCustomizado)
+        setStep('configure')
+      } else if (mode.provider) {
+        // Configurar individualmente — provider conhecido, pula seleção
+        setSelectedProvider(mode.provider)
+        setPixelId('7644657994596') // ID já configurado
+        setStep('configure')
+      } else {
+        setStep('select_provider')
+      }
+    } else {
+      setStep('select_provider')
+    }
+  }
+
+  // biome-ignore lint: inicializa ao abrir
+  useState(() => {
+    if (open) initFromMode()
+  })
+
+  // Reinicializa quando o modal abre
+  // biome-ignore lint: effect on open
+  const [prevOpen, setPrevOpen] = useState(false)
+  if (open && !prevOpen) {
+    initFromMode()
+  }
+  if (open !== prevOpen) {
+    setPrevOpen(open)
+  }
+
+  const resetForm = () => {
+    setStep('select_provider')
+    setSelectedProvider(null)
+    setNomePixel('')
+    setPixelId('')
+    setSelectedEvents([])
+    setApiConversao(false)
+    setTokenApi('')
+    setSelectedProdutos([])
+    setProdutoSearch('')
+    setReceberEvento('imediatos')
+    setDiferenciarBoleto(false)
+    setValorCustomizado('nunca')
+    setErrors({})
+  }
+
+  const handleClose = () => {
+    resetForm()
+    onClose()
+  }
+
+  const handleSelectProvider = (provider: PixelProvider) => {
+    setSelectedProvider(provider)
+    setStep('configure')
+  }
+
+  const handleBackToSelect = () => {
+    setStep('select_provider')
+    setSelectedProvider(null)
+    setPixelId('')
+    setSelectedEvents([])
+    setApiConversao(false)
+    setTokenApi('')
+    setErrors({})
+  }
+
+  const toggleEvent = (eventKey: string) => {
+    setSelectedEvents((prev) =>
+      prev.includes(eventKey)
+        ? prev.filter((e) => e !== eventKey)
+        : [...prev, eventKey]
+    )
+    setErrors((prev) => ({ ...prev, events: '' }))
+  }
+
+  const addProduto = (produtoId: number) => {
+    if (!selectedProdutos.includes(produtoId)) {
+      setSelectedProdutos((prev) => [...prev, produtoId])
+      setErrors((prev) => ({ ...prev, produtos: '' }))
+    }
+    setProdutoSearch('')
+  }
+
+  const removeProduto = (produtoId: number) => {
+    setSelectedProdutos((prev) => prev.filter((id) => id !== produtoId))
+  }
+
+  const validate = (): boolean => {
+    const newErrors: Record<string, string> = {}
+
+    if (!nomePixel.trim()) {
+      newErrors.nomePixel = 'O nome do pixel é obrigatório'
+    }
+    if (!pixelId.trim()) {
+      newErrors.pixelId = 'O ID do pixel é obrigatório'
+    }
+    if (selectedEvents.length === 0) {
+      newErrors.events = 'Selecione pelo menos um evento'
+    }
+    if (selectedProdutos.length === 0) {
+      newErrors.produtos = 'Selecione pelo menos um produto'
+    }
+    if (apiConversao && !tokenApi.trim()) {
+      newErrors.tokenApi = 'O token da API de conversão é obrigatório'
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleSave = () => {
+    if (!validate() || !selectedProvider) return
+
+    const config: PixelConfig = {
+      provider: selectedProvider,
+      nomePixel,
+      pixelId,
+      events: selectedEvents,
+      apiConversao,
+      tokenApi,
+      produtos: selectedProdutos,
+      diferenciarBoleto,
+      valorCustomizado,
+    }
+
+    onSave?.(config)
+    handleClose()
+  }
+
+  const providerInfo = PIXEL_OPTIONS.find((p) => p.key === selectedProvider)
+
+  const hasPurchase = selectedEvents.includes('Purchase')
+
+  return (
+    <Modal
+      open={open}
+      onCancel={handleClose}
+      footer={null}
+      width={720}
+      destroyOnHidden
+      closable
+      title={null}
+      className="configurar-pixel-modal"
+      centered
+      styles={{
+        body: { padding: 0 },
+      }}
+    >
+      {/* ══════════ STEP 1: Seleção do tipo de pixel (RN01) ══════════ */}
+      {step === 'select_provider' && (
+        <div className="p-6">
+          <div className="text-center mb-6">
+            <Title level={4} className="!mb-1">
+              {isBulk
+                ? 'Configurar Pixel em Massa'
+                : isEdit
+                  ? 'Configurar Pixel'
+                  : 'Configurar Pixel'}
+            </Title>
+            <Text type="secondary">
+              Selecione o tipo de pixel que deseja configurar
+            </Text>
+          </div>
+
+          {/* Banner de contexto: quantos produtos selecionados (bulk) ou qual produto (edit) */}
+          {isBulk && mode.type === 'bulk' && (
+            <Alert
+              type="info"
+              showIcon
+              className="!mb-4"
+              message={
+                <Text className="text-sm">
+                  Configurando pixel para <Text strong>{mode.produtoIds.length} produto(s) / evento(s)</Text> selecionado(s)
+                </Text>
+              }
+              description={
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {mode.produtoIds.slice(0, 5).map((id) => (
+                    <Tag key={id} className="!text-xs">
+                      {mode.produtoNomes[id] || `Produto ${id}`}
+                    </Tag>
+                  ))}
+                  {mode.produtoIds.length > 5 && (
+                    <Tag className="!text-xs">+{mode.produtoIds.length - 5} mais</Tag>
+                  )}
+                </div>
+              }
+            />
+          )}
+
+          {isEdit && mode.type === 'edit' && (
+            <Alert
+              type="info"
+              showIcon
+              className="!mb-4"
+              message={
+                <Text className="text-sm">
+                  Configurando pixel para: <Text strong>{mode.produtoNome}</Text>
+                </Text>
+              }
+            />
+          )}
+
+          <div className="flex flex-col gap-3">
+            {PIXEL_OPTIONS.map((option) => (
+              <button
+                key={option.key}
+                onClick={() => handleSelectProvider(option.key)}
+                className="flex items-center gap-4 p-4 border border-[#d9d9d9] rounded-lg hover:border-[#0d2772] hover:bg-[#f5f7ff] transition-all cursor-pointer bg-white text-left w-full"
+              >
+                <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-[#f5f5f5] shrink-0 overflow-hidden">
+                  <img
+                    src={option.logo}
+                    alt={option.label}
+                    className="w-6 h-6 object-contain"
+                  />
+                </div>
+                <div className="flex-1">
+                  <Text strong className="text-base">{option.label}</Text>
+                </div>
+                <LeftOutlined className="rotate-180 text-[rgba(0,0,0,0.25)]" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ══════════ STEP 2: Configuração do pixel ══════════ */}
+      {step === 'configure' && providerInfo && (
+        <div className="flex flex-col">
+          {/* Header */}
+          <div className="px-6 pt-6 pb-4 border-b border-[#f0f0f0]">
+            <div className="flex items-center gap-3">
+              {/* No modo configure/bulk com provider/edit com provider, não tem "voltar" para step 1 */}
+              {mode.type !== 'configure' && !(mode.type === 'bulk' && mode.provider) && !(isEdit && mode.type === 'edit' && (mode.existing || mode.provider)) && (
+                <>
+                  <Button
+                    type="text"
+                    icon={<LeftOutlined />}
+                    onClick={handleBackToSelect}
+                    className="!p-0 !h-auto"
+                  >
+                    Voltar
+                  </Button>
+                  <Divider type="vertical" className="!h-5" />
+                </>
+              )}
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 flex items-center justify-center rounded bg-[#f5f5f5] overflow-hidden">
+                  <img
+                    src={providerInfo.logo}
+                    alt={providerInfo.label}
+                    className="w-5 h-5 object-contain"
+                  />
+                </div>
+                <Title level={5} className="!mb-0">
+                  Configurar {providerInfo.label}
+                </Title>
+              </div>
+            </div>
+            {/* Contexto de bulk no step 2 */}
+            {isBulk && mode.type === 'bulk' && (
+              <div className="mt-3 px-0">
+                <Tag color="blue" className="!text-xs">
+                  {mode.produtoIds.length} produto(s) / evento(s) selecionado(s)
+                </Tag>
+              </div>
+            )}
+          </div>
+
+          {/* Body - scrollable */}
+          <div className="px-6 py-5 flex flex-col gap-6 max-h-[60vh] overflow-y-auto">
+
+            {/* ── Nome do pixel ── */}
+            <div className="flex flex-col gap-2">
+              <Text strong>Nome do pixel</Text>
+              <Input
+                placeholder={`Ex: ${providerInfo.label} - Principal`}
+                value={nomePixel}
+                onChange={(e) => {
+                  setNomePixel(e.target.value)
+                  setErrors((prev) => ({ ...prev, nomePixel: '' }))
+                }}
+                status={errors.nomePixel ? 'error' : undefined}
+              />
+              <Text type="secondary" className="text-xs">
+                Dê um nome para identificar este pixel (ex: "Facebook - Remarketing", "GA4 - Loja Principal")
+              </Text>
+              {errors.nomePixel && (
+                <Text type="danger" className="text-xs">{errors.nomePixel}</Text>
+              )}
+            </div>
+
+            <Divider className="!my-0" />
+
+            {/* ── RN02: ID do pixel ── */}
+            <div className="flex flex-col gap-2">
+              <Text strong>{providerInfo.idLabel}</Text>
+              <Input
+                placeholder={providerInfo.idPlaceholder}
+                value={pixelId}
+                onChange={(e) => {
+                  setPixelId(e.target.value)
+                  setErrors((prev) => ({ ...prev, pixelId: '' }))
+                }}
+                status={errors.pixelId ? 'error' : undefined}
+                disabled={isBulk || (isEdit && mode.type === 'edit' && !!mode.provider)}
+              />
+              {errors.pixelId && (
+                <Text type="danger" className="text-xs">{errors.pixelId}</Text>
+              )}
+            </div>
+
+            <Divider className="!my-0" />
+
+            {/* ── RN04: Seleção de eventos (RF03) ── */}
+            <div className="flex flex-col gap-3">
+              <div>
+                <Text strong>Eventos que serão enviados</Text>
+                <br />
+                <Text type="secondary" className="text-xs">
+                  Selecione os eventos que deseja rastrear. Pelo menos um evento deve ser selecionado.
+                </Text>
+              </div>
+              {errors.events && (
+                <Text type="danger" className="text-xs">{errors.events}</Text>
+              )}
+              <div className="grid grid-cols-2 gap-3">
+                {EVENTS.map((event) => (
+                  <label
+                    key={event.key}
+                    className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-all ${
+                      selectedEvents.includes(event.key)
+                        ? 'border-[#0d2772] bg-[#f5f7ff]'
+                        : 'border-[#d9d9d9] hover:border-[#0d2772]/40'
+                    }`}
+                  >
+                    <Checkbox
+                      checked={selectedEvents.includes(event.key)}
+                      onChange={() => toggleEvent(event.key)}
+                      className="!mt-0.5"
+                    />
+                    <div className="flex-1">
+                      <Text strong className="text-sm">
+                        <Tag className="!text-xs">{event.key}</Tag>
+                      </Text>
+                      <br />
+                      <Text type="secondary" className="text-xs">
+                        {event.description}
+                      </Text>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* ── RF04: Configs avançadas de Purchase ── */}
+            {hasPurchase && (
+              <>
+                <Divider className="!my-0" />
+                <div className="flex flex-col gap-4">
+                  <div>
+                    <Text strong>Configurações de Purchase</Text>
+                    <br />
+                    <Text type="secondary" className="text-xs">
+                      Configure como os eventos de venda serão enviados.
+                    </Text>
+                  </div>
+
+                  {/* Deseja receber evento de */}
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <Text className="text-sm">Deseja receber evento de:</Text>
+                      <Tooltip title="Define em qual momento o evento de Purchase será disparado para a plataforma de anúncios. Isso impacta diretamente a otimização das suas campanhas.">
+                        <QuestionCircleOutlined className="text-[rgba(0,0,0,0.45)] text-xs cursor-help" />
+                      </Tooltip>
+                    </div>
+                    <Radio.Group
+                      value={receberEvento}
+                      onChange={(e) => setReceberEvento(e.target.value)}
+                      className="flex flex-col gap-3"
+                    >
+                      <div className="p-3 border border-[#d9d9d9] rounded-lg hover:border-[#0d2772]/40 transition-all">
+                        <Radio value="imediatos">
+                          <Text strong className="text-sm">Pagamentos imediatos</Text>
+                        </Radio>
+                        <Text type="secondary" className="text-xs block ml-6">
+                          O evento é disparado assim que o pagamento é confirmado. Aplica-se a: Pix, Cartão de crédito e Saldo Eduzz.
+                        </Text>
+                      </div>
+                      <div className="p-3 border border-[#d9d9d9] rounded-lg hover:border-[#0d2772]/40 transition-all">
+                        <Radio value="nao_imediato">
+                          <Text strong className="text-sm">Pagamento não imediato</Text>
+                        </Radio>
+                        <Text type="secondary" className="text-xs block ml-6">
+                          O evento é disparado quando o boleto é gerado (antes da compensação). Útil para rastrear a intenção de compra mesmo antes da confirmação do pagamento.
+                        </Text>
+                      </div>
+                      <div className="p-3 border border-[#d9d9d9] rounded-lg hover:border-[#0d2772]/40 transition-all">
+                        <Radio value="todos">
+                          <Text strong className="text-sm">Todos</Text>
+                        </Radio>
+                        <Text type="secondary" className="text-xs block ml-6">
+                          Dispara o evento para todas as formas de pagamento (imediatos + boleto). Recomendado para ter a visão completa de conversões.
+                        </Text>
+                      </div>
+                    </Radio.Group>
+                  </div>
+
+                  {/* RF19: Diferenciar boleto */}
+                  <div className="flex items-center justify-between p-3 border border-[#d9d9d9] rounded-lg">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <Text className="text-sm">Diferenciar pagamento não imediato (boleto)</Text>
+                        <Tooltip title="Quando ativado, a geração do boleto dispara um evento separado (ex: ViewBoleto) antes do evento de Purchase. Isso permite distinguir quem gerou boleto de quem efetivamente pagou.">
+                          <QuestionCircleOutlined className="text-[rgba(0,0,0,0.45)] text-xs cursor-help" />
+                        </Tooltip>
+                      </div>
+                      <Text type="secondary" className="text-xs">
+                        Se ativado, boletos gerados enviam evento intermediário antes do Purchase.
+                      </Text>
+                    </div>
+                    <Switch
+                      checked={diferenciarBoleto}
+                      onChange={setDiferenciarBoleto}
+                    />
+                  </div>
+
+                  {/* RF20: Valor customizado */}
+                  <div className="flex flex-col gap-2">
+                    <Text className="text-sm">Envio do valor da compra</Text>
+                    <Select
+                      value={valorCustomizado}
+                      onChange={setValorCustomizado}
+                      options={[
+                        { value: 'nunca', label: 'Nunca enviar' },
+                        { value: 'customizado', label: 'Sempre enviar com valores customizados' },
+                        { value: 'sempre', label: 'Sempre enviar' },
+                      ]}
+                    />
+                    {valorCustomizado === 'customizado' && (
+                      <div className="flex flex-col gap-3 mt-1 p-4 bg-[#fafafa] rounded-lg border border-[rgba(0,0,0,0.06)]">
+                        <div className="flex flex-col gap-1.5">
+                          <Text className="text-xs font-medium">Método de pagamento</Text>
+                          <Select
+                            placeholder="Selecione o método de pagamento"
+                            options={[
+                              { value: 'cartao', label: 'Cartão de crédito' },
+                              { value: 'boleto', label: 'Boleto' },
+                              { value: 'pix', label: 'PIX' },
+                              { value: 'todos', label: 'Todos os métodos' },
+                            ]}
+                          />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                          <Text className="text-xs font-medium">Novo valor</Text>
+                          <Input placeholder="Ex: 99.90" prefix="R$" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+
+            <Divider className="!my-0" />
+
+            {/* ── RN03: Associação a produtos (após eventos) ── */}
+            <div className="flex flex-col gap-3">
+              <Text strong>Vincular produto(s) / evento(s)</Text>
+
+              {errors.produtos && (
+                <Text type="danger" className="text-xs">{errors.produtos}</Text>
+              )}
+
+              {/* Campo de busca e lista de produtos - sempre aberto */}
+              {!isProductsLocked && (
+                <div className="flex flex-col gap-3">
+                  <Input
+                    placeholder="Pesquise pelo ID ou título do produto para adicionar mais produtos"
+                    suffix={<SearchOutlined className="text-[rgba(0,0,0,0.45)]" />}
+                    value={produtoSearch}
+                    onChange={(e) => setProdutoSearch(e.target.value)}
+                  />
+
+                  <div className="border border-[#d9d9d9] rounded-lg max-h-[200px] overflow-y-auto">
+                    <label className="flex items-center gap-3 px-4 py-2.5 border-b border-[#f0f0f0] hover:bg-[#f5f7ff] cursor-pointer bg-[#fafafa]">
+                      <Checkbox
+                        checked={selectedProdutos.length === PRODUTOS_DISPONIVEIS.filter(p => p.isPai).length}
+                        indeterminate={selectedProdutos.length > 0 && selectedProdutos.length < PRODUTOS_DISPONIVEIS.filter(p => p.isPai).length}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedProdutos(PRODUTOS_DISPONIVEIS.filter(p => p.isPai).map(p => p.id))
+                          } else {
+                            setSelectedProdutos([])
+                          }
+                        }}
+                      />
+                      <Text strong className="text-sm">Todos</Text>
+                    </label>
+                    {PRODUTOS_DISPONIVEIS.filter((p) => {
+                      if (!p.isPai) return false
+                      if (!produtoSearch.trim()) return true
+                      return p.nome.toLowerCase().includes(produtoSearch.toLowerCase()) || p.id.toString().includes(produtoSearch)
+                    }).map((produto) => (
+                      <label
+                        key={produto.id}
+                        className="flex items-center gap-3 px-4 py-2.5 border-b border-[#f0f0f0] last:border-b-0 hover:bg-[#f5f7ff] cursor-pointer"
+                      >
+                        <Checkbox
+                          checked={selectedProdutos.includes(produto.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              addProduto(produto.id)
+                            } else {
+                              removeProduto(produto.id)
+                            }
+                          }}
+                        />
+                        <Text className="text-sm">
+                          {produto.id} - {produto.nome}
+                        </Text>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Tags de produtos selecionados */}
+              {selectedProdutos.length > 0 && (
+                <div>
+                  <div className={`flex flex-wrap gap-1.5 ${!produtosExpanded ? 'max-h-[68px] overflow-hidden' : ''}`}>
+                    {selectedProdutos.map((id) => {
+                      const prod = PRODUTOS_DISPONIVEIS.find((p) => p.id === id)
+                      const produtoNome = prod?.nome
+                        || (mode.type === 'bulk' ? mode.produtoNomes[id] : undefined)
+                        || (mode.type === 'edit' ? mode.produtoNome : undefined)
+                        || `Produto ${id}`
+                      return (
+                        <Tag
+                          key={id}
+                          closable={!isProductsLocked}
+                          onClose={() => removeProduto(id)}
+                          className="!flex items-center gap-1 !py-1 !px-2"
+                        >
+                          {id} - {produtoNome}
+                        </Tag>
+                      )
+                    })}
+                  </div>
+                  {selectedProdutos.length > 4 && !produtosExpanded && (
+                    <button
+                      type="button"
+                      onClick={() => setProdutosExpanded(true)}
+                      className="text-[#0d2772] text-xs mt-1 hover:underline cursor-pointer bg-transparent border-none p-0"
+                    >
+                      Ver mais ({selectedProdutos.length - 4} produtos ocultos)
+                    </button>
+                  )}
+                  {produtosExpanded && selectedProdutos.length > 4 && (
+                    <button
+                      type="button"
+                      onClick={() => setProdutosExpanded(false)}
+                      className="text-[#0d2772] text-xs mt-1 hover:underline cursor-pointer bg-transparent border-none p-0"
+                    >
+                      Ver menos
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <Divider className="!my-0" />
+
+            {/* ── RN05: API de conversão ── */}
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Text strong>API de Conversão</Text>
+                  <br />
+                  <Text type="secondary" className="text-xs">
+                    Envio via servidor para maior precisão no rastreamento.
+                  </Text>
+                </div>
+                <Switch
+                  checked={apiConversao}
+                  onChange={(checked) => {
+                    setApiConversao(checked)
+                    if (!checked) {
+                      setTokenApi('')
+                      setErrors((prev) => ({ ...prev, tokenApi: '' }))
+                    }
+                  }}
+                />
+              </div>
+
+              {apiConversao && (
+                <div className="p-4 bg-[#fafafa] rounded-lg flex flex-col gap-2">
+                  <Text strong className="text-sm">Token API de Conversão</Text>
+                  <Input.Password
+                    placeholder="Cole o token da API de conversão aqui"
+                    value={tokenApi}
+                    onChange={(e) => {
+                      setTokenApi(e.target.value)
+                      setErrors((prev) => ({ ...prev, tokenApi: '' }))
+                    }}
+                    status={errors.tokenApi ? 'error' : undefined}
+                  />
+                  {errors.tokenApi && (
+                    <Text type="danger" className="text-xs">{errors.tokenApi}</Text>
+                  )}
+                  <Alert
+                    type="info"
+                    showIcon
+                    message={
+                      <Text className="text-xs">
+                        Dentro das configurações do seu Pixel do Facebook, vá na aba Configurações e em API de Conversões, dentro da sessão Configurar Manualmente, clique em Gerar Token de Acesso.
+                      </Text>
+                    }
+                    className="!mt-1"
+                  />
+                </div>
+              )}
+            </div>
+
+          </div>
+
+          {/* Footer */}
+          <div className="px-6 py-4 border-t border-[#f0f0f0] flex justify-end gap-3 sticky bottom-0 bg-white z-10">
+            <Button onClick={handleClose}>Cancelar</Button>
+            <Button type="primary" onClick={handleSave}>
+              {isBulk
+                ? `Aplicar para ${selectedProdutos.length} item(ns)`
+                : 'Aplicar'}
+            </Button>
+          </div>
+        </div>
+      )}
+    </Modal>
+  )
+}

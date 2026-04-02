@@ -3,6 +3,7 @@ import {
   Breadcrumb,
   Button,
   ConfigProvider,
+  Input,
   Layout,
   Menu,
   Tag,
@@ -13,6 +14,7 @@ import {
   LeftOutlined,
   CaretRightOutlined,
 } from '@ant-design/icons'
+import { EduzzLogo, CheckoutSunLogo } from './Logos'
 
 const { Sider, Content } = Layout
 const { Title, Text } = Typography
@@ -24,24 +26,24 @@ type HistoricoItem = {
   status: 'success' | 'error'
 }
 
-const historico: HistoricoItem[] = [
-  { evento: 'Pageview', origem: 'Navegador', dataHora: '11/03/2026 às 12:45', status: 'success' },
-  { evento: 'Pageview', origem: 'Celular', dataHora: '11/03/2026 às 11:45', status: 'error' },
-  { evento: 'Pageview', origem: 'Tablet', dataHora: '11/03/2026 às 10:45', status: 'success' },
-  { evento: 'Pageview', origem: 'Navegador', dataHora: '11/03/2026 às 09:56', status: 'success' },
-]
-
 const eventos = [
-  { tag: 'Pageview', descricao: 'Comprador acessou a página de checkout' },
-  { tag: 'FormInteraction', descricao: 'Preencheu o formulário de primeiro nome' },
-  { tag: 'Lead', descricao: 'Preenchimento do formulário de nome, email e documento' },
-  { tag: 'AddPaymentInfo', descricao: 'Interação com formas de pagamento' },
-  { tag: 'InitiateCheckout', descricao: 'Clicou no botão de pagar' },
-  { tag: 'Purchase', descricao: 'Pagamento confirmado' },
+  { tag: 'PageView', descricao: 'Quando o comprador acessa a página do checkout' },
+  { tag: 'FormInteraction', descricao: 'Ao preencher nome, e-mail ou outro campo inicial' },
+  { tag: 'Lead', descricao: 'Ao preencher nome, email e telefone' },
+  { tag: 'AddPaymentInfo', descricao: 'Ao interagir com formas de pagamento' },
+  { tag: 'Purchase', descricao: 'Quando o pagamento é confirmado' },
+  { tag: 'ViewBoleto', descricao: 'Quando o boleto gerado for visualizado' },
 ]
 
-export default function TesteDeEvento() {
-  const [logs, setLogs] = useState<HistoricoItem[]>(historico)
+interface TesteDeEventoProps {
+  produtoId?: number
+  produtoNome?: string
+  onVoltar?: () => void
+}
+
+export default function TesteDeEvento({ produtoId, produtoNome, onVoltar }: TesteDeEventoProps) {
+  const [logs, setLogs] = useState<HistoricoItem[]>([])
+  const [codigoTeste, setCodigoTeste] = useState('')
 
   const handleTestar = (tag: string) => {
     const novoLog: HistoricoItem = {
@@ -68,36 +70,35 @@ export default function TesteDeEvento() {
   const sucessos = logs.filter((l) => l.status === 'success').length
   const erros = logs.filter((l) => l.status === 'error').length
 
+  const getOrigemTag = (origem: string) => {
+    if (origem === 'Navegador') {
+      return <Tag color="cyan">Pixel</Tag>
+    }
+    return <Tag color="purple">API</Tag>
+  }
+
   return (
     <ConfigProvider theme={{ token: { colorPrimary: '#0d2772' } }}>
     <Layout className="min-h-screen bg-white">
       {/* Header */}
       <div className="h-[78px] bg-[#fafafa] flex items-center justify-center border-b border-[rgba(0,0,0,0.06)]">
-        <img
-          src="https://www.figma.com/api/mcp/asset/f3a95eae-e8e0-48cc-b54d-388ec81eb3a7"
-          alt="Eduzz"
-          className="h-[30px]"
-        />
+        <EduzzLogo />
       </div>
 
       <Layout>
         {/* Sidebar */}
         <Sider width={288} className="!bg-white border-r border-[rgba(0,0,0,0.06)]">
           <div className="px-4 py-[10px]">
-            <img
-              src="https://www.figma.com/api/mcp/asset/e045d090-b979-4ee3-b74b-c1986d859fce"
-              alt="Checkout Sun"
-              className="h-[25px]"
-            />
+            <CheckoutSunLogo />
           </div>
           <Menu
             mode="inline"
-            selectedKeys={['monitoramento']}
+            selectedKeys={['rastreamento']}
             className="border-none"
             items={[
               { key: 'visao-geral', label: 'Visão geral' },
               { key: 'produtos', label: 'Produtos' },
-              { key: 'monitoramento', label: 'Monitoramento' },
+              { key: 'rastreamento', label: 'Rastreamento' },
             ]}
           />
         </Sider>
@@ -108,27 +109,50 @@ export default function TesteDeEvento() {
           <Breadcrumb
             items={[
               { title: <HomeOutlined /> },
-              { title: 'Breadcrumb Link' },
-              { title: 'Breadcrumb Link' },
-              { title: 'Breadcrumb Link' },
+              { title: 'Checkout Sun' },
+              { title: 'Rastreamento' },
+              { title: 'Teste de evento' },
             ]}
           />
 
           {/* Back button */}
           <div>
-            <Button icon={<LeftOutlined />}>Voltar</Button>
+            <Button icon={<LeftOutlined />} onClick={onVoltar}>Voltar</Button>
           </div>
 
           {/* Title */}
           <div>
-            <Title level={3} className="!mb-1">Teste de evento</Title>
+            <Title level={3} className="!mb-1">
+              Teste de evento {produtoNome ? `- ${produtoId} - ${produtoNome}` : ''}
+            </Title>
             <Text type="secondary">
               Envie um evento de teste sem realizar uma compra real e confira no histórico abaixo.
             </Text>
           </div>
 
+          {/* Código de teste da Meta */}
+          <div className="bg-[#fafafa] border border-[#d9d9d9] rounded-lg p-6 flex flex-col gap-3">
+            <Text strong className="text-base">Código de teste da Meta</Text>
+            <Text type="secondary">
+              Copie o código de teste do Gerenciador da Meta e cole aqui. O botão &quot;testar&quot; ficará disponível após o preenchimento. O código será enviado como parâmetro no link do checkout para que a Meta identifique o evento como teste.
+            </Text>
+            <Input
+              placeholder="Cole o código de teste da Meta aqui (ex: TESTE1234)"
+              value={codigoTeste}
+              onChange={(e) => setCodigoTeste(e.target.value)}
+              className="max-w-[480px]"
+            />
+          </div>
+
           {/* Event cards */}
-          <div className="flex flex-col gap-4 ">
+          <div className={`flex flex-col gap-4 ${!codigoTeste ? 'opacity-50 pointer-events-none' : ''}`}>
+            {!codigoTeste && (
+              <div className="flex items-center gap-2 px-4 py-3 bg-[#fff7e6] border border-[#ffd591] rounded-lg">
+                <Text className="text-sm text-[#d46b08]">
+                  Insira o código de teste acima para habilitar os botões de teste.
+                </Text>
+              </div>
+            )}
             {Array.from({ length: Math.ceil(eventos.length / 2) }, (_, rowIndex) => (
               <div key={rowIndex} className="flex gap-4">
                 {eventos.slice(rowIndex * 2, rowIndex * 2 + 2).map((ev) => (
@@ -142,6 +166,7 @@ export default function TesteDeEvento() {
                         type="text"
                         icon={<CaretRightOutlined />}
                         onClick={() => handleTestar(ev.tag)}
+                        disabled={!codigoTeste}
                         className="text-[rgba(0,0,0,0.65)]"
                       >
                         Testar
@@ -155,7 +180,7 @@ export default function TesteDeEvento() {
           </div>
 
           {/* Summary bar */}
-          <div className=" border border-[#d9d9d9] rounded-lg px-2 py-4 flex items-center justify-end gap-6 bg-white">
+          <div className="border border-[#d9d9d9] rounded-lg px-2 py-4 flex items-center justify-end gap-6 bg-white">
             <Text type="secondary">Últimos 30 minutos</Text>
             <Tag>{logs.length} evento(s)</Tag>
             <Tag color="success">{sucessos} sucesso(s)</Tag>
@@ -164,11 +189,11 @@ export default function TesteDeEvento() {
           </div>
 
           {/* History table */}
-          <div className=" border border-[#f0f0f0] rounded-lg overflow-hidden bg-white">
+          <div className="border border-[#f0f0f0] rounded-lg overflow-hidden bg-white">
             {/* Table header */}
             <div className="flex bg-[rgba(0,0,0,0.02)] border-b border-[rgba(0,0,0,0.06)]">
               <div className="flex-[2] px-4 h-[46px] flex items-center border-r border-[#f0f0f0]">
-                <Text strong className="text-sm">Histórico de envios</Text>
+                <Text strong className="text-sm">Evento</Text>
               </div>
               <div className="flex-1 px-4 h-[46px] flex items-center justify-center border-r border-[#f0f0f0]">
                 <Text strong className="text-sm">Origem</Text>
@@ -195,17 +220,17 @@ export default function TesteDeEvento() {
                   <div className="flex-[2] px-4">
                     <Tag>{item.evento}</Tag>
                   </div>
-                  <div className="flex-1 px-4 text-center">
-                    <Text>{item.origem}</Text>
+                  <div className="flex-1 px-4 flex justify-center">
+                    {getOrigemTag(item.origem)}
                   </div>
                   <div className="flex-1 px-4 text-center">
                     <Text>{item.dataHora}</Text>
                   </div>
                   <div className="flex-1 px-4 flex justify-center">
                     {item.status === 'success' ? (
-                      <Tag color="success">Success</Tag>
+                      <Tag color="success">Sucesso</Tag>
                     ) : (
-                      <Tag color="error">Error</Tag>
+                      <Tag color="error">Não enviado</Tag>
                     )}
                   </div>
                 </div>
