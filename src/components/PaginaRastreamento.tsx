@@ -6,6 +6,7 @@ import {
   Layout,
   Menu,
   Modal,
+  Pagination,
   Tabs,
   Tag,
   Timeline,
@@ -47,9 +48,19 @@ const pixelCardsIniciais: PixelCard[] = [
     createdAt: '09/01/2026',
     historico: [
       { data: '09/01/2026 10:30', descricao: 'Pixel criado' },
+      { data: '12/01/2026 09:15', descricao: 'Adicionado evento PageView' },
       { data: '15/01/2026 14:12', descricao: 'Adicionado evento Purchase' },
+      { data: '18/01/2026 11:00', descricao: 'Configurado valor customizado para Purchase' },
+      { data: '25/01/2026 16:45', descricao: 'Adicionado evento Lead' },
+      { data: '02/02/2026 08:30', descricao: 'Ativada API de conversões' },
+      { data: '10/02/2026 13:20', descricao: 'Adicionados produtos Academia 360 e Curso de Marketing' },
+      { data: '15/02/2026 10:00', descricao: 'Adicionado evento FormInteraction' },
       { data: '22/02/2026 09:45', descricao: 'Token da API de conversões atualizado' },
+      { data: '01/03/2026 14:30', descricao: 'Removido evento AddPaymentInfo' },
+      { data: '05/03/2026 11:10', descricao: 'Adicionado evento InitiateCheckout' },
       { data: '10/03/2026 16:20', descricao: 'Adicionados 3 novos produtos' },
+      { data: '18/03/2026 09:00', descricao: 'Configuração de boleto diferenciado ativada' },
+      { data: '25/03/2026 15:40', descricao: 'Token da API renovado' },
     ],
     produtosCount: 10,
     configured: true,
@@ -198,6 +209,8 @@ export default function PaginaRastreamento({
   const [modalMode, setModalMode] = useState<ModalMode>({ type: 'new' })
   const [pixelCards] = useState<PixelCard[]>(pixelCardsIniciais)
   const [historicoModal, setHistoricoModal] = useState<{ open: boolean; card: PixelCard | null }>({ open: false, card: null })
+  const [historicoPagina, setHistoricoPagina] = useState(1)
+  const HISTORICO_POR_PAGINA = 10
 
   const providerKeyMap: Record<string, PixelProvider> = {
     meta: 'meta',
@@ -303,7 +316,7 @@ export default function PaginaRastreamento({
                             {card.historico && card.historico.length > 0 && (
                               <span
                                 className="text-xs text-[rgba(0,0,0,0.45)] hover:text-[#0d2772] cursor-pointer inline-flex items-center gap-1"
-                                onClick={(e) => { e.stopPropagation(); setHistoricoModal({ open: true, card }) }}
+                                onClick={(e) => { e.stopPropagation(); setHistoricoPagina(1); setHistoricoModal({ open: true, card }) }}
                               >
                                 <HistoryOutlined />
                                 Última edição: {card.historico[card.historico.length - 1].data.split(' ')[0]}
@@ -402,20 +415,43 @@ export default function PaginaRastreamento({
         title={`Histórico de alterações — ${historicoModal.card?.label || historicoModal.card?.provider || ''}`}
         width={480}
       >
-        {historicoModal.card?.historico && (
-          <Timeline
-            className="!mt-6"
-            items={[...historicoModal.card.historico].reverse().map((h) => ({
-              children: (
-                <div>
-                  <Text className="!text-sm">{h.descricao}</Text>
-                  <br />
-                  <Text type="secondary" className="!text-xs">{h.data}</Text>
+        {historicoModal.card?.historico && (() => {
+          const todos = [...historicoModal.card.historico].reverse()
+          const total = todos.length
+          const inicio = (historicoPagina - 1) * HISTORICO_POR_PAGINA
+          const paginados = todos.slice(inicio, inicio + HISTORICO_POR_PAGINA)
+
+          return (
+            <div className="flex flex-col gap-4">
+              <div className="max-h-[400px] overflow-y-auto">
+                <Timeline
+                  className="!mt-6"
+                  items={paginados.map((h) => ({
+                    children: (
+                      <div>
+                        <Text className="!text-sm">{h.descricao}</Text>
+                        <br />
+                        <Text type="secondary" className="!text-xs">{h.data}</Text>
+                      </div>
+                    ),
+                  }))}
+                />
+              </div>
+              {total > HISTORICO_POR_PAGINA && (
+                <div className="flex justify-center border-t border-[#f0f0f0] pt-3">
+                  <Pagination
+                    current={historicoPagina}
+                    pageSize={HISTORICO_POR_PAGINA}
+                    total={total}
+                    onChange={(page) => setHistoricoPagina(page)}
+                    size="small"
+                    showTotal={(total) => <Text type="secondary" className="!text-xs">{total} alterações</Text>}
+                  />
                 </div>
-              ),
-            }))}
-          />
-        )}
+              )}
+            </div>
+          )
+        })()}
       </Modal>
     </ConfigProvider>
   )
