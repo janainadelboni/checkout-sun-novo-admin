@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import {
   Breadcrumb,
   Button,
@@ -27,7 +27,8 @@ import {
   SettingOutlined,
 } from '@ant-design/icons'
 import ConfigurarPixelModal, { type ModalMode, type PixelConfig } from './ConfigurarPixelModal'
-import { EduzzLogo, CheckoutSunLogo } from './Logos'
+import { EduzzLogo, CheckoutSunLogo } from '../Logos'
+import { rootzzTheme } from '../../theme/rootzz'
 
 const { Sider, Content } = Layout
 const { Title, Text } = Typography
@@ -123,10 +124,15 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<ModalMode>({ type: 'new' })
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false)
+  const [pendingBulkConfig, setPendingBulkConfig] = useState<PixelConfig | null>(null)
   const [testProdutoFilter, setTestProdutoFilter] = useState<number | null>(null)
   const [testCode, setTestCode] = useState('')
   const [testValidated, setTestValidated] = useState(false)
   const [testResults, setTestResults] = useState<{ evento: string; origem: string; parametro: string; dataHora: string; status: 'Sucesso' | 'Erro' }[]>([])
+
+  const testResultsRef = useRef<HTMLDivElement>(null)
+  const [testHighlight, setTestHighlight] = useState(false)
 
   const handleTestarEvento = (eventoName: string) => {
     const origens = ['Navegador', 'Servidor'] as const
@@ -139,6 +145,11 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
       status: statuses[Math.floor(Math.random() * statuses.length)],
     }
     setTestResults((prev) => [novoResult, ...prev])
+    setTestHighlight(true)
+    setTimeout(() => {
+      testResultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    }, 100)
+    setTimeout(() => setTestHighlight(false), 2000)
   }
 
   const handleLimparTestes = () => {
@@ -161,7 +172,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
       events: ['PageView', 'FormInteraction', 'Lead', 'AddPaymentInfo', 'Initiatecheckout', 'Purchase'],
       apiConversao: true,
       tokenApi: 'EAABsbCS1IEXBO...',
-      produtos: [2704934],
+      produtos: ['2704934'],
       diferenciarBoleto: false,
       valorCustomizado: 'nunca',
     },
@@ -172,7 +183,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
       events: ['PageView', 'FormInteraction', 'AddPaymentInfo', 'Purchase'],
       apiConversao: false,
       tokenApi: '',
-      produtos: [2704935],
+      produtos: ['2704935'],
       diferenciarBoleto: false,
       valorCustomizado: 'nunca',
     },
@@ -183,7 +194,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
       events: ['PageView', 'Lead', 'Purchase'],
       apiConversao: false,
       tokenApi: '',
-      produtos: [2411153],
+      produtos: ['2411153'],
       diferenciarBoleto: false,
       valorCustomizado: 'nunca',
     },
@@ -194,7 +205,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
       events: ['PageView', 'FormInteraction', 'Initiatecheckout', 'Purchase'],
       apiConversao: true,
       tokenApi: 'EAABsbCS1IEXBO...',
-      produtos: [2030747],
+      produtos: ['2030747'],
       diferenciarBoleto: false,
       valorCustomizado: 'sempre',
     },
@@ -205,7 +216,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
       events: ['PageView', 'AddPaymentInfo'],
       apiConversao: false,
       tokenApi: '',
-      produtos: [2576289],
+      produtos: ['2576289'],
       diferenciarBoleto: false,
       valorCustomizado: 'nunca',
     },
@@ -216,7 +227,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
       events: ['PageView', 'Lead', 'Initiatecheckout', 'Purchase'],
       apiConversao: false,
       tokenApi: '',
-      produtos: [2073333],
+      produtos: ['2073333'],
       diferenciarBoleto: true,
       valorCustomizado: 'nunca',
     },
@@ -227,7 +238,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
       events: ['PageView', 'FormInteraction', 'Purchase'],
       apiConversao: false,
       tokenApi: '',
-      produtos: [9104452],
+      produtos: ['9104452'],
       diferenciarBoleto: false,
       valorCustomizado: 'nunca',
     },
@@ -238,7 +249,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
       events: ['PageView', 'FormInteraction', 'AddPaymentInfo', 'Purchase'],
       apiConversao: false,
       tokenApi: '',
-      produtos: [2073334],
+      produtos: ['2073334'],
       diferenciarBoleto: false,
       valorCustomizado: 'nunca',
     },
@@ -256,12 +267,33 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
 
 
   const handleSaveConfig = (config: PixelConfig) => {
+    // Se é bulk (mais de 1 produto), mostra confirmação antes de aplicar
+    if (config.produtos.length > 1) {
+      setPendingBulkConfig(config)
+      setBulkConfirmOpen(true)
+      return
+    }
+    applyConfig(config)
+  }
+
+  const applyConfig = (config: PixelConfig) => {
     const newConfigs = { ...pixelConfigs }
     for (const prodId of config.produtos) {
-      newConfigs[prodId] = config
+      const numId = Number(prodId)
+      if (!isNaN(numId)) {
+        newConfigs[numId] = config
+      }
     }
     setPixelConfigs(newConfigs)
     console.log('Pixel configurado:', config)
+  }
+
+  const confirmBulkConfig = () => {
+    if (pendingBulkConfig) {
+      applyConfig(pendingBulkConfig)
+    }
+    setBulkConfirmOpen(false)
+    setPendingBulkConfig(null)
   }
 
   const handleClearAllLogFilters = () => {
@@ -454,7 +486,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
   }
 
   return (
-    <ConfigProvider theme={{ token: { colorPrimary: '#0d2772' } }}>
+    <ConfigProvider theme={rootzzTheme}>
       <Layout className="min-h-screen bg-white">
         {/* Header */}
         <div className="h-[78px] bg-[#fafafa] flex items-center justify-center border-b border-[rgba(0,0,0,0.06)]">
@@ -480,7 +512,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
           </Sider>
 
           {/* Main Content */}
-          <Content className="p-8 bg-white flex flex-col gap-8 max-w-[1280px] mx-auto w-full">
+          <Content className="p-8 bg-white flex flex-col gap-6 max-w-[1280px] mx-auto w-full">
             {/* Breadcrumb */}
             <Breadcrumb
               items={[
@@ -954,8 +986,8 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
                               value={logOrigemFilter}
                               onChange={(value) => setLogOrigemFilter(value ?? null)}
                               options={[
-                                { value: 'Navegador', label: 'Navegador' },
-                                { value: 'Servidor', label: 'Servidor' },
+                                { value: 'Navegador', label: 'Pixel' },
+                                { value: 'Servidor', label: 'API' },
                               ]}
                               className="w-full"
                             />
@@ -1002,7 +1034,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
                             <Tag className="!text-xs">Produtos: Todos</Tag>
                           )}
                           <Tag className="!text-xs">Últimos 30 dias</Tag>
-                          <Tag className="!text-xs">Origem: {logOrigemFilter ?? 'Todos'}</Tag>
+                          <Tag className="!text-xs">Origem: {logOrigemFilter === 'Navegador' ? 'Pixel' : logOrigemFilter === 'Servidor' ? 'API' : 'Todos'}</Tag>
                           <Tag className="!text-xs">Eventos: {logEventoFilter ?? 'todos'}</Tag>
                           <Tag className="!text-xs">Status: {logStatusFilter ?? 'todos'}</Tag>
                           {hasAnyLogFilter && (
@@ -1210,7 +1242,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
 
                       {/* Test results - only appear after user clicks "Testar" */}
                       {testResults.length > 0 && (
-                        <>
+                        <div ref={testResultsRef}>
                           {/* Summary bar */}
                           <div className="flex items-center justify-end gap-3 bg-[#fafafa] rounded-lg px-4 py-2.5">
                             <Text type="secondary" className="text-sm">Últimas 24h</Text>
@@ -1272,8 +1304,9 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
                             ]}
                             pagination={false}
                             size="middle"
+                            rowClassName={(_, index) => index === 0 && testHighlight ? 'animate-highlight' : ''}
                           />
-                        </>
+                        </div>
                       )}
                     </div>
                     )
@@ -1291,6 +1324,37 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
         onSave={handleSaveConfig}
         mode={modalMode}
       />
+
+      {/* Modal de dupla confirmação para configuração em massa */}
+      <Modal
+        open={bulkConfirmOpen}
+        onCancel={() => { setBulkConfirmOpen(false); setPendingBulkConfig(null) }}
+        footer={null}
+        width={520}
+        closable
+        title={null}
+      >
+        {pendingBulkConfig && (
+          <div className="flex flex-col gap-6 py-2">
+            <div>
+              <Title level={4} className="!mb-2">Atenção: configuração em massa</Title>
+              <Text>
+                Essa ação irá <Text strong>sobrescrever todas as configurações individuais</Text> dos{' '}
+                {pendingBulkConfig.produtos.length} produtos selecionados. Configurações anteriores serão perdidas.
+              </Text>
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <Button onClick={() => { setBulkConfirmOpen(false); setPendingBulkConfig(null) }}>
+                Cancelar
+              </Button>
+              <Button type="primary" danger onClick={confirmBulkConfig}>
+                Sobrescrever e aplicar
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
 
       {/* Modal de confirmação de exclusão */}
       <Modal

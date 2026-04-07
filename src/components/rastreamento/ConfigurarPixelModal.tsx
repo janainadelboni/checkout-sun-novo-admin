@@ -2,11 +2,12 @@ import { useState } from 'react'
 import {
   Modal,
   Button,
+  Checkbox,
   Input,
   Radio,
   Select,
   Switch,
-  Checkbox,
+  TreeSelect,
   Typography,
   Divider,
   Tag,
@@ -15,7 +16,6 @@ import {
 } from 'antd'
 import {
   LeftOutlined,
-  SearchOutlined,
   QuestionCircleOutlined,
 } from '@ant-design/icons'
 
@@ -79,24 +79,53 @@ const EVENTS: EventOption[] = [
   { key: 'ViewBoleto', label: 'Visualização de boleto', description: 'Quando o boleto gerado for visualizado' },
 ]
 
-/* ─── Produtos mock ─── */
-type ProdutoBusca = {
-  id: number
-  nome: string
-  isPai: boolean
+/* ─── Produtos mock (tree) ─── */
+const produtosTree = [
+  { title: 'Selecionar todos', value: 'todos', key: 'todos', children: [
+    { title: '2704934 – A Nova Escola De Vendas', value: '2704934', key: '2704934' },
+    { title: '2704935 – Plano Black Monstro 40% OFF', value: '2704935', key: '2704935' },
+    { title: '2411153 – A sabedoria do grande sábio do marketing digital', value: '2411153', key: '2411153' },
+    { title: '2030747 – Academia 360', value: '2030747', key: '2030747' },
+    { title: 'Festival Eduzz Summit 2026', value: 'festival-summit', key: 'festival-summit', children: [
+      { title: '2576289 – Ingresso PISTA - Lote 01', value: '2576289', key: '2576289' },
+      { title: '2576290 – Ingresso PISTA - Lote 02', value: '2576290', key: '2576290' },
+      { title: '2576291 – Ingresso VIP - Lote 01', value: '2576291', key: '2576291' },
+    ]},
+    { title: '2073333 – Apresentação Pesquisa Unity', value: '2073333', key: '2073333' },
+    { title: 'Pack de Templates Pro', value: 'pack-templates', key: 'pack-templates', children: [
+      { title: '9104452 – Planilha de vendas', value: '9104452', key: '9104452' },
+      { title: '9104453 – Planilha financeira', value: '9104453', key: '9104453' },
+    ]},
+    { title: '2073334 – Curso de Marketing Digital', value: '2073334', key: '2073334' },
+  ]},
+]
+
+// Helper: extrai todos os IDs numéricos (folhas) dos valores selecionados no tree
+const getAllLeafValues = (nodes: typeof produtosTree, selected: string[]): number[] => {
+  const ids: number[] = []
+  for (const node of nodes) {
+    if (selected.includes(node.value)) {
+      const num = Number(node.value)
+      if (!isNaN(num)) ids.push(num)
+    }
+    if ('children' in node && node.children) {
+      ids.push(...getAllLeafValues(node.children as typeof produtosTree, selected))
+    }
+  }
+  return ids
 }
 
-const PRODUTOS_DISPONIVEIS: ProdutoBusca[] = [
-  { id: 2704934, nome: 'A Nova Escola De Vendas', isPai: true },
-  { id: 2704935, nome: 'Plano Black Monstro 40% OFF', isPai: true },
-  { id: 2411153, nome: 'A sabedoria do grande sábio do marketing digital', isPai: true },
-  { id: 2030747, nome: 'Academia 360', isPai: true },
-  { id: 2576289, nome: 'Animação AI Aprendendo a ilustre CSAT', isPai: true },
-  { id: 2073333, nome: 'Apresentação Pesquisa Unity', isPai: true },
-  { id: 9104452, nome: 'Planilha de vendas', isPai: true },
-  { id: 2073334, nome: 'Curso de Marketing Digital', isPai: true },
-  { id: 9999901, nome: 'Módulo Bônus (produto filho)', isPai: false },
-]
+// Helper: nome do produto por value
+const getNodeTitle = (nodes: typeof produtosTree, value: string): string | undefined => {
+  for (const node of nodes) {
+    if (node.value === value) return node.title
+    if ('children' in node && node.children) {
+      const found = getNodeTitle(node.children as typeof produtosTree, value)
+      if (found) return found
+    }
+  }
+  return undefined
+}
 
 /* ─── Steps ─── */
 type Step = 'select_provider' | 'configure'
@@ -123,7 +152,7 @@ export interface PixelConfig {
   events: string[]
   apiConversao: boolean
   tokenApi: string
-  produtos: number[]
+  produtos: string[]
   diferenciarBoleto: boolean
   valorCustomizado: 'nunca' | 'customizado' | 'sempre'
 }
@@ -143,8 +172,7 @@ export default function ConfigurarPixelModal({
   const [selectedEvents, setSelectedEvents] = useState<string[]>([])
   const [apiConversao, setApiConversao] = useState(false)
   const [tokenApi, setTokenApi] = useState('')
-  const [selectedProdutos, setSelectedProdutos] = useState<number[]>([])
-  const [produtoSearch, setProdutoSearch] = useState('')
+  const [selectedProdutos, setSelectedProdutos] = useState<string[]>([])
   const [receberEvento, setReceberEvento] = useState<'imediatos' | 'nao_imediato' | 'todos'>('imediatos')
   const [diferenciarBoleto, setDiferenciarBoleto] = useState(false)
   const [valorCustomizado, setValorCustomizado] = useState<'nunca' | 'customizado' | 'sempre'>('nunca')
@@ -156,7 +184,7 @@ export default function ConfigurarPixelModal({
   const isProductsLocked = mode.type === 'edit'
   const isBulk = mode.type === 'bulk'
   const isEdit = mode.type === 'edit'
-  const [produtosExpanded, setProdutosExpanded] = useState(false)
+
 
   // Inicializa o modal com base no modo ao abrir
   const initFromMode = () => {
@@ -166,7 +194,7 @@ export default function ConfigurarPixelModal({
       if (info) setNomePixel(`${info.label} - Principal`)
       setStep('configure')
     } else if (mode.type === 'bulk') {
-      setSelectedProdutos(mode.produtoIds)
+      setSelectedProdutos(mode.produtoIds.map(String))
       if (mode.provider) {
         setSelectedProvider(mode.provider)
         const info = PIXEL_OPTIONS.find((p) => p.key === mode.provider)
@@ -177,7 +205,7 @@ export default function ConfigurarPixelModal({
         setStep('select_provider')
       }
     } else if (mode.type === 'edit') {
-      setSelectedProdutos([mode.produtoId])
+      setSelectedProdutos([String(mode.produtoId)])
       if (mode.existing) {
         // Modo edição com dados existentes
         setSelectedProvider(mode.existing.provider)
@@ -226,7 +254,6 @@ export default function ConfigurarPixelModal({
     setApiConversao(false)
     setTokenApi('')
     setSelectedProdutos([])
-    setProdutoSearch('')
     setReceberEvento('imediatos')
     setDiferenciarBoleto(false)
     setValorCustomizado('nunca')
@@ -240,6 +267,8 @@ export default function ConfigurarPixelModal({
 
   const handleSelectProvider = (provider: PixelProvider) => {
     setSelectedProvider(provider)
+    const info = PIXEL_OPTIONS.find((p) => p.key === provider)
+    if (info) setNomePixel(`${info.label} - Principal`)
     setStep('configure')
   }
 
@@ -262,16 +291,9 @@ export default function ConfigurarPixelModal({
     setErrors((prev) => ({ ...prev, events: '' }))
   }
 
-  const addProduto = (produtoId: number) => {
-    if (!selectedProdutos.includes(produtoId)) {
-      setSelectedProdutos((prev) => [...prev, produtoId])
-      setErrors((prev) => ({ ...prev, produtos: '' }))
-    }
-    setProdutoSearch('')
-  }
-
-  const removeProduto = (produtoId: number) => {
-    setSelectedProdutos((prev) => prev.filter((id) => id !== produtoId))
+  const handleProdutosChange = (values: string[]) => {
+    setSelectedProdutos(values)
+    setErrors((prev) => ({ ...prev, produtos: '' }))
   }
 
   const validate = (): boolean => {
@@ -662,99 +684,36 @@ export default function ConfigurarPixelModal({
                 <Text type="danger" className="text-xs">{errors.produtos}</Text>
               )}
 
-              {/* Campo de busca e lista de produtos - sempre aberto */}
+              {/* TreeSelect de produtos */}
               {!isProductsLocked && (
-                <div className="flex flex-col gap-3">
-                  <Input
-                    placeholder="Pesquise pelo ID ou título do produto para adicionar mais produtos"
-                    suffix={<SearchOutlined className="text-[rgba(0,0,0,0.45)]" />}
-                    value={produtoSearch}
-                    onChange={(e) => setProdutoSearch(e.target.value)}
-                  />
-
-                  <div className="border border-[#d9d9d9] rounded-lg max-h-[200px] overflow-y-auto">
-                    <label className="flex items-center gap-3 px-4 py-2.5 border-b border-[#f0f0f0] hover:bg-[#f5f7ff] cursor-pointer bg-[#fafafa]">
-                      <Checkbox
-                        checked={selectedProdutos.length === PRODUTOS_DISPONIVEIS.filter(p => p.isPai).length}
-                        indeterminate={selectedProdutos.length > 0 && selectedProdutos.length < PRODUTOS_DISPONIVEIS.filter(p => p.isPai).length}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedProdutos(PRODUTOS_DISPONIVEIS.filter(p => p.isPai).map(p => p.id))
-                          } else {
-                            setSelectedProdutos([])
-                          }
-                        }}
-                      />
-                      <Text strong className="text-sm">Todos</Text>
-                    </label>
-                    {PRODUTOS_DISPONIVEIS.filter((p) => {
-                      if (!p.isPai) return false
-                      if (!produtoSearch.trim()) return true
-                      return p.nome.toLowerCase().includes(produtoSearch.toLowerCase()) || p.id.toString().includes(produtoSearch)
-                    }).map((produto) => (
-                      <label
-                        key={produto.id}
-                        className="flex items-center gap-3 px-4 py-2.5 border-b border-[#f0f0f0] last:border-b-0 hover:bg-[#f5f7ff] cursor-pointer"
-                      >
-                        <Checkbox
-                          checked={selectedProdutos.includes(produto.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              addProduto(produto.id)
-                            } else {
-                              removeProduto(produto.id)
-                            }
-                          }}
-                        />
-                        <Text className="text-sm">
-                          {produto.id} - {produto.nome}
-                        </Text>
-                      </label>
-                    ))}
-                  </div>
-                </div>
+                <TreeSelect
+                  treeData={produtosTree}
+                  value={selectedProdutos}
+                  onChange={handleProdutosChange}
+                  treeCheckable
+                  showCheckedStrategy={TreeSelect.SHOW_PARENT}
+                  placeholder="Pesquise pelo ID ou título do produto"
+                  className="w-full"
+                  maxTagCount={3}
+                  maxTagPlaceholder={(omitted) => `+${omitted.length} mais`}
+                  treeDefaultExpandAll
+                  showSearch
+                  treeNodeFilterProp="title"
+                  allowClear
+                />
               )}
 
-              {/* Tags de produtos selecionados */}
-              {selectedProdutos.length > 0 && (
-                <div>
-                  <div className={`flex flex-wrap gap-1.5 ${!produtosExpanded ? 'max-h-[68px] overflow-hidden' : ''}`}>
-                    {selectedProdutos.map((id) => {
-                      const prod = PRODUTOS_DISPONIVEIS.find((p) => p.id === id)
-                      const produtoNome = prod?.nome
-                        || (mode.type === 'bulk' ? mode.produtoNomes[id] : undefined)
-                        || (mode.type === 'edit' ? mode.produtoNome : undefined)
-                        || `Produto ${id}`
-                      return (
-                        <Tag
-                          key={id}
-                          closable={!isProductsLocked}
-                          onClose={() => removeProduto(id)}
-                          className="!flex items-center gap-1 !py-1 !px-2"
-                        >
-                          {id} - {produtoNome}
-                        </Tag>
-                      )
-                    })}
-                  </div>
-                  {selectedProdutos.length > 4 && !produtosExpanded && (
-                    <button
-                      type="button"
-                      onClick={() => setProdutosExpanded(true)}
-                      className="text-[#0d2772] text-xs mt-1 hover:underline cursor-pointer bg-transparent border-none p-0"
-                    >
-                      Ver mais ({selectedProdutos.length - 4} produtos ocultos)
-                    </button>
-                  )}
-                  {produtosExpanded && selectedProdutos.length > 4 && (
-                    <button
-                      type="button"
-                      onClick={() => setProdutosExpanded(false)}
-                      className="text-[#0d2772] text-xs mt-1 hover:underline cursor-pointer bg-transparent border-none p-0"
-                    >
-                      Ver menos
-                    </button>
-                  )}
+              {/* Produtos selecionados em modo edit (locked) */}
+              {isProductsLocked && selectedProdutos.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedProdutos.map((val) => {
+                    const title = getNodeTitle(produtosTree, val) || (mode.type === 'edit' ? `${mode.produtoId} - ${mode.produtoNome}` : val)
+                    return (
+                      <Tag key={val} className="!flex items-center gap-1 !py-1 !px-2">
+                        {title}
+                      </Tag>
+                    )
+                  })}
                 </div>
               )}
             </div>

@@ -1,3 +1,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes row-highlight {
+  0% { background-color: #e6f4ff; }
+  100% { background-color: transparent; }
+}
+
+.animate-highlight td {
+  animation: row-highlight 2s ease-out;
+}

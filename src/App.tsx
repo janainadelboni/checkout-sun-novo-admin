@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { App as AntdApp } from 'antd'
-import PaginaRastreamento from './components/PaginaRastreamento'
-import PaginaDoPixel from './components/PaginaDoPixel'
+import PaginaRastreamento from './components/rastreamento/PaginaRastreamento'
+import PaginaDoPixel from './components/rastreamento/PaginaDoPixel'
+import PaginaAnalytics from './components/analytics/PaginaAnalytics'
 
 /* ─── Navegação simples por estado ─── */
 type Page =
   | { type: 'rastreamento' }
   | { type: 'pixel'; provider: string }
+  | { type: 'analytics' }
 
 export default function App() {
   const [page, setPage] = useState<Page>({ type: 'rastreamento' })
@@ -21,6 +23,11 @@ export default function App() {
       {page.type === 'pixel' && (
         <PaginaDoPixel
           provider={page.provider}
+          onVoltar={() => setPage({ type: 'rastreamento' })}
+        />
+      )}
+      {page.type === 'analytics' && (
+        <PaginaAnalytics
           onVoltar={() => setPage({ type: 'rastreamento' })}
         />
       )}

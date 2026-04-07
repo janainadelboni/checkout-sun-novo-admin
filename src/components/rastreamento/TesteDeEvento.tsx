@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import {
   Breadcrumb,
   Button,
@@ -14,7 +14,7 @@ import {
   LeftOutlined,
   CaretRightOutlined,
 } from '@ant-design/icons'
-import { EduzzLogo, CheckoutSunLogo } from './Logos'
+import { EduzzLogo, CheckoutSunLogo } from '../Logos'
 
 const { Sider, Content } = Layout
 const { Title, Text } = Typography
@@ -44,6 +44,8 @@ interface TesteDeEventoProps {
 export default function TesteDeEvento({ produtoId, produtoNome, onVoltar }: TesteDeEventoProps) {
   const [logs, setLogs] = useState<HistoricoItem[]>([])
   const [codigoTeste, setCodigoTeste] = useState('')
+  const tabelaRef = useRef<HTMLDivElement>(null)
+  const [highlightIndex, setHighlightIndex] = useState<number | null>(null)
 
   const handleTestar = (tag: string) => {
     const novoLog: HistoricoItem = {
@@ -61,6 +63,27 @@ export default function TesteDeEvento({ produtoId, produtoNome, onVoltar }: Test
       status: 'success',
     }
     setLogs((prev) => [novoLog, ...prev])
+    setHighlightIndex(0)
+    setTimeout(() => {
+      const el = tabelaRef.current
+      if (!el) return
+      // Tenta todos os possíveis containers de scroll
+      el.scrollIntoView({ behavior: 'smooth', block: 'end' })
+      // Fallback: encontra o container com scroll e scrolla manualmente
+      let parent = el.parentElement
+      while (parent) {
+        const style = getComputedStyle(parent)
+        if (style.overflow === 'auto' || style.overflow === 'scroll' || style.overflowY === 'auto' || style.overflowY === 'scroll') {
+          const elTop = el.getBoundingClientRect().top - parent.getBoundingClientRect().top + parent.scrollTop
+          parent.scrollTo({ top: elTop - 80, behavior: 'smooth' })
+          break
+        }
+        parent = parent.parentElement
+      }
+      // Fallback final: window
+      window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' })
+    }, 50)
+    setTimeout(() => setHighlightIndex(null), 2000)
   }
 
   const handleLimpar = () => {
@@ -189,7 +212,7 @@ export default function TesteDeEvento({ produtoId, produtoNome, onVoltar }: Test
           </div>
 
           {/* History table */}
-          <div className="border border-[#f0f0f0] rounded-lg overflow-hidden bg-white">
+          <div id="tabela-resultados" ref={tabelaRef} className="border border-[#f0f0f0] rounded-lg overflow-hidden bg-white">
             {/* Table header */}
             <div className="flex bg-[rgba(0,0,0,0.02)] border-b border-[rgba(0,0,0,0.06)]">
               <div className="flex-[2] px-4 h-[46px] flex items-center border-r border-[#f0f0f0]">
@@ -215,7 +238,7 @@ export default function TesteDeEvento({ produtoId, produtoNome, onVoltar }: Test
               logs.map((item, i) => (
                 <div
                   key={i}
-                  className="flex border-b border-[#f0f0f0] h-16 items-center"
+                  className={`flex border-b border-[#f0f0f0] h-16 items-center transition-colors duration-700 ${i === highlightIndex ? 'bg-[#e6f4ff]' : ''}`}
                 >
                   <div className="flex-[2] px-4">
                     <Tag>{item.evento}</Tag>

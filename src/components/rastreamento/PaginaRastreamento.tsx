@@ -13,8 +13,9 @@ import {
   Typography,
 } from 'antd'
 import { HomeOutlined, EyeOutlined, SettingOutlined, PlusOutlined, HistoryOutlined } from '@ant-design/icons'
-import { EduzzLogo, CheckoutSunLogo } from './Logos'
+import { EduzzLogo, CheckoutSunLogo } from '../Logos'
 import ConfigurarPixelModal, { type ModalMode, type PixelProvider } from './ConfigurarPixelModal'
+import { rootzzTheme } from '../../theme/rootzz'
 
 const { Sider, Content } = Layout
 const { Title, Text } = Typography
@@ -127,16 +128,6 @@ const pixelCardsIniciais: PixelCard[] = [
     configured: true,
     detailsLabel: 'Ver detalhes',
   },
-  {
-    key: 'google_ads-1',
-    provider: 'Google AdWords',
-    providerKey: 'google_ads',
-    logo: 'https://www.gstatic.com/adx/doubleclick.ico',
-    pixelId: '0000000000000',
-    createdAt: null,
-    produtosCount: null,
-    configured: false,
-  },
 ]
 
 function BrandLogo({ card }: { card: PixelCard }) {
@@ -207,7 +198,8 @@ export default function PaginaRastreamento({
 }: PaginaRastreamentoProps) {
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<ModalMode>({ type: 'new' })
-  const [pixelCards] = useState<PixelCard[]>(pixelCardsIniciais)
+  const [emptyState, setEmptyState] = useState(false)
+  const pixelCards = emptyState ? [] : pixelCardsIniciais
   const [historicoModal, setHistoricoModal] = useState<{ open: boolean; card: PixelCard | null }>({ open: false, card: null })
   const [historicoPagina, setHistoricoPagina] = useState(1)
   const HISTORICO_POR_PAGINA = 10
@@ -231,7 +223,7 @@ export default function PaginaRastreamento({
   }
 
   return (
-    <ConfigProvider theme={{ token: { colorPrimary: '#0d2772' } }}>
+    <ConfigProvider theme={rootzzTheme}>
       <Layout className="min-h-screen bg-white">
         {/* Header */}
         <div className="h-[78px] bg-[#fafafa] flex items-center justify-center border-b border-[rgba(0,0,0,0.06)]">
@@ -257,7 +249,7 @@ export default function PaginaRastreamento({
           </Sider>
 
           {/* Main Content */}
-          <Content className="p-8 bg-white flex flex-col gap-8 max-w-[1280px] mx-auto w-full">
+          <Content className="p-8 bg-white flex flex-col gap-6 max-w-[1280px] mx-auto w-full">
             {/* Breadcrumb */}
             <Breadcrumb
               items={[
@@ -295,6 +287,30 @@ export default function PaginaRastreamento({
                   label: 'Pixel',
                   children: (
                     <div className="flex flex-col gap-4">
+                      {/* Toggle para demo */}
+                      <div className="flex items-center gap-2">
+                        <input type="checkbox" checked={emptyState} onChange={(e) => setEmptyState(e.target.checked)} className="accent-[#0d2772]" />
+                        <Text type="secondary" className="!text-xs">Simular primeiro acesso (sem pixels)</Text>
+                      </div>
+
+                      {pixelCards.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-16 px-8 border border-dashed border-[#d9d9d9] rounded-lg bg-[#fafafa]">
+                          <div className="text-4xl mb-4">📡</div>
+                          <Title level={4} className="!mb-2">Nenhum pixel configurado</Title>
+                          <Text type="secondary" className="text-center max-w-[420px] mb-6">
+                            Configure seu primeiro pixel para começar a rastrear eventos de conversão dos seus produtos. O pixel permite acompanhar ações dos compradores no checkout.
+                          </Text>
+                          <Button
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            size="large"
+                            onClick={handleAddPixel}
+                          >
+                            Configurar primeiro pixel
+                          </Button>
+                        </div>
+                      ) : null}
+
                       {pixelCards.map((card) => (
                         <div
                           key={card.key}
