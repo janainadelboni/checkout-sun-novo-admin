@@ -417,7 +417,7 @@ export default function ConfigurarPixelModal({
               <button
                 key={option.key}
                 onClick={() => handleSelectProvider(option.key)}
-                className="flex items-center gap-4 p-4 border border-[#d9d9d9] rounded-lg hover:border-[#0d2772] hover:bg-[#f5f7ff] transition-all cursor-pointer bg-white text-left w-full"
+                className="flex items-center gap-4 p-4 border border-[#d9d9d9] rounded-lg hover:border-[#2B4ACF] hover:bg-[#f5f7ff] transition-all cursor-pointer bg-white text-left w-full"
               >
                 <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-[#f5f5f5] shrink-0 overflow-hidden">
                   <img
@@ -542,8 +542,8 @@ export default function ConfigurarPixelModal({
                     key={event.key}
                     className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-all ${
                       selectedEvents.includes(event.key)
-                        ? 'border-[#0d2772] bg-[#f5f7ff]'
-                        : 'border-[#d9d9d9] hover:border-[#0d2772]/40'
+                        ? 'border-[#2B4ACF] bg-[#f5f7ff]'
+                        : 'border-[#d9d9d9] hover:border-[#2B4ACF]/40'
                     }`}
                   >
                     <Checkbox
@@ -591,7 +591,7 @@ export default function ConfigurarPixelModal({
                       onChange={(e) => setReceberEvento(e.target.value)}
                       className="flex flex-col gap-3"
                     >
-                      <div className="p-3 border border-[#d9d9d9] rounded-lg hover:border-[#0d2772]/40 transition-all">
+                      <div className="p-3 border border-[#d9d9d9] rounded-lg hover:border-[#2B4ACF]/40 transition-all">
                         <Radio value="imediatos">
                           <Text strong className="text-sm">Pagamentos imediatos</Text>
                         </Radio>
@@ -599,7 +599,7 @@ export default function ConfigurarPixelModal({
                           O evento é disparado assim que o pagamento é confirmado. Aplica-se a: Pix, Cartão de crédito e Saldo Eduzz.
                         </Text>
                       </div>
-                      <div className="p-3 border border-[#d9d9d9] rounded-lg hover:border-[#0d2772]/40 transition-all">
+                      <div className="p-3 border border-[#d9d9d9] rounded-lg hover:border-[#2B4ACF]/40 transition-all">
                         <Radio value="nao_imediato">
                           <Text strong className="text-sm">Pagamento não imediato</Text>
                         </Radio>
@@ -607,7 +607,7 @@ export default function ConfigurarPixelModal({
                           O evento é disparado quando o boleto é gerado (antes da compensação). Útil para rastrear a intenção de compra mesmo antes da confirmação do pagamento.
                         </Text>
                       </div>
-                      <div className="p-3 border border-[#d9d9d9] rounded-lg hover:border-[#0d2772]/40 transition-all">
+                      <div className="p-3 border border-[#d9d9d9] rounded-lg hover:border-[#2B4ACF]/40 transition-all">
                         <Radio value="todos">
                           <Text strong className="text-sm">Todos</Text>
                         </Radio>

@@ -146,7 +146,7 @@ export default function TabPersonalizado() {
       <>
         <div className="flex flex-col items-center justify-center py-16 gap-4">
           <AppstoreOutlined className="text-[48px] text-[rgba(0,0,0,0.15)]" />
-          <Title level={4} className="!mb-0 text-[#0d2772]">Monte do seu jeito!</Title>
+          <Title level={4} className="!mb-0 text-[#2B4ACF]">Monte do seu jeito!</Title>
           <Text type="secondary" className="text-center max-w-[400px]">
             Personalize esta aba com as métricas que fazem mais sentido para o seu negócio. Escolha entre opções de transações, performance, pagamentos e origem.
           </Text>
@@ -207,7 +207,7 @@ function WidgetModal({
                 const jaAdicionado = adicionados.includes(widget.id)
                 return (
                   <div key={widget.id} className="flex items-center gap-3 py-3 border-b border-[rgba(0,0,0,0.06)] last:border-b-0">
-                    <div className="text-[#0d2772] text-lg w-5 flex justify-center shrink-0">{widget.icon}</div>
+                    <div className="text-[#2B4ACF] text-lg w-5 flex justify-center shrink-0">{widget.icon}</div>
                     <div className="flex-1 min-w-0">
                       <Text strong className="text-sm block">{widget.nome}</Text>
                       <Text type="secondary" className="text-xs">{widget.descricao}</Text>

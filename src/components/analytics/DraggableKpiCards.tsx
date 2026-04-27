@@ -143,7 +143,7 @@ export default function DraggableKpiCards({
       {/* Edit dropdown to add/remove cards */}
       {isEditing && (
         <Dropdown menu={{ items: dropdownItems }} trigger={['click']} placement="bottomRight">
-          <button className="w-8 shrink-0 rounded-lg border-2 border-dashed border-[rgba(0,0,0,0.15)] flex items-center justify-center cursor-pointer bg-transparent hover:border-[#0d2772] hover:text-[#0d2772] text-[rgba(0,0,0,0.25)] transition-colors">
+          <button className="w-8 shrink-0 rounded-lg border-2 border-dashed border-[rgba(0,0,0,0.15)] flex items-center justify-center cursor-pointer bg-transparent hover:border-[#2B4ACF] hover:text-[#2B4ACF] text-[rgba(0,0,0,0.25)] transition-colors">
             <EditOutlined className="text-sm" />
           </button>
         </Dropdown>

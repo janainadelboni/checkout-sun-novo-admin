@@ -1,4 +1,4 @@
-import { Typography, Tooltip } from 'antd'
+import { Typography, Table } from 'antd'
 
 const { Title, Text } = Typography
 
@@ -12,9 +12,9 @@ function PieChart({ segments, size = 160 }: { segments: { percent: number; color
         const x1 = cx + r * Math.cos(s - Math.PI / 2); const y1 = cy + r * Math.sin(s - Math.PI / 2)
         const x2 = cx + r * Math.cos(e - Math.PI / 2); const y2 = cy + r * Math.sin(e - Math.PI / 2)
         return (
-          <Tooltip key={i} title={`${seg.label}: ${seg.percent}%`}>
-            <path d={`M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${la} 1 ${x2} ${y2} Z`} fill={seg.color} className="cursor-pointer hover:opacity-80 transition-opacity" />
-          </Tooltip>
+          <path key={i} d={`M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${la} 1 ${x2} ${y2} Z`} fill={seg.color} className="cursor-pointer hover:opacity-80 transition-opacity">
+            <title>{`${seg.label}: ${seg.percent}%`}</title>
+          </path>
         )
       })}
     </svg>
@@ -22,36 +22,48 @@ function PieChart({ segments, size = 160 }: { segments: { percent: number; color
 }
 
 const origemVendas = [
-  { label: 'Produtor', color: '#13C2C2', percent: 40, percentStr: '40%', quantidade: 190 },
-  { label: 'Afiliado', color: '#FAAD14', percent: 34, percentStr: '34%', quantidade: 223 },
-  { label: 'Coprodutor', color: '#1890FF', percent: 20, percentStr: '20%', quantidade: 19 },
-  { label: 'Outros', color: '#EB2F96', percent: 6, percentStr: '6%', quantidade: 5 },
+  { key: '1', origem: 'Produtor', color: '#13C2C2', quantidade: 190 },
+  { key: '2', origem: 'Afiliado', color: '#FAAD14', quantidade: 223 },
+  { key: '3', origem: 'Coprodutor', color: '#1890FF', quantidade: 19 },
+  { key: '4', origem: 'Outros', color: '#D9D9D9', quantidade: 8 },
 ]
 
+const total = origemVendas.reduce((s, d) => s + d.quantidade, 0)
+
 export function OrigemVendasConcluidas() {
+  const columns = [
+    {
+      title: 'Origem',
+      dataIndex: 'origem',
+      key: 'origem',
+      render: (nome: string, r: typeof origemVendas[0]) => (
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: r.color }} />
+          <Text className="text-sm">{nome}</Text>
+        </div>
+      ),
+    },
+    {
+      title: 'Quantidade',
+      dataIndex: 'quantidade',
+      key: 'quantidade',
+      width: 130,
+      render: (v: number) => (
+        <span>
+          {v.toLocaleString('pt-BR')}
+          <Text type="secondary" className="text-xs ml-1">({((v / total) * 100).toFixed(0)}%)</Text>
+        </span>
+      ),
+    },
+  ]
+
   return (
     <div className="border border-[rgba(0,0,0,0.06)] rounded-lg p-6 h-full">
       <Title level={5} className="!mb-4">Origem das vendas concluídas</Title>
       <div className="flex justify-center mb-4">
-        <PieChart segments={origemVendas.map((d) => ({ percent: d.percent, color: d.color, label: d.label }))} />
+        <PieChart segments={origemVendas.map((d) => ({ percent: Math.round((d.quantidade / total) * 100), color: d.color, label: d.origem }))} />
       </div>
-      <div className="flex items-center py-1">
-        <div className="flex-1" />
-        <div className="w-[70px] text-right shrink-0 pl-4"><Text type="secondary" className="text-[11px] whitespace-nowrap">Percentual</Text></div>
-        <div className="w-[75px] text-right shrink-0 pl-4"><Text type="secondary" className="text-[11px] whitespace-nowrap">Quantidade</Text></div>
-      </div>
-      {origemVendas.map((d) => (
-        <Tooltip key={d.label} title={`${d.label}: ${d.percentStr} (${d.quantidade.toLocaleString('pt-BR')})`}>
-          <div className="flex items-center py-2 border-b border-[rgba(0,0,0,0.06)] last:border-b-0 cursor-default hover:bg-[rgba(0,0,0,0.02)] rounded transition-colors">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <div className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: d.color }} />
-              <Text className="text-xs whitespace-nowrap">{d.label}</Text>
-            </div>
-            <div className="w-[70px] text-right shrink-0 pl-4"><Text className="text-xs whitespace-nowrap">{d.percentStr}</Text></div>
-            <div className="w-[75px] text-right shrink-0 pl-4"><Text type="secondary" className="text-xs whitespace-nowrap">{d.quantidade}</Text></div>
-          </div>
-        </Tooltip>
-      ))}
+      <Table dataSource={origemVendas} columns={columns} pagination={false} size="small" />
     </div>
   )
 }

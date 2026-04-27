@@ -37,7 +37,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { EduzzLogo, CheckoutSunLogo } from '../Logos'
-import { rootzzTheme } from '../../theme/rootzz'
+import antdTheme from '../../theme/antd'
 import TabPerformance from './TabPerformance'
 import TabTransacoes from './TabTransacoes'
 import TabPagamentos from './TabPagamentos'
@@ -114,6 +114,7 @@ const produtosTree = [
 const { RangePicker } = DatePicker
 
 const PERIODOS: Record<string, string> = {
+  hoje: 'Hoje',
   ultimos_7: 'Últimos 7 dias',
   ultimos_15: 'Últimos 15 dias',
   ultimos_30: 'Últimos 30 dias',
@@ -143,7 +144,7 @@ function SortableTab({
         onPointerDown={(e) => { if (isEditing) e.stopPropagation() }}
         onClick={onClick}
         className={`pb-3 text-sm font-medium border-b-2 transition-colors bg-transparent whitespace-nowrap cursor-pointer ${
-          isActive ? 'border-[#0d2772] text-[#0d2772]' : 'border-transparent text-[rgba(0,0,0,0.45)] hover:text-[rgba(0,0,0,0.85)]'
+          isActive ? 'border-[#2B4ACF] text-[#2B4ACF]' : 'border-transparent text-[rgba(0,0,0,0.45)] hover:text-[rgba(0,0,0,0.85)]'
         }`}
       >
         {tab}
@@ -152,7 +153,7 @@ function SortableTab({
   )
 }
 
-const TAB_COMPONENTS: Record<string, React.FC<{ isEditing?: boolean }>> = {
+const TAB_COMPONENTS: Record<string, React.FC<{ isEditing?: boolean; hasData?: boolean }>> = {
   Performance: TabPerformance,
   Transações: TabTransacoes,
   Pagamentos: TabPagamentos,
@@ -160,15 +161,28 @@ const TAB_COMPONENTS: Record<string, React.FC<{ isEditing?: boolean }>> = {
   Personalizado: TabPersonalizado,
 }
 
-export default function PaginaAnalytics({ onVoltar: _onVoltar }: { onVoltar: () => void }) {
+export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { onVoltar: () => void; onNavigate?: (key: 'analytics' | 'rastreamento' | 'order-bump') => void }) {
   const [tabs, setTabs] = useState(['Performance', 'Transações', 'Pagamentos', 'Origem', 'Personalizado'])
   const [activeTab, setActiveTab] = useState('Performance')
   const [isEditing, setIsEditing] = useState(false)
 
-  // --- Filters state ---
-  const [produtoFilter, setProdutoFilter] = useState<string[]>(['todos'])
-  const [periodo, setPeriodo] = useState('ultimos_30')
-  const [customRange, setCustomRange] = useState<[string, string] | null>(null)
+  // --- Filters state (with localStorage persistence) ---
+  const [produtoFilter, setProdutoFilter] = useState<string[]>(() => {
+    try { const v = localStorage.getItem('analytics_produtoFilter'); return v ? JSON.parse(v) : ['todos'] } catch { return ['todos'] }
+  })
+  const [periodo, setPeriodo] = useState(() => {
+    const saved = localStorage.getItem('analytics_periodo')
+    // Default to ultimos_7 if no saved value or if saved value is 'hoje' (no data scenario)
+    return saved && saved !== 'hoje' ? saved : 'ultimos_7'
+  })
+  const [customRange, setCustomRange] = useState<[string, string] | null>(() => {
+    try { const v = localStorage.getItem('analytics_customRange'); return v ? JSON.parse(v) : null } catch { return null }
+  })
+
+  // Persist filters
+  const updateProdutoFilter = (v: string[]) => { setProdutoFilter(v); localStorage.setItem('analytics_produtoFilter', JSON.stringify(v)) }
+  const updatePeriodo = (v: string) => { setPeriodo(v); localStorage.setItem('analytics_periodo', v); if (v !== 'personalizado') { setCustomRange(null); localStorage.removeItem('analytics_customRange') } }
+  const updateCustomRange = (v: [string, string] | null) => { setCustomRange(v); if (v) localStorage.setItem('analytics_customRange', JSON.stringify(v)); else localStorage.removeItem('analytics_customRange') }
 
   // --- Saved filters ---
   const [filtrosSalvos, setFiltrosSalvos] = useState<FiltroSalvo[]>([])
@@ -207,13 +221,13 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar }: { onVoltar: () 
       setPeriodo('ultimos_30')
     } else {
       // Find the value key matching this label and remove it
-      setProdutoFilter([])
+      updateProdutoFilter([])
     }
   }
 
   const handleLimparFiltros = () => {
-    setProdutoFilter([])
-    setPeriodo('ultimos_30')
+    updateProdutoFilter([])
+    updatePeriodo('ultimos_30')
   }
 
   const handleSalvarFiltro = (nome: string) => {
@@ -232,8 +246,8 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar }: { onVoltar: () 
   }
 
   const handleAplicarFiltro = (filtro: FiltroSalvo) => {
-    setProdutoFilter(filtro.produtos)
-    setPeriodo(filtro.periodo)
+    updateProdutoFilter(filtro.produtos)
+    updatePeriodo(filtro.periodo)
     setFiltrosSalvosModalOpen(false)
   }
 
@@ -256,7 +270,7 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar }: { onVoltar: () 
   const ActiveTabComponent = TAB_COMPONENTS[activeTab]
 
   return (
-    <ConfigProvider theme={rootzzTheme}>
+    <ConfigProvider theme={antdTheme(false)}>
       <Layout className="min-h-screen bg-white">
         <div className="h-[78px] bg-[#fafafa] flex items-center justify-center border-b border-[rgba(0,0,0,0.06)]">
           <EduzzLogo />
@@ -265,11 +279,20 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar }: { onVoltar: () 
         <Layout className="!bg-white">
           <Sider width={288} className="!bg-white border-r border-[rgba(0,0,0,0.06)]">
             <div className="px-4 py-[10px]"><CheckoutSunLogo /></div>
-            <Menu mode="inline" selectedKeys={['visao-geral']} className="border-none" items={[
-              { key: 'visao-geral', label: 'Visão geral' },
-              { key: 'produtos', label: 'Produtos' },
-              { key: 'monitoramento', label: 'Monitoramento' },
-            ]} />
+            <Menu
+              mode="inline"
+              selectedKeys={['visao-geral']}
+              className="border-none"
+              onClick={({ key }) => {
+                if (key === 'rastreamento') onNavigate?.('rastreamento')
+                else if (key === 'order-bump') onNavigate?.('order-bump')
+              }}
+              items={[
+                { key: 'visao-geral', label: 'Visão geral' },
+                { key: 'rastreamento', label: 'Rastreamento' },
+                { key: 'order-bump', label: 'Order Bump' },
+              ]}
+            />
           </Sider>
 
           <Content className="bg-white flex flex-col gap-0 w-full">
@@ -317,7 +340,7 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar }: { onVoltar: () 
                   <TreeSelect
                     treeData={produtosTree}
                     value={produtoFilter}
-                    onChange={setProdutoFilter}
+                    onChange={updateProdutoFilter}
                     treeCheckable
                     showCheckedStrategy={TreeSelect.SHOW_PARENT}
                     placeholder="Pesquise pelo ID ou título do produto"
@@ -335,7 +358,7 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar }: { onVoltar: () 
                   <div className="flex gap-2">
                     <Select
                       value={periodo}
-                      onChange={(v) => { setPeriodo(v); if (v !== 'personalizado') setCustomRange(null) }}
+                      onChange={(v) => updatePeriodo(v)}
                       className={periodo === 'personalizado' ? 'w-[160px]' : 'w-full'}
                       options={Object.entries(PERIODOS).map(([value, label]) => ({ value, label }))}
                     />
@@ -346,7 +369,7 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar }: { onVoltar: () 
                         className="flex-1"
                         onChange={(_dates, dateStrings) => {
                           if (dateStrings[0] && dateStrings[1]) {
-                            setCustomRange([dateStrings[0], dateStrings[1]])
+                            updateCustomRange([dateStrings[0], dateStrings[1]])
                           }
                         }}
                       />
@@ -429,7 +452,7 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar }: { onVoltar: () 
             </div>
 
             {/* Tab Content */}
-            {ActiveTabComponent && <ActiveTabComponent isEditing={isEditing} />}
+            {ActiveTabComponent && <ActiveTabComponent isEditing={isEditing} hasData={periodo !== 'hoje'} />}
             </div>
           </Content>
         </Layout>

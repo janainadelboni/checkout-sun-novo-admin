@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import {
-  Breadcrumb,
   Button,
   ConfigProvider,
   Layout,
@@ -12,16 +11,17 @@ import {
   Timeline,
   Typography,
 } from 'antd'
-import { HomeOutlined, EyeOutlined, SettingOutlined, PlusOutlined, HistoryOutlined } from '@ant-design/icons'
+import { EyeOutlined, SettingOutlined, PlusOutlined, HistoryOutlined } from '@ant-design/icons'
 import { EduzzLogo, CheckoutSunLogo } from '../Logos'
 import ConfigurarPixelModal, { type ModalMode, type PixelProvider } from './ConfigurarPixelModal'
-import { rootzzTheme } from '../../theme/rootzz'
+import antdTheme from '../../theme/antd'
 
 const { Sider, Content } = Layout
 const { Title, Text } = Typography
 
 interface PaginaRastreamentoProps {
   onVerDetalhes: (pixelProvider: string) => void
+  onNavigate?: (key: 'analytics' | 'rastreamento' | 'order-bump') => void
 }
 
 type PixelCard = {
@@ -195,6 +195,7 @@ function BrandLogo({ card }: { card: PixelCard }) {
 
 export default function PaginaRastreamento({
   onVerDetalhes,
+  onNavigate,
 }: PaginaRastreamentoProps) {
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<ModalMode>({ type: 'new' })
@@ -223,7 +224,7 @@ export default function PaginaRastreamento({
   }
 
   return (
-    <ConfigProvider theme={rootzzTheme}>
+    <ConfigProvider theme={antdTheme(false)}>
       <Layout className="min-h-screen bg-white">
         {/* Header */}
         <div className="h-[78px] bg-[#fafafa] flex items-center justify-center border-b border-[rgba(0,0,0,0.06)]">
@@ -240,25 +241,20 @@ export default function PaginaRastreamento({
               mode="inline"
               selectedKeys={['rastreamento']}
               className="border-none"
+              onClick={({ key }) => {
+                if (key === 'visao-geral') onNavigate?.('analytics')
+                else if (key === 'order-bump') onNavigate?.('order-bump')
+              }}
               items={[
                 { key: 'visao-geral', label: 'Visão geral' },
-                { key: 'produtos', label: 'Produtos' },
                 { key: 'rastreamento', label: 'Rastreamento' },
+                { key: 'order-bump', label: 'Order Bump' },
               ]}
             />
           </Sider>
 
           {/* Main Content */}
           <Content className="p-8 bg-white flex flex-col gap-6 max-w-[1280px] mx-auto w-full">
-            {/* Breadcrumb */}
-            <Breadcrumb
-              items={[
-                { title: <HomeOutlined /> },
-                { title: 'Checkout Sun' },
-                { title: 'Rastreamento' },
-              ]}
-            />
-
             {/* Title + Subtitle + Add button */}
             <div className="flex items-start justify-between">
               <div>
@@ -289,7 +285,7 @@ export default function PaginaRastreamento({
                     <div className="flex flex-col gap-4">
                       {/* Toggle para demo */}
                       <div className="flex items-center gap-2">
-                        <input type="checkbox" checked={emptyState} onChange={(e) => setEmptyState(e.target.checked)} className="accent-[#0d2772]" />
+                        <input type="checkbox" checked={emptyState} onChange={(e) => setEmptyState(e.target.checked)} className="accent-[#2B4ACF]" />
                         <Text type="secondary" className="!text-xs">Simular primeiro acesso (sem pixels)</Text>
                       </div>
 
@@ -316,7 +312,7 @@ export default function PaginaRastreamento({
                           key={card.key}
                           className={`flex items-center p-4 border rounded-lg w-full transition-all ${
                             card.configured
-                              ? 'border-[#d9d9d9] hover:border-[#0d2772]/40 hover:shadow-sm cursor-pointer'
+                              ? 'border-[#d9d9d9] hover:border-[#2B4ACF]/40 hover:shadow-sm cursor-pointer'
                               : 'border-dashed border-[#d9d9d9] bg-[#fafafa]'
                           }`}
                           onClick={() => card.configured && onVerDetalhes(card.providerKey)}
@@ -325,13 +321,13 @@ export default function PaginaRastreamento({
                           <div className="w-[260px] shrink-0 flex flex-col gap-1">
                             <BrandLogo card={card} />
                             {card.label && (
-                              <Text className="!text-xs !text-[#0d2772] font-medium">
+                              <Text className="!text-xs !text-[#2B4ACF] font-medium">
                                 {card.label}
                               </Text>
                             )}
                             {card.historico && card.historico.length > 0 && (
                               <span
-                                className="text-xs text-[rgba(0,0,0,0.45)] hover:text-[#0d2772] cursor-pointer inline-flex items-center gap-1"
+                                className="text-xs text-[rgba(0,0,0,0.45)] hover:text-[#2B4ACF] cursor-pointer inline-flex items-center gap-1"
                                 onClick={(e) => { e.stopPropagation(); setHistoricoPagina(1); setHistoricoModal({ open: true, card }) }}
                               >
                                 <HistoryOutlined />

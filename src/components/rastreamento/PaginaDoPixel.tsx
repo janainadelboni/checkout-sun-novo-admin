@@ -28,7 +28,7 @@ import {
 } from '@ant-design/icons'
 import ConfigurarPixelModal, { type ModalMode, type PixelConfig } from './ConfigurarPixelModal'
 import { EduzzLogo, CheckoutSunLogo } from '../Logos'
-import { rootzzTheme } from '../../theme/rootzz'
+import antdTheme from '../../theme/antd'
 
 const { Sider, Content } = Layout
 const { Title, Text } = Typography
@@ -105,9 +105,10 @@ const PROVIDER_LOGOS: Record<string, string> = {
 interface PaginaDoPixelProps {
   provider?: string
   onVoltar?: () => void
+  onNavigate?: (key: 'analytics' | 'rastreamento' | 'order-bump') => void
 }
 
-export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPixelProps) {
+export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }: PaginaDoPixelProps) {
   const [produtos] = useState<Produto[]>(produtosIniciais)
   const [selectedIds, setSelectedIds] = useState<number[]>([])
   const [produtoFilter, setProdutoFilter] = useState<number[]>([])
@@ -486,7 +487,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
   }
 
   return (
-    <ConfigProvider theme={rootzzTheme}>
+    <ConfigProvider theme={antdTheme(false)}>
       <Layout className="min-h-screen bg-white">
         {/* Header */}
         <div className="h-[78px] bg-[#fafafa] flex items-center justify-center border-b border-[rgba(0,0,0,0.06)]">
@@ -503,10 +504,15 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
               mode="inline"
               selectedKeys={['rastreamento']}
               className="border-none"
+              onClick={({ key }) => {
+                if (key === 'visao-geral') onNavigate?.('analytics')
+                else if (key === 'rastreamento') onNavigate?.('rastreamento')
+                else if (key === 'order-bump') onNavigate?.('order-bump')
+              }}
               items={[
-                { key: 'visao-geral', label: 'Visao geral' },
-                { key: 'produtos', label: 'Produtos' },
+                { key: 'visao-geral', label: 'Visão geral' },
                 { key: 'rastreamento', label: 'Rastreamento' },
+                { key: 'order-bump', label: 'Order Bump' },
               ]}
             />
           </Sider>
@@ -667,8 +673,8 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
                                   <Tag
                                     className="!text-xs !font-semibold !px-2 !py-0.5 !rounded"
                                     style={{
-                                      color: '#0d2772',
-                                      borderColor: '#0d2772',
+                                      color: '#2B4ACF',
+                                      borderColor: '#2B4ACF',
                                       backgroundColor: 'transparent',
                                     }}
                                   >
@@ -779,7 +785,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
                                 if (el) el.indeterminate = indeterminate
                               }}
                               onChange={toggleSelectAll}
-                              className="w-4 h-4 cursor-pointer accent-[#0d2772]"
+                              className="w-4 h-4 cursor-pointer accent-[#2B4ACF]"
                             />
                           </div>
                           <div className="flex-1 px-4 flex items-center gap-1">
@@ -818,7 +824,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
                                     checked={selectedIds.includes(produto.id)}
                                     onChange={() => toggleSelect(produto.id)}
                                     onClick={(e) => e.stopPropagation()}
-                                    className="w-4 h-4 cursor-pointer accent-[#0d2772]"
+                                    className="w-4 h-4 cursor-pointer accent-[#2B4ACF]"
                                   />
                                 </div>
                                 <div className="flex-1 px-4">
@@ -832,7 +838,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
                                       type="text"
                                       icon={<SettingOutlined />}
                                       onClick={(e) => { e.stopPropagation(); handleConfigIndividual(produto.id) }}
-                                      className="!text-[rgba(0,0,0,0.45)] hover:!text-[#0d2772] !whitespace-nowrap"
+                                      className="!text-[rgba(0,0,0,0.45)] hover:!text-[#2B4ACF] !whitespace-nowrap"
                                     >
                                       Configurar
                                     </Button>
@@ -879,8 +885,8 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
                                             <Tag
                                               className="!text-xs !font-semibold !px-2 !py-0.5 !rounded"
                                               style={{
-                                                color: '#0d2772',
-                                                borderColor: '#0d2772',
+                                                color: '#2B4ACF',
+                                                borderColor: '#2B4ACF',
                                                 backgroundColor: 'transparent',
                                               }}
                                             >
@@ -1080,7 +1086,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
                             dataIndex: 'nomeEvento',
                             key: 'nomeEvento',
                             render: (evento: string) => (
-                              <Tag className="!border-solid !bg-transparent !text-[#0d2772] !border-[#d9d9d9] !font-medium">{evento}</Tag>
+                              <Tag className="!border-solid !bg-transparent !text-[#2B4ACF] !border-[#d9d9d9] !font-medium">{evento}</Tag>
                             ),
                           },
                           {
@@ -1221,7 +1227,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
                             <div className="flex items-center justify-between">
                               <Tag
                                 className="!text-xs !font-semibold !px-2.5 !py-0.5 !rounded !bg-transparent"
-                                style={{ color: '#0d2772', borderColor: '#0d2772' }}
+                                style={{ color: '#2B4ACF', borderColor: '#2B4ACF' }}
                               >
                                 {ev.name}
                               </Tag>
@@ -1265,7 +1271,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar }: PaginaDoPi
                                 dataIndex: 'evento',
                                 key: 'evento',
                                 render: (evento: string) => (
-                                  <Tag className="!border-solid !bg-transparent !text-[#0d2772] !border-[#d9d9d9] !font-medium">{evento}</Tag>
+                                  <Tag className="!border-solid !bg-transparent !text-[#2B4ACF] !border-[#d9d9d9] !font-medium">{evento}</Tag>
                                 ),
                               },
                               {

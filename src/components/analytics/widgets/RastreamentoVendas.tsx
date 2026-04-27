@@ -22,21 +22,25 @@ function PieChart({ segments, size = 140 }: { segments: { percent: number; color
   )
 }
 
-const rastreamentoData: Record<string, { label: string; percent: string; quantidade: number; cor: string }[]> = {
+const rastreamentoData: Record<string, { label: string; quantidade: number; cor: string }[]> = {
   Source: [
-    { label: 'Google', percent: '100%', quantidade: 10000, cor: '#1890FF' },
-    { label: 'Facebook', percent: '100%', quantidade: 10000, cor: '#1890FF' },
-    { label: 'Instagram', percent: '100%', quantidade: 10000, cor: '#FAAD14' },
-    { label: 'email', percent: '100%', quantidade: 10000, cor: '#EB2F96' },
+    { label: 'Google', quantidade: 10000, cor: '#1890FF' },
+    { label: 'Facebook', quantidade: 8500, cor: '#1890FF' },
+    { label: 'Instagram', quantidade: 6200, cor: '#FAAD14' },
+    { label: 'email', quantidade: 3800, cor: '#EB2F96' },
   ],
-  Medium: [{ label: 'cpc', percent: '60%', quantidade: 6000, cor: '#1890FF' }, { label: 'organic', percent: '40%', quantidade: 4000, cor: '#52C41A' }],
-  Campaign: [{ label: 'black_friday', percent: '80%', quantidade: 8000, cor: '#722ED1' }, { label: 'launch_2025', percent: '20%', quantidade: 2000, cor: '#FAAD14' }],
-  Term: [{ label: 'curso online', percent: '70%', quantidade: 7000, cor: '#1890FF' }, { label: 'mentoria', percent: '30%', quantidade: 3000, cor: '#EB2F96' }],
-  Content: [{ label: 'banner_topo', percent: '55%', quantidade: 5500, cor: '#52C41A' }, { label: 'video_ad', percent: '45%', quantidade: 4500, cor: '#FAAD14' }],
+  Medium: [{ label: 'cpc', quantidade: 6000, cor: '#1890FF' }, { label: 'organic', quantidade: 4000, cor: '#52C41A' }],
+  Campaign: [{ label: 'black_friday', quantidade: 8000, cor: '#722ED1' }, { label: 'launch_2025', quantidade: 2000, cor: '#FAAD14' }],
+  Term: [{ label: 'curso online', quantidade: 7000, cor: '#1890FF' }, { label: 'mentoria', quantidade: 3000, cor: '#EB2F96' }],
+  Content: [{ label: 'banner_topo', quantidade: 5500, cor: '#52C41A' }, { label: 'video_ad', quantidade: 4500, cor: '#FAAD14' }],
 }
 
 export function RastreamentoVendas() {
   const [tab, setTab] = useState('Source')
+  const data = rastreamentoData[tab] || []
+  const totalQtd = data.reduce((s, d) => s + d.quantidade, 0)
+  const maxQtd = Math.max(...data.map((d) => d.quantidade))
+
   return (
     <div className="border border-[rgba(0,0,0,0.06)] rounded-lg p-6">
       <div className="flex items-center justify-between mb-4">
@@ -46,9 +50,8 @@ export function RastreamentoVendas() {
       <div className="flex gap-6">
         <div className="flex flex-col items-center gap-3 shrink-0">
           <PieChart segments={[
-            { percent: 40, color: '#1890FF', label: 'Rastreável' },
-            { percent: 30, color: '#FAAD14', label: 'Não rastreável' },
-            { percent: 30, color: '#52C41A', label: 'Outros' },
+            { percent: 65, color: '#1890FF', label: 'Rastreável' },
+            { percent: 35, color: '#FAAD14', label: 'Não rastreável' },
           ]} />
           <div className="flex flex-col gap-1">
             {[{ label: 'Rastreável', color: '#1890FF' }, { label: 'Não rastreável', color: '#FAAD14' }].map((l) => (
@@ -62,21 +65,28 @@ export function RastreamentoVendas() {
         <div className="flex-1 min-w-0">
           <div className="flex items-center py-1">
             <div className="w-[100px] shrink-0" /><div className="flex-1" />
-            <div className="w-[70px] text-right shrink-0 pl-4"><Text type="secondary" className="text-[11px] whitespace-nowrap">Percentual</Text></div>
-            <div className="w-[75px] text-right shrink-0 pl-4"><Text type="secondary" className="text-[11px] whitespace-nowrap">Quantidade</Text></div>
+            <div className="w-[110px] text-right shrink-0 pl-4"><Text type="secondary" className="text-[11px] whitespace-nowrap">Quantidade</Text></div>
           </div>
-          {(rastreamentoData[tab] || []).map((item) => (
-            <Tooltip key={item.label} title={`${item.label}: ${item.percent} (${item.quantidade.toLocaleString('pt-BR')})`}>
-            <div className="flex items-center py-2.5 border-b border-[rgba(0,0,0,0.06)] last:border-b-0 cursor-default hover:bg-[rgba(0,0,0,0.02)] rounded transition-colors">
-              <div className="w-[100px] shrink-0"><Text className="text-sm whitespace-nowrap">{item.label}</Text></div>
-              <div className="flex-1 h-4 bg-[#f5f5f5] rounded overflow-hidden mx-2">
-                <div className="h-full rounded" style={{ width: item.percent, backgroundColor: item.cor, minWidth: '4px' }} />
+          {data.map((item) => {
+            const pct = ((item.quantidade / totalQtd) * 100).toFixed(0)
+            const barW = ((item.quantidade / maxQtd) * 100).toFixed(0)
+            return (
+              <Tooltip key={item.label} title={`${item.label}: ${item.quantidade.toLocaleString('pt-BR')} vendas (${pct}%)`}>
+              <div className="flex items-center py-2.5 border-b border-[rgba(0,0,0,0.06)] last:border-b-0 cursor-default hover:bg-[rgba(0,0,0,0.02)] rounded transition-colors">
+                <div className="w-[100px] shrink-0"><Text className="text-sm whitespace-nowrap">{item.label}</Text></div>
+                <div className="flex-1 h-4 bg-[#f5f5f5] rounded overflow-hidden mx-2">
+                  <div className="h-full rounded" style={{ width: `${barW}%`, backgroundColor: item.cor, minWidth: '4px' }} />
+                </div>
+                <div className="w-[110px] text-right shrink-0 pl-4">
+                  <span>
+                    <Text className="text-xs">{item.quantidade.toLocaleString('pt-BR')}</Text>
+                    <Text type="secondary" className="text-[10px] ml-1">({pct}%)</Text>
+                  </span>
+                </div>
               </div>
-              <div className="w-[70px] text-right shrink-0 pl-4"><Text className="text-xs whitespace-nowrap">{item.percent}</Text></div>
-              <div className="w-[75px] text-right shrink-0 pl-4"><Text type="secondary" className="text-xs whitespace-nowrap">{item.quantidade.toLocaleString('pt-BR')}</Text></div>
-            </div>
-            </Tooltip>
-          ))}
+              </Tooltip>
+            )
+          })}
         </div>
       </div>
     </div>

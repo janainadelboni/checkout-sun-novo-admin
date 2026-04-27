@@ -101,7 +101,7 @@ export default function TesteDeEvento({ produtoId, produtoNome, onVoltar }: Test
   }
 
   return (
-    <ConfigProvider theme={{ token: { colorPrimary: '#0d2772' } }}>
+    <ConfigProvider theme={{ token: { colorPrimary: '#2B4ACF' } }}>
     <Layout className="min-h-screen bg-white">
       {/* Header */}
       <div className="h-[78px] bg-[#fafafa] flex items-center justify-center border-b border-[rgba(0,0,0,0.06)]">

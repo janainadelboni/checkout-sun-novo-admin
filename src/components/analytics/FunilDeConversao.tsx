@@ -5,10 +5,10 @@ import { QuestionCircleOutlined } from '@ant-design/icons'
 const { Title, Text } = Typography
 
 const funilEtapas = [
-  { label: 'Visitou a página', evento: 'PageView', valor: 10200, cor: '#1890FF' },
-  { label: 'Preencheu dados', evento: 'FormInteraction', valor: 4590, cor: '#FAAD14' },
-  { label: 'Dados de pagamento', evento: 'AddPaymentInfo', valor: 2856, cor: '#52C41A' },
-  { label: 'Compra finalizada', evento: 'Purchase', valor: 1224, cor: '#EB2F96' },
+  { label: 'Visitou a página', evento: 'pageview', valor: 10200, cor: '#1890FF' },
+  { label: 'Preencheu dados', evento: 'lead', valor: 4590, cor: '#FAAD14' },
+  { label: 'Dados de pagamento', evento: 'addpaymentinfo', valor: 2856, cor: '#52C41A' },
+  { label: 'Compra finalizada', evento: 'purchase', valor: 1224, cor: '#EB2F96' },
 ]
 
 export default function FunilDeConversao() {
@@ -56,8 +56,8 @@ export default function FunilDeConversao() {
                 <Tag
                   className="!text-xs !font-semibold !px-2 !py-0.5 !rounded cursor-help"
                   style={{
-                    color: '#0d2772',
-                    borderColor: '#0d2772',
+                    color: '#2B4ACF',
+                    borderColor: '#2B4ACF',
                     backgroundColor: 'transparent',
                   }}
                 >

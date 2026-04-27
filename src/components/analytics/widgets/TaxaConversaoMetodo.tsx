@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Typography, Segmented, Tooltip } from 'antd'
+import { Typography, Segmented } from 'antd'
 
 const { Title, Text } = Typography
 
@@ -23,10 +23,12 @@ function PieChart({ segments, size = 160 }: { segments: { percent: number; color
 }
 
 const transacoes = [
-  { label: 'Transações geradas', percent: 40, color: '#1890FF', valor: 'R$ 9.324,01', quantidade: 1247 },
-  { label: 'Transações em aberto', percent: 20, color: '#EB2F96', valor: 'R$ 9.324,01', quantidade: 1200 },
-  { label: 'Transações pagas', percent: 10, color: '#FAAD14', valor: 'R$ 300,00', quantidade: 800 },
+  { label: 'Transações geradas', color: '#1890FF', valor: 'R$ 9.324,01', quantidade: 1247 },
+  { label: 'Transações em aberto', color: '#EB2F96', valor: 'R$ 9.324,01', quantidade: 1200 },
+  { label: 'Transações pagas', color: '#FAAD14', valor: 'R$ 300,00', quantidade: 800 },
 ]
+
+const totalQtd = transacoes.reduce((s, t) => s + t.quantidade, 0)
 
 export function TaxaConversaoMetodo() {
   const [tab, setTab] = useState('Geral')
@@ -35,27 +37,35 @@ export function TaxaConversaoMetodo() {
       <Title level={5} className="!mb-3">Transações</Title>
       <Segmented value={tab} onChange={(v) => setTab(v as string)} options={['Geral', 'Cartão', 'Boleto', 'Pix']} size="small" className="mb-4" />
       <div className="flex justify-center mb-4">
-        <PieChart segments={transacoes.map((t) => ({ percent: t.percent, color: t.color, label: t.label, detail: `${t.percent}% — ${t.valor} (${t.quantidade})` }))} />
+        <PieChart segments={transacoes.map((t) => ({
+          percent: Math.round((t.quantidade / totalQtd) * 100),
+          color: t.color,
+          label: t.label,
+          detail: `${t.valor} (${t.quantidade})`,
+        }))} />
       </div>
-      <div className="flex items-center py-1">
-        <div className="flex-1" />
-        <div className="w-[65px] text-right shrink-0 pl-4"><Text type="secondary" className="text-[11px] whitespace-nowrap">Percentual</Text></div>
-        <div className="w-[90px] text-right shrink-0 pl-4"><Text type="secondary" className="text-[11px] whitespace-nowrap">Valor</Text></div>
-        <div className="w-[65px] text-right shrink-0 pl-4"><Text type="secondary" className="text-[11px] whitespace-nowrap">Quantidade</Text></div>
+      <div className="flex flex-col">
+        {transacoes.map((t) => {
+          const pct = ((t.quantidade / totalQtd) * 100).toFixed(0)
+          return (
+            <div key={t.label} className="flex items-center py-2 border-b border-[rgba(0,0,0,0.06)] last:border-b-0">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <div className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: t.color }} />
+                <Text className="text-xs whitespace-nowrap">{t.label}</Text>
+              </div>
+              <div className="w-[90px] text-right shrink-0 pl-3">
+                <Text strong className="text-xs whitespace-nowrap">{t.valor}</Text>
+              </div>
+              <div className="w-[90px] text-right shrink-0 pl-3">
+                <span>
+                  <Text className="text-xs">{t.quantidade.toLocaleString('pt-BR')}</Text>
+                  <Text type="secondary" className="text-[10px] ml-1">({pct}%)</Text>
+                </span>
+              </div>
+            </div>
+          )
+        })}
       </div>
-      {transacoes.map((t) => (
-        <Tooltip key={t.label} title={`${t.label}: ${t.valor} (${t.quantidade})`}>
-        <div className="flex items-center py-2 border-b border-[rgba(0,0,0,0.06)] last:border-b-0 cursor-default hover:bg-[rgba(0,0,0,0.02)] rounded transition-colors">
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <div className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: t.color }} />
-            <Text className="text-xs whitespace-nowrap">{t.label}</Text>
-          </div>
-          <div className="w-[65px] text-right shrink-0 pl-4"><Text className="text-xs whitespace-nowrap">{t.percent}%</Text></div>
-          <div className="w-[90px] text-right shrink-0 pl-4"><Text strong className="text-xs whitespace-nowrap">{t.valor}</Text></div>
-          <div className="w-[65px] text-right shrink-0 pl-4"><Text type="secondary" className="text-xs whitespace-nowrap">{t.quantidade}</Text></div>
-        </div>
-        </Tooltip>
-      ))}
     </div>
   )
 }

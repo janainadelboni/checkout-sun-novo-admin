@@ -1,4 +1,4 @@
-import { Typography, Tooltip } from 'antd'
+import { Typography, Table } from 'antd'
 
 const { Title, Text } = Typography
 
@@ -12,9 +12,9 @@ function PieChart({ segments, size = 160 }: { segments: { percent: number; color
         const x1 = cx + r * Math.cos(s - Math.PI / 2); const y1 = cy + r * Math.sin(s - Math.PI / 2)
         const x2 = cx + r * Math.cos(e - Math.PI / 2); const y2 = cy + r * Math.sin(e - Math.PI / 2)
         return (
-          <Tooltip key={i} title={`${seg.label}: ${seg.percent}%`}>
-            <path d={`M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${la} 1 ${x2} ${y2} Z`} fill={seg.color} className="cursor-pointer hover:opacity-80 transition-opacity" />
-          </Tooltip>
+          <path key={i} d={`M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${la} 1 ${x2} ${y2} Z`} fill={seg.color} className="cursor-pointer hover:opacity-80 transition-opacity">
+            <title>{`${seg.label}: ${seg.percent}%`}</title>
+          </path>
         )
       })}
     </svg>
@@ -22,36 +22,68 @@ function PieChart({ segments, size = 160 }: { segments: { percent: number; color
 }
 
 const dispositivos = [
-  { label: 'Desktop', color: '#1890FF', percent: 40, percentStr: '40%', quantidade: 190 },
-  { label: 'Celular', color: '#FAAD14', percent: 34, percentStr: '34%', quantidade: 223 },
-  { label: 'Tablet', color: '#EB2F96', percent: 20, percentStr: '20%', quantidade: 19 },
-  { label: 'Outros', color: '#F5F5F5', percent: 6, percentStr: '6%', quantidade: 5 },
+  { key: '1', dispositivo: 'Desktop', color: '#1890FF', acessos: 5200, compras: 190, ticket: 223.68 },
+  { key: '2', dispositivo: 'Celular', color: '#FAAD14', acessos: 4100, compras: 223, ticket: 180.50 },
+  { key: '3', dispositivo: 'Tablet', color: '#EB2F96', acessos: 800, compras: 19, ticket: 150.00 },
+  { key: '4', dispositivo: 'Outros', color: '#D9D9D9', acessos: 300, compras: 5, ticket: 95.00 },
 ]
 
+const totalAcessos = dispositivos.reduce((s, d) => s + d.acessos, 0)
+const totalCompras = dispositivos.reduce((s, d) => s + d.compras, 0)
+
 export function DispositivosAcesso() {
+  const columns = [
+    {
+      title: 'Dispositivo',
+      dataIndex: 'dispositivo',
+      key: 'dispositivo',
+      render: (nome: string, r: typeof dispositivos[0]) => (
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: r.color }} />
+          <Text className="text-sm">{nome}</Text>
+        </div>
+      ),
+    },
+    {
+      title: 'Acessos',
+      dataIndex: 'acessos',
+      key: 'acessos',
+      width: 120,
+      render: (v: number) => (
+        <span>
+          {v.toLocaleString('pt-BR')}
+          <Text type="secondary" className="text-xs ml-1">({((v / totalAcessos) * 100).toFixed(0)}%)</Text>
+        </span>
+      ),
+    },
+    {
+      title: 'Compras',
+      dataIndex: 'compras',
+      key: 'compras',
+      width: 120,
+      render: (v: number) => (
+        <span>
+          {v.toLocaleString('pt-BR')}
+          <Text type="secondary" className="text-xs ml-1">({((v / totalCompras) * 100).toFixed(0)}%)</Text>
+        </span>
+      ),
+    },
+    {
+      title: 'Ticket médio',
+      dataIndex: 'ticket',
+      key: 'ticket',
+      width: 110,
+      render: (v: number) => `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+    },
+  ]
+
   return (
     <div className="border border-[rgba(0,0,0,0.06)] rounded-lg p-6 h-full">
       <Title level={5} className="!mb-4">Dispositivos de acesso</Title>
       <div className="flex justify-center mb-4">
-        <PieChart segments={dispositivos.map((d) => ({ percent: d.percent, color: d.color, label: d.label }))} />
+        <PieChart segments={dispositivos.map((d) => ({ percent: Math.round((d.acessos / totalAcessos) * 100), color: d.color, label: d.dispositivo }))} />
       </div>
-      <div className="flex items-center py-1">
-        <div className="flex-1" />
-        <div className="w-[70px] text-right shrink-0 pl-4"><Text type="secondary" className="text-[11px] whitespace-nowrap">Percentual</Text></div>
-        <div className="w-[75px] text-right shrink-0 pl-4"><Text type="secondary" className="text-[11px] whitespace-nowrap">Quantidade</Text></div>
-      </div>
-      {dispositivos.map((d) => (
-        <Tooltip key={d.label} title={`${d.label}: ${d.percentStr} (${d.quantidade.toLocaleString('pt-BR')})`}>
-          <div className="flex items-center py-2 border-b border-[rgba(0,0,0,0.06)] last:border-b-0 cursor-default hover:bg-[rgba(0,0,0,0.02)] rounded transition-colors">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <div className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: d.color }} />
-              <Text className="text-xs whitespace-nowrap">{d.label}</Text>
-            </div>
-            <div className="w-[70px] text-right shrink-0 pl-4"><Text className="text-xs whitespace-nowrap">{d.percentStr}</Text></div>
-            <div className="w-[75px] text-right shrink-0 pl-4"><Text type="secondary" className="text-xs whitespace-nowrap">{d.quantidade}</Text></div>
-          </div>
-        </Tooltip>
-      ))}
+      <Table dataSource={dispositivos} columns={columns} pagination={false} size="small" />
     </div>
   )
 }
