@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Typography } from 'antd'
 
-const { Title, Text } = Typography
+
 
 export function VisaoGeralVendas() {
   const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
@@ -30,8 +30,8 @@ export function VisaoGeralVendas() {
   const formatCurrency = (v: number) => `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
 
   return (
-    <div className="border border-[rgba(0,0,0,0.06)] rounded-lg p-6">
-      <Title level={5} className="!mb-4">Visão geral de vendas</Title>
+    <div className="border border-(--ant-color-split) rounded-lg p-6">
+      <Typography.Title level={5} className="mb-4">Visão geral de vendas</Typography.Title>
       <svg
         viewBox={`0 0 ${width} ${height + 30}`}
         className="w-full"
@@ -41,14 +41,14 @@ export function VisaoGeralVendas() {
         {gridLinesValor.map((val) => (
           <g key={`lv-${val}`}>
             <line x1={padL} y1={toYValor(val)} x2={width - padR} y2={toYValor(val)} stroke="rgba(0,0,0,0.06)" />
-            <text x={padL - 8} y={toYValor(val) + 4} textAnchor="end" fill="rgba(0,0,0,0.45)" fontSize="10">
+            <text x={padL - 8} y={toYValor(val) + 4} textAnchor="end" fill="var(--ant-color-text-tertiary)" fontSize="10">
               {val === 0 ? '0' : `${(val / 1000).toFixed(0)}k`}
             </text>
           </g>
         ))}
         {/* Right axis (qty) */}
         {gridLinesVolume.map((val) => (
-          <text key={`rv-${val}`} x={width - padR + 8} y={toYVolume(val) + 4} textAnchor="start" fill="rgba(0,0,0,0.45)" fontSize="10">
+          <text key={`rv-${val}`} x={width - padR + 8} y={toYVolume(val) + 4} textAnchor="start" fill="var(--ant-color-text-tertiary)" fontSize="10">
             {val}
           </text>
         ))}
@@ -57,16 +57,16 @@ export function VisaoGeralVendas() {
         <text x={width - 15} y={padY - 6} fill="rgba(0,0,0,0.35)" fontSize="9" textAnchor="end">Qtd</text>
         {/* Month labels */}
         {meses.map((m, i) => (
-          <text key={m} x={toX(i)} y={height + 15} textAnchor="middle" fill="rgba(0,0,0,0.45)" fontSize="10">{m}</text>
+          <text key={m} x={toX(i)} y={height + 15} textAnchor="middle" fill="var(--ant-color-text-tertiary)" fontSize="10">{m}</text>
         ))}
         {/* Lines */}
-        <path d={pathValor} fill="none" stroke="#FAAD14" strokeWidth="2.5" />
+        <path d={pathValor} fill="none" stroke="var(--ant-color-warning)" strokeWidth="2.5" />
         <path d={pathVolume} fill="none" stroke="#13C2C2" strokeWidth="2.5" />
         {/* Hover */}
         {hoverIndex !== null && (
           <>
             <line x1={toX(hoverIndex)} y1={padY} x2={toX(hoverIndex)} y2={padY + chartH} stroke="rgba(0,0,0,0.15)" strokeWidth="1" strokeDasharray="4 2" />
-            <circle cx={toX(hoverIndex)} cy={toYValor(valorTransacionado[hoverIndex])} r="4" fill="#FAAD14" stroke="#fff" strokeWidth="2" />
+            <circle cx={toX(hoverIndex)} cy={toYValor(valorTransacionado[hoverIndex])} r="4" fill="var(--ant-color-warning)" stroke="#fff" strokeWidth="2" />
             <circle cx={toX(hoverIndex)} cy={toYVolume(volumeTransacoes[hoverIndex])} r="4" fill="#13C2C2" stroke="#fff" strokeWidth="2" />
           </>
         )}
@@ -81,7 +81,7 @@ export function VisaoGeralVendas() {
             <g>
               <rect x={tooltipX} y={tooltipY} width={tooltipW} height={tooltipH} rx="4" fill="rgba(0,0,0,0.8)" />
               <text x={tooltipX + 8} y={tooltipY + 16} fill="#fff" fontSize="10" fontWeight="600">{meses[hoverIndex]}</text>
-              <circle cx={tooltipX + 12} cy={tooltipY + 30} r="3" fill="#FAAD14" />
+              <circle cx={tooltipX + 12} cy={tooltipY + 30} r="3" fill="var(--ant-color-warning)" />
               <text x={tooltipX + 20} y={tooltipY + 33} fill="rgba(255,255,255,0.8)" fontSize="9">Valor: {formatCurrency(valorTransacionado[hoverIndex])}</text>
               <circle cx={tooltipX + 12} cy={tooltipY + 44} r="3" fill="#13C2C2" />
               <text x={tooltipX + 20} y={tooltipY + 47} fill="rgba(255,255,255,0.8)" fontSize="9">Volume: {volumeTransacoes[hoverIndex]} transações</text>
@@ -94,8 +94,8 @@ export function VisaoGeralVendas() {
         ))}
       </svg>
       <div className="flex gap-6 mt-2">
-        <div className="flex items-center gap-1.5"><div className="w-3 h-0.5 bg-[#FAAD14] rounded" /><Text type="secondary" className="text-xs">Valor transacionado (R$)</Text></div>
-        <div className="flex items-center gap-1.5"><div className="w-3 h-0.5 bg-[#13C2C2] rounded" /><Text type="secondary" className="text-xs">Volume de transações (qtd)</Text></div>
+        <div className="flex items-center gap-1.5"><div className="w-3 h-0.5 bg-[#FAAD14] rounded" /><Typography.Text type="secondary" >Valor transacionado (R$)</Typography.Text></div>
+        <div className="flex items-center gap-1.5"><div className="w-3 h-0.5 bg-[#13C2C2] rounded" /><Typography.Text type="secondary" >Volume de transações (qtd)</Typography.Text></div>
       </div>
     </div>
   )

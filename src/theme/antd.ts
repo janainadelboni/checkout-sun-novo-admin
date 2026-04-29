@@ -1,15 +1,12 @@
-import { theme, type ThemeConfig } from 'antd';
+import type { ThemeConfig } from 'antd';
+import dsTheme from '@eduzz/design-tokens/theme';
 
-import tokens from './tokens.json';
-
-const antdTheme = (isDark: boolean): ThemeConfig => {
-  const { token, components } = tokens;
-
-  return {
-    algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
-    token,
-    components
-  };
-};
+// Wraps the Eduzz Design System theme with our app-level customizations.
+// Source: https://github.com/eduzz-design/design-tokens (synced via `pnpm sync-tokens`)
+const antdTheme = (isDark: boolean): ThemeConfig => ({
+  ...dsTheme(isDark),
+  cssVar: true,
+  hashed: false,
+});
 
 export default antdTheme;

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Typography, Tooltip, Dropdown, Checkbox } from 'antd'
-import { QuestionCircleOutlined, HolderOutlined, CloseOutlined, EditOutlined } from '@ant-design/icons'
+import { HelpCircle, GripVertical, X, Pencil } from 'lucide-react'
 import {
   DndContext,
   closestCenter,
@@ -17,7 +17,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
-const { Title, Text } = Typography
+
 
 export type KpiItem = {
   id: string
@@ -55,8 +55,8 @@ function SortableCard({
     >
       {isEditing && (
         <>
-          <div className="absolute top-2 right-2 text-[rgba(0,0,0,0.25)]">
-            <HolderOutlined className="text-base" />
+          <div className="absolute top-2 right-2 text-(--ant-color-text-quaternary)">
+            <GripVertical size={14} className="text-base" />
           </div>
           <button
             onPointerDown={(e) => e.stopPropagation()}
@@ -64,19 +64,19 @@ function SortableCard({
             className="absolute top-2 right-8 opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded-full w-5 h-5 flex items-center justify-center cursor-pointer border border-[rgba(0,0,0,0.1)] hover:border-red-300"
             title="Remover"
           >
-            <CloseOutlined className="text-[10px] text-red-400" />
+            <X size={14} className="text-sm text-red-400" />
           </button>
         </>
       )}
       <div className="flex items-center gap-1">
-        <Text type="secondary" className="text-xs">{item.label}</Text>
+        <Typography.Text type="secondary" >{item.label}</Typography.Text>
         {item.tooltip && (
           <Tooltip title={item.tooltip}>
-            <QuestionCircleOutlined className="text-[rgba(0,0,0,0.25)] text-xs cursor-help" />
+            <HelpCircle size={14} className="text-(--ant-color-text-quaternary) text-sm cursor-help" />
           </Tooltip>
         )}
       </div>
-      <Title level={3} className="!mb-0 !mt-0">{item.valor}</Title>
+      <Typography.Title level={3} className="mb-0 mt-0">{item.valor}</Typography.Title>
     </div>
   )
 }
@@ -143,8 +143,8 @@ export default function DraggableKpiCards({
       {/* Edit dropdown to add/remove cards */}
       {isEditing && (
         <Dropdown menu={{ items: dropdownItems }} trigger={['click']} placement="bottomRight">
-          <button className="w-8 shrink-0 rounded-lg border-2 border-dashed border-[rgba(0,0,0,0.15)] flex items-center justify-center cursor-pointer bg-transparent hover:border-[#2B4ACF] hover:text-[#2B4ACF] text-[rgba(0,0,0,0.25)] transition-colors">
-            <EditOutlined className="text-sm" />
+          <button className="w-8 shrink-0 rounded-lg border-2 border-dashed border-[rgba(0,0,0,0.15)] flex items-center justify-center cursor-pointer bg-transparent hover:border-(--ant-color-primary) hover:text-(--ant-color-primary) text-(--ant-color-text-quaternary) transition-colors">
+            <Pencil size={14} className="text-sm" />
           </button>
         </Dropdown>
       )}

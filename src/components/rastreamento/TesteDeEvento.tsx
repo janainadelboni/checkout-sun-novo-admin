@@ -2,22 +2,17 @@ import { useRef, useState } from 'react'
 import {
   Breadcrumb,
   Button,
-  ConfigProvider,
   Input,
   Layout,
   Menu,
   Tag,
   Typography,
 } from 'antd'
-import {
-  HomeOutlined,
-  LeftOutlined,
-  CaretRightOutlined,
-} from '@ant-design/icons'
+import { Home, ChevronLeft, ChevronRight } from 'lucide-react'
 import { EduzzLogo, CheckoutSunLogo } from '../Logos'
 
 const { Sider, Content } = Layout
-const { Title, Text } = Typography
+
 
 type HistoricoItem = {
   evento: string
@@ -101,17 +96,16 @@ export default function TesteDeEvento({ produtoId, produtoNome, onVoltar }: Test
   }
 
   return (
-    <ConfigProvider theme={{ token: { colorPrimary: '#2B4ACF' } }}>
-    <Layout className="min-h-screen bg-white">
+    <Layout className="min-h-screen bg-(--ant-color-bg-container)">
       {/* Header */}
-      <div className="h-[78px] bg-[#fafafa] flex items-center justify-center border-b border-[rgba(0,0,0,0.06)]">
+      <div className="h-[78px] bg-(--ant-color-fill-quaternary) flex items-center justify-center border-b border-(--ant-color-split)">
         <EduzzLogo />
       </div>
 
       <Layout>
         {/* Sidebar */}
-        <Sider width={288} className="!bg-white border-r border-[rgba(0,0,0,0.06)]">
-          <div className="px-4 py-[10px]">
+        <Sider theme="light" width={288} className="border-r border-(--ant-color-split)">
+          <div className="px-4 py-2.5">
             <CheckoutSunLogo />
           </div>
           <Menu
@@ -131,7 +125,7 @@ export default function TesteDeEvento({ produtoId, produtoNome, onVoltar }: Test
           {/* Breadcrumb */}
           <Breadcrumb
             items={[
-              { title: <HomeOutlined /> },
+              { title: <Home size={14} /> },
               { title: 'Checkout Sun' },
               { title: 'Rastreamento' },
               { title: 'Teste de evento' },
@@ -140,25 +134,25 @@ export default function TesteDeEvento({ produtoId, produtoNome, onVoltar }: Test
 
           {/* Back button */}
           <div>
-            <Button icon={<LeftOutlined />} onClick={onVoltar}>Voltar</Button>
+            <Button icon={<ChevronLeft size={14} />} onClick={onVoltar}>Voltar</Button>
           </div>
 
           {/* Title */}
           <div>
-            <Title level={3} className="!mb-1">
+            <Typography.Title level={3} className="mb-1">
               Teste de evento {produtoNome ? `- ${produtoId} - ${produtoNome}` : ''}
-            </Title>
-            <Text type="secondary">
+            </Typography.Title>
+            <Typography.Text type="secondary">
               Envie um evento de teste sem realizar uma compra real e confira no histórico abaixo.
-            </Text>
+            </Typography.Text>
           </div>
 
           {/* Código de teste da Meta */}
-          <div className="bg-[#fafafa] border border-[#d9d9d9] rounded-lg p-6 flex flex-col gap-3">
-            <Text strong className="text-base">Código de teste da Meta</Text>
-            <Text type="secondary">
+          <div className="bg-(--ant-color-fill-quaternary) border border-(--ant-color-border) rounded-lg p-6 flex flex-col gap-3">
+            <Typography.Text strong >Código de teste da Meta</Typography.Text>
+            <Typography.Text type="secondary">
               Copie o código de teste do Gerenciador da Meta e cole aqui. O botão &quot;testar&quot; ficará disponível após o preenchimento. O código será enviado como parâmetro no link do checkout para que a Meta identifique o evento como teste.
-            </Text>
+            </Typography.Text>
             <Input
               placeholder="Cole o código de teste da Meta aqui (ex: TESTE1234)"
               value={codigoTeste}
@@ -171,9 +165,9 @@ export default function TesteDeEvento({ produtoId, produtoNome, onVoltar }: Test
           <div className={`flex flex-col gap-4 ${!codigoTeste ? 'opacity-50 pointer-events-none' : ''}`}>
             {!codigoTeste && (
               <div className="flex items-center gap-2 px-4 py-3 bg-[#fff7e6] border border-[#ffd591] rounded-lg">
-                <Text className="text-sm text-[#d46b08]">
+                <Typography.Text className="text-[#d46b08]">
                   Insira o código de teste acima para habilitar os botões de teste.
-                </Text>
+                </Typography.Text>
               </div>
             )}
             {Array.from({ length: Math.ceil(eventos.length / 2) }, (_, rowIndex) => (
@@ -181,21 +175,21 @@ export default function TesteDeEvento({ produtoId, produtoNome, onVoltar }: Test
                 {eventos.slice(rowIndex * 2, rowIndex * 2 + 2).map((ev) => (
                   <div
                     key={ev.tag}
-                    className="flex-1 bg-white border border-[#d9d9d9] rounded-lg p-4 flex flex-col gap-2"
+                    className="flex-1 bg-white border border-(--ant-color-border) rounded-lg p-4 flex flex-col gap-2"
                   >
                     <div className="flex items-center justify-between">
-                      <Tag className="py-[7px] text-sm">{ev.tag}</Tag>
+                      <Tag className="py-2 text-sm">{ev.tag}</Tag>
                       <Button
                         type="text"
-                        icon={<CaretRightOutlined />}
+                        icon={<ChevronRight size={14} />}
                         onClick={() => handleTestar(ev.tag)}
                         disabled={!codigoTeste}
-                        className="text-[rgba(0,0,0,0.65)]"
+                        className="text-(--ant-color-text-secondary)"
                       >
                         Testar
                       </Button>
                     </div>
-                    <Text>{ev.descricao}</Text>
+                    <Typography.Text>{ev.descricao}</Typography.Text>
                   </div>
                 ))}
               </div>
@@ -203,8 +197,8 @@ export default function TesteDeEvento({ produtoId, produtoNome, onVoltar }: Test
           </div>
 
           {/* Summary bar */}
-          <div className="border border-[#d9d9d9] rounded-lg px-2 py-4 flex items-center justify-end gap-6 bg-white">
-            <Text type="secondary">Últimos 30 minutos</Text>
+          <div className="border border-(--ant-color-border) rounded-lg px-2 py-4 flex items-center justify-end gap-6 bg-white">
+            <Typography.Text type="secondary">Últimos 30 minutos</Typography.Text>
             <Tag>{logs.length} evento(s)</Tag>
             <Tag color="success">{sucessos} sucesso(s)</Tag>
             <Tag color="error">{erros} erro(s)</Tag>
@@ -212,33 +206,33 @@ export default function TesteDeEvento({ produtoId, produtoNome, onVoltar }: Test
           </div>
 
           {/* History table */}
-          <div id="tabela-resultados" ref={tabelaRef} className="border border-[#f0f0f0] rounded-lg overflow-hidden bg-white">
+          <div id="tabela-resultados" ref={tabelaRef} className="border border-(--ant-color-split) rounded-lg overflow-hidden bg-white">
             {/* Table header */}
-            <div className="flex bg-[rgba(0,0,0,0.02)] border-b border-[rgba(0,0,0,0.06)]">
-              <div className="flex-[2] px-4 h-[46px] flex items-center border-r border-[#f0f0f0]">
-                <Text strong className="text-sm">Evento</Text>
+            <div className="flex bg-[rgba(0,0,0,0.02)] border-b border-(--ant-color-split)">
+              <div className="flex-[2] px-4 h-[46px] flex items-center border-r border-(--ant-color-split)">
+                <Typography.Text strong >Evento</Typography.Text>
               </div>
-              <div className="flex-1 px-4 h-[46px] flex items-center justify-center border-r border-[#f0f0f0]">
-                <Text strong className="text-sm">Origem</Text>
+              <div className="flex-1 px-4 h-[46px] flex items-center justify-center border-r border-(--ant-color-split)">
+                <Typography.Text strong >Origem</Typography.Text>
               </div>
-              <div className="flex-1 px-4 h-[46px] flex items-center justify-center border-r border-[#f0f0f0]">
-                <Text strong className="text-sm">Data e hora</Text>
+              <div className="flex-1 px-4 h-[46px] flex items-center justify-center border-r border-(--ant-color-split)">
+                <Typography.Text strong >Data e hora</Typography.Text>
               </div>
               <div className="flex-1 px-4 h-[46px] flex items-center justify-center">
-                <Text strong className="text-sm">Status</Text>
+                <Typography.Text strong >Status</Typography.Text>
               </div>
             </div>
 
             {/* Table rows */}
             {logs.length === 0 ? (
               <div className="px-4 py-8 text-center">
-                <Text type="secondary">Nenhum evento registrado.</Text>
+                <Typography.Text type="secondary">Nenhum evento registrado.</Typography.Text>
               </div>
             ) : (
               logs.map((item, i) => (
                 <div
                   key={i}
-                  className={`flex border-b border-[#f0f0f0] h-16 items-center transition-colors duration-700 ${i === highlightIndex ? 'bg-[#e6f4ff]' : ''}`}
+                  className={`flex border-b border-(--ant-color-split) h-16 items-center transition-colors duration-700 ${i === highlightIndex ? 'bg-[#e6f4ff]' : ''}`}
                 >
                   <div className="flex-[2] px-4">
                     <Tag>{item.evento}</Tag>
@@ -247,7 +241,7 @@ export default function TesteDeEvento({ produtoId, produtoNome, onVoltar }: Test
                     {getOrigemTag(item.origem)}
                   </div>
                   <div className="flex-1 px-4 text-center">
-                    <Text>{item.dataHora}</Text>
+                    <Typography.Text>{item.dataHora}</Typography.Text>
                   </div>
                   <div className="flex-1 px-4 flex justify-center">
                     {item.status === 'success' ? (
@@ -263,6 +257,5 @@ export default function TesteDeEvento({ produtoId, produtoNome, onVoltar }: Test
         </Content>
       </Layout>
     </Layout>
-    </ConfigProvider>
   )
 }

@@ -1,26 +1,18 @@
-import { useState } from 'react'
+import { cloneElement, useState, type CSSProperties, type ReactElement } from 'react'
 import {
   Button,
-  ConfigProvider,
   DatePicker,
   Input,
   Layout,
   Menu,
   Modal,
   Select,
+  Tabs,
   Tag,
   TreeSelect,
   Typography,
 } from 'antd'
-import {
-  HolderOutlined,
-  SettingOutlined,
-  BookOutlined,
-  SaveOutlined,
-  DeleteOutlined,
-  UndoOutlined,
-} from '@ant-design/icons'
-
+import { Settings, Book, Save, Trash2, Undo2 } from 'lucide-react'
 import {
   DndContext,
   closestCenter,
@@ -37,7 +29,6 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { EduzzLogo, CheckoutSunLogo } from '../Logos'
-import antdTheme from '../../theme/antd'
 import TabPerformance from './TabPerformance'
 import TabTransacoes from './TabTransacoes'
 import TabPagamentos from './TabPagamentos'
@@ -45,7 +36,7 @@ import TabOrigem from './TabOrigem'
 import TabPersonalizado from './TabPersonalizado'
 
 const { Sider, Content } = Layout
-const { Title, Text } = Typography
+
 
 // --- Types ---
 type FiltroSalvo = {
@@ -122,35 +113,25 @@ const PERIODOS: Record<string, string> = {
   personalizado: 'Personalizado',
 }
 
-// --- SortableTab (unchanged) ---
-function SortableTab({
-  tab, isActive, isEditing, onClick,
-}: {
-  tab: string; isActive: boolean; isEditing: boolean; onClick: () => void
-}) {
+// Sortable wrapper for Antd Tabs renderTabBar — clones the tab node to preserve internal layout
+function DraggableTabNode({ children, nodeKey }: { nodeKey: string; children: ReactElement }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: tab, disabled: !isEditing,
+    id: nodeKey,
   })
-  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }
-
-  return (
-    <div
-      ref={setNodeRef} style={style}
-      {...(isEditing ? { ...attributes, ...listeners } : {})}
-      className={`flex items-center gap-1.5 ${isEditing ? 'cursor-grab active:cursor-grabbing' : ''}`}
-    >
-      {isEditing && <div className="text-[rgba(0,0,0,0.25)] flex items-center mb-3"><HolderOutlined className="text-xs" /></div>}
-      <button
-        onPointerDown={(e) => { if (isEditing) e.stopPropagation() }}
-        onClick={onClick}
-        className={`pb-3 text-sm font-medium border-b-2 transition-colors bg-transparent whitespace-nowrap cursor-pointer ${
-          isActive ? 'border-[#2B4ACF] text-[#2B4ACF]' : 'border-transparent text-[rgba(0,0,0,0.45)] hover:text-[rgba(0,0,0,0.85)]'
-        }`}
-      >
-        {tab}
-      </button>
-    </div>
-  )
+  const childProps = (children.props ?? {}) as { style?: CSSProperties }
+  const style: CSSProperties = {
+    ...(childProps.style ?? {}),
+    transform: CSS.Translate.toString(transform),
+    transition,
+    cursor: 'move',
+    opacity: isDragging ? 0.5 : 1,
+  }
+  return cloneElement(children as ReactElement<Record<string, unknown>>, {
+    ref: setNodeRef,
+    style,
+    ...attributes,
+    ...listeners,
+  })
 }
 
 const TAB_COMPONENTS: Record<string, React.FC<{ isEditing?: boolean; hasData?: boolean }>> = {
@@ -163,6 +144,13 @@ const TAB_COMPONENTS: Record<string, React.FC<{ isEditing?: boolean; hasData?: b
 
 export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { onVoltar: () => void; onNavigate?: (key: 'analytics' | 'rastreamento' | 'order-bump') => void }) {
   const [tabs, setTabs] = useState(['Performance', 'Transações', 'Pagamentos', 'Origem', 'Personalizado'])
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
+  const handleTabDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (over && active.id !== over.id) {
+      setTabs((prev) => arrayMove(prev, prev.indexOf(active.id as string), prev.indexOf(over.id as string)))
+    }
+  }
   const [activeTab, setActiveTab] = useState('Performance')
   const [isEditing, setIsEditing] = useState(false)
 
@@ -258,27 +246,16 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { o
     }
   }
 
-  // --- DnD ---
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
-  const handleTabDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
-    if (over && active.id !== over.id) {
-      setTabs((prev) => arrayMove(prev, prev.indexOf(active.id as string), prev.indexOf(over.id as string)))
-    }
-  }
-
-  const ActiveTabComponent = TAB_COMPONENTS[activeTab]
-
   return (
-    <ConfigProvider theme={antdTheme(false)}>
-      <Layout className="min-h-screen bg-white">
-        <div className="h-[78px] bg-[#fafafa] flex items-center justify-center border-b border-[rgba(0,0,0,0.06)]">
+    <>
+      <Layout className="min-h-screen bg-(--ant-color-bg-container)">
+        <div className="h-[78px] bg-(--ant-color-fill-quaternary) flex items-center justify-center border-b border-(--ant-color-split)">
           <EduzzLogo />
         </div>
 
-        <Layout className="!bg-white">
-          <Sider width={288} className="!bg-white border-r border-[rgba(0,0,0,0.06)]">
-            <div className="px-4 py-[10px]"><CheckoutSunLogo /></div>
+        <Layout className="bg-white">
+          <Sider theme="light" width={288} className="border-r border-(--ant-color-split)">
+            <div className="px-4 py-2.5"><CheckoutSunLogo /></div>
             <Menu
               mode="inline"
               selectedKeys={['visao-geral']}
@@ -298,16 +275,16 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { o
           <Content className="bg-white flex flex-col gap-0 w-full">
             {/* Edit mode bar */}
             {isEditing && (
-              <div className="bg-[#f5f5f5] border-b border-[rgba(0,0,0,0.06)] px-8 py-3 flex items-center justify-between sticky top-0 z-20">
-                <Text strong className="text-sm">Modo de edição</Text>
+              <div className="bg-(--ant-color-fill-tertiary) border-b border-(--ant-color-split) px-8 py-3 flex items-center justify-between sticky top-0 z-20">
+                <Typography.Text strong >Modo de edição</Typography.Text>
                 <div className="flex items-center gap-2">
-                  <Button icon={<UndoOutlined />} onClick={() => { /* TODO: restore defaults */ }}>
+                  <Button icon={<Undo2 size={14} />} onClick={() => { /* TODO: restore defaults */ }}>
                     Restaurar padrão
                   </Button>
                   <Button onClick={() => setIsEditing(false)}>
                     Cancelar
                   </Button>
-                  <Button type="primary" icon={<SaveOutlined />} onClick={() => setIsEditing(false)}>
+                  <Button type="primary" icon={<Save size={14} />} onClick={() => setIsEditing(false)}>
                     Salvar
                   </Button>
                 </div>
@@ -318,12 +295,12 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { o
             {/* Title */}
             <div className="flex items-start justify-between">
               <div>
-                <Title level={3} className="!mb-1">Visão geral</Title>
-                <Text type="secondary">Acompanhe as métricas de seus produtos em tempo real</Text>
+                <Typography.Title level={3} className="mb-1">Visão geral</Typography.Title>
+                <Typography.Text type="secondary">Acompanhe as métricas de seus produtos em tempo real</Typography.Text>
               </div>
               {!isEditing && (
                 <Button
-                  icon={<SettingOutlined />}
+                  icon={<Settings size={14} />}
                   onClick={() => setIsEditing(true)}
                 >
                   Personalizar
@@ -332,11 +309,11 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { o
             </div>
 
             {/* Filters */}
-            <div className="border border-[rgba(0,0,0,0.06)] rounded-lg p-4 flex flex-col gap-3">
+            <div className="border border-(--ant-color-split) rounded-lg p-4 flex flex-col gap-3">
               {/* Row 1: Inputs */}
               <div className="flex gap-4">
                 <div className="flex-1 flex flex-col gap-1">
-                  <Text type="secondary" className="text-xs">Produto(s)</Text>
+                  <Typography.Text type="secondary" >Produto(s)</Typography.Text>
                   <TreeSelect
                     treeData={produtosTree}
                     value={produtoFilter}
@@ -354,7 +331,7 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { o
                   />
                 </div>
                 <div className={`flex flex-col gap-1 ${periodo === 'personalizado' ? 'w-[380px]' : 'w-[200px]'}`}>
-                  <Text type="secondary" className="text-xs">Período</Text>
+                  <Typography.Text type="secondary" >Período</Typography.Text>
                   <div className="flex gap-2">
                     <Select
                       value={periodo}
@@ -378,9 +355,9 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { o
                 </div>
                 {/* Filtros salvos dropdown */}
                 <div className="w-[200px] flex flex-col gap-1">
-                  <Text type="secondary" className="text-xs">&nbsp;</Text>
+                  <Typography.Text type="secondary" >&nbsp;</Typography.Text>
                   <Button
-                    icon={<BookOutlined />}
+                    icon={<Book size={14} />}
                     onClick={() => setFiltrosSalvosModalOpen(true)}
                     disabled={filtrosSalvos.length === 0}
                     className="w-full !justify-start"
@@ -392,12 +369,12 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { o
 
               {/* Row 2: Active filters + Save */}
               <div className="flex items-center gap-2">
-                <Text type="secondary" className="text-xs whitespace-nowrap">Filtros ativo(s):</Text>
+                <Typography.Text type="secondary" className="whitespace-nowrap">Filtros ativo(s):</Typography.Text>
                 {filtrosAtivos.map((filtro) => (
-                  <Tag key={filtro} closable onClose={() => handleRemoveTag(filtro)} className="!m-0">{filtro}</Tag>
+                  <Tag key={filtro} closable onClose={() => handleRemoveTag(filtro)} className="m-0">{filtro}</Tag>
                 ))}
                 <a
-                  className="text-xs text-[rgba(0,0,0,0.45)] hover:text-[rgba(0,0,0,0.65)] cursor-pointer ml-1 whitespace-nowrap"
+                  className="text-sm text-(--ant-color-text-tertiary) hover:text-(--ant-color-text-secondary) cursor-pointer ml-1 whitespace-nowrap"
                   onClick={handleLimparFiltros}
                 >
                   Limpar filtro(s)
@@ -409,7 +386,6 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { o
                 {isSavingInline ? (
                   <div className="flex items-center gap-2">
                     <Input
-                      size="small"
                       placeholder="Nome do filtro"
                       value={inlineNome}
                       onChange={(e) => setInlineNome(e.target.value)}
@@ -417,18 +393,17 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { o
                       className="w-[180px]"
                       autoFocus
                     />
-                    <Button size="small" type="primary" onClick={() => handleSalvarFiltro(inlineNome)} disabled={!inlineNome.trim()}>
+                    <Button type="primary" onClick={() => handleSalvarFiltro(inlineNome)} disabled={!inlineNome.trim()}>
                       Salvar
                     </Button>
-                    <Button size="small" onClick={() => { setIsSavingInline(false); setInlineNome('') }}>
+                    <Button onClick={() => { setIsSavingInline(false); setInlineNome('') }}>
                       Cancelar
                     </Button>
                   </div>
                 ) : (
                   hasFiltrosAtivos && (
                     <Button
-                      size="small"
-                      icon={<SaveOutlined />}
+                      icon={<Save size={14} />}
                       onClick={() => setIsSavingInline(true)}
                     >
                       Salvar filtro
@@ -439,20 +414,31 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { o
             </div>
 
             {/* Tabs */}
-            <div className="flex items-center gap-6 border-b border-[rgba(0,0,0,0.06)]">
-              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleTabDragEnd}>
-                <SortableContext items={tabs} strategy={horizontalListSortingStrategy}>
-                  <div className="flex items-center gap-6">
-                    {tabs.map((tab) => (
-                      <SortableTab key={tab} tab={tab} isActive={activeTab === tab} isEditing={isEditing} onClick={() => setActiveTab(tab)} />
-                    ))}
-                  </div>
-                </SortableContext>
-              </DndContext>
-            </div>
-
-            {/* Tab Content */}
-            {ActiveTabComponent && <ActiveTabComponent isEditing={isEditing} hasData={periodo !== 'hoje'} />}
+            <Tabs
+              activeKey={activeTab}
+              onChange={setActiveTab}
+              items={tabs.map((tab) => {
+                const Component = TAB_COMPONENTS[tab]
+                return {
+                  key: tab,
+                  label: tab,
+                  children: Component ? <Component isEditing={isEditing} hasData={periodo !== 'hoje'} /> : null,
+                }
+              })}
+              renderTabBar={(tabBarProps, DefaultTabBar) => (
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleTabDragEnd}>
+                  <SortableContext items={tabs} strategy={horizontalListSortingStrategy}>
+                    <DefaultTabBar {...tabBarProps}>
+                      {(node) => (
+                        <DraggableTabNode key={node.key} nodeKey={String(node.key)}>
+                          {node}
+                        </DraggableTabNode>
+                      )}
+                    </DefaultTabBar>
+                  </SortableContext>
+                </DndContext>
+              )}
+            />
             </div>
           </Content>
         </Layout>
@@ -470,7 +456,7 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { o
         width={520}
       >
         <div className="flex flex-col gap-1">
-          <Text className="text-sm">Nome do filtro</Text>
+          <Typography.Text >Nome do filtro</Typography.Text>
           <Input
             placeholder="Ex: Treinadores dos últimos 30 dias"
             value={salvarNome}
@@ -491,26 +477,25 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { o
       >
         <div className="flex flex-col gap-3">
           {filtrosSalvos.length === 0 ? (
-            <Text type="secondary" className="text-sm py-4 text-center block">
+            <Typography.Text type="secondary" className="py-4 text-center block">
               Nenhum filtro salvo ainda.
-            </Text>
+            </Typography.Text>
           ) : (
             filtrosSalvos.map((filtro) => (
-              <div key={filtro.id} className="border border-[rgba(0,0,0,0.06)] rounded-lg p-4 flex items-center gap-4">
+              <div key={filtro.id} className="border border-(--ant-color-split) rounded-lg p-4 flex items-center gap-4">
                 <div className="flex-1 min-w-0">
-                  <Text strong className="text-sm block mb-1.5">{filtro.nome}</Text>
+                  <Typography.Text strong className="block mb-1.5">{filtro.nome}</Typography.Text>
                   <div className="flex items-center gap-2">
-                    <Tag className="!m-0">{filtro.produtos.length} produto{filtro.produtos.length !== 1 ? 's' : ''}</Tag>
-                    <Tag className="!m-0">{PERIODOS[filtro.periodo]}</Tag>
+                    <Tag className="m-0">{filtro.produtos.length} produto{filtro.produtos.length !== 1 ? 's' : ''}</Tag>
+                    <Tag className="m-0">{PERIODOS[filtro.periodo]}</Tag>
                   </div>
                 </div>
-                <Button type="primary" size="small" onClick={() => handleAplicarFiltro(filtro)}>
+                <Button type="primary" onClick={() => handleAplicarFiltro(filtro)}>
                   Aplicar
                 </Button>
                 <Button
-                  size="small"
                   danger
-                  icon={<DeleteOutlined />}
+                  icon={<Trash2 size={14} />}
                   onClick={() => setExcluirId(filtro.id)}
                 />
               </div>
@@ -530,8 +515,8 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { o
         okButtonProps={{ danger: true }}
         width={520}
       >
-        <Text>Você está prestes a excluir um filtro salvo, tem certeza que deseja continuar?</Text>
+        <Typography.Text>Você está prestes a excluir um filtro salvo, tem certeza que deseja continuar?</Typography.Text>
       </Modal>
-    </ConfigProvider>
+    </>
   )
 }

@@ -1,13 +1,10 @@
 import { useState } from 'react'
 import { Tooltip, Typography, Tag, Segmented } from 'antd'
-import { QuestionCircleOutlined } from '@ant-design/icons'
-
-const { Title, Text } = Typography
-
+import { HelpCircle } from 'lucide-react'
 const funilEtapas = [
   { label: 'Visitou a página', evento: 'pageview', valor: 10200, cor: '#1890FF' },
-  { label: 'Preencheu dados', evento: 'lead', valor: 4590, cor: '#FAAD14' },
-  { label: 'Dados de pagamento', evento: 'addpaymentinfo', valor: 2856, cor: '#52C41A' },
+  { label: 'Preencheu dados', evento: 'lead', valor: 4590, cor: 'var(--ant-color-warning)' },
+  { label: 'Dados de pagamento', evento: 'addpaymentinfo', valor: 2856, cor: 'var(--ant-color-success)' },
   { label: 'Compra finalizada', evento: 'purchase', valor: 1224, cor: '#EB2F96' },
 ]
 
@@ -21,18 +18,17 @@ export default function FunilDeConversao() {
   })
 
   return (
-    <div className="border border-[rgba(0,0,0,0.06)] rounded-lg p-6">
+    <div className="border border-(--ant-color-split) rounded-lg p-6">
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
-        <Title level={5} className="!mb-0">Funil de conversão</Title>
+        <Typography.Title level={5} className="mb-0">Funil de conversão</Typography.Title>
         <Tooltip title="Taxa calculada com base em 'Visitou a página' (base = 100%).">
-          <QuestionCircleOutlined className="text-[rgba(0,0,0,0.45)] text-sm cursor-help" />
+          <HelpCircle size={14} className="text-(--ant-color-text-tertiary) text-sm cursor-help" />
         </Tooltip>
-        <Segmented
+        <Segmented size="small"
           value={dispositivo}
           onChange={(value) => setDispositivo(value as string)}
           options={['Desktop', 'Celular']}
-          size="small"
         />
       </div>
 
@@ -41,45 +37,35 @@ export default function FunilDeConversao() {
         {/* Header do funil */}
         <div className="flex items-center justify-end gap-0 mb-1">
           <div className="w-[50px] text-right">
-            <Text type="secondary" className="text-[11px] font-medium whitespace-nowrap">Taxa</Text>
+            <Typography.Text type="secondary" className="font-medium whitespace-nowrap">Taxa</Typography.Text>
           </div>
           <div className="w-[70px] text-right">
-            <Text type="secondary" className="text-[11px] font-medium whitespace-nowrap">Qtd.</Text>
+            <Typography.Text type="secondary" className="font-medium whitespace-nowrap">Qtd.</Typography.Text>
           </div>
         </div>
 
         {/* Etapas */}
         {funilComPercent.map((etapa) => (
-          <div key={etapa.label} className="flex items-center gap-2">
-            <div className="w-[140px] shrink-0">
+          <div key={etapa.label} className="flex items-center gap-3">
+            <div className="w-[180px] shrink-0">
               <Tooltip title={`Evento: ${etapa.evento}`}>
-                <Tag
-                  className="!text-xs !font-semibold !px-2 !py-0.5 !rounded cursor-help"
-                  style={{
-                    color: '#2B4ACF',
-                    borderColor: '#2B4ACF',
-                    backgroundColor: 'transparent',
-                  }}
-                >
-                  {etapa.label}
-                </Tag>
+                <Tag color="blue" className="cursor-help">{etapa.label}</Tag>
               </Tooltip>
             </div>
-            <div className="flex-1 h-6 bg-[#f5f5f5] rounded overflow-hidden">
+            <div className="flex-1 h-6 bg-(--ant-color-fill-tertiary) rounded overflow-hidden">
               <div
-                className="h-full rounded transition-all"
+                className="h-full rounded transition-all min-w-1"
                 style={{
                   width: `${etapa.topoFundo}%`,
                   backgroundColor: etapa.cor,
-                  minWidth: '4px',
                 }}
               />
             </div>
-            <div className="w-[50px] text-right shrink-0 pl-4">
-              <Text strong className="text-xs">{etapa.topoFundo}%</Text>
+            <div className="w-[50px] text-right shrink-0">
+              <Typography.Text strong>{etapa.topoFundo}%</Typography.Text>
             </div>
-            <div className="w-[70px] text-right shrink-0 pl-4">
-              <Text type="secondary" className="text-xs">{etapa.valor.toLocaleString('pt-BR')}</Text>
+            <div className="w-[70px] text-right shrink-0">
+              <Typography.Text type="secondary">{etapa.valor.toLocaleString('pt-BR')}</Typography.Text>
             </div>
           </div>
         ))}

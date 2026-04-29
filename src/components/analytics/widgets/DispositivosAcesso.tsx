@@ -1,6 +1,6 @@
 import { Typography, Table } from 'antd'
 
-const { Title, Text } = Typography
+
 
 function PieChart({ segments, size = 160 }: { segments: { percent: number; color: string; label: string }[]; size?: number }) {
   const cx = size / 2; const cy = size / 2; const r = size / 2 - 10; let cum = 0
@@ -23,7 +23,7 @@ function PieChart({ segments, size = 160 }: { segments: { percent: number; color
 
 const dispositivos = [
   { key: '1', dispositivo: 'Desktop', color: '#1890FF', acessos: 5200, compras: 190, ticket: 223.68 },
-  { key: '2', dispositivo: 'Celular', color: '#FAAD14', acessos: 4100, compras: 223, ticket: 180.50 },
+  { key: '2', dispositivo: 'Celular', color: 'var(--ant-color-warning)', acessos: 4100, compras: 223, ticket: 180.50 },
   { key: '3', dispositivo: 'Tablet', color: '#EB2F96', acessos: 800, compras: 19, ticket: 150.00 },
   { key: '4', dispositivo: 'Outros', color: '#D9D9D9', acessos: 300, compras: 5, ticket: 95.00 },
 ]
@@ -40,7 +40,7 @@ export function DispositivosAcesso() {
       render: (nome: string, r: typeof dispositivos[0]) => (
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: r.color }} />
-          <Text className="text-sm">{nome}</Text>
+          <Typography.Text >{nome}</Typography.Text>
         </div>
       ),
     },
@@ -52,7 +52,7 @@ export function DispositivosAcesso() {
       render: (v: number) => (
         <span>
           {v.toLocaleString('pt-BR')}
-          <Text type="secondary" className="text-xs ml-1">({((v / totalAcessos) * 100).toFixed(0)}%)</Text>
+          <Typography.Text type="secondary" className="ml-1">({((v / totalAcessos) * 100).toFixed(0)}%)</Typography.Text>
         </span>
       ),
     },
@@ -64,7 +64,7 @@ export function DispositivosAcesso() {
       render: (v: number) => (
         <span>
           {v.toLocaleString('pt-BR')}
-          <Text type="secondary" className="text-xs ml-1">({((v / totalCompras) * 100).toFixed(0)}%)</Text>
+          <Typography.Text type="secondary" className="ml-1">({((v / totalCompras) * 100).toFixed(0)}%)</Typography.Text>
         </span>
       ),
     },
@@ -78,12 +78,12 @@ export function DispositivosAcesso() {
   ]
 
   return (
-    <div className="border border-[rgba(0,0,0,0.06)] rounded-lg p-6 h-full">
-      <Title level={5} className="!mb-4">Dispositivos de acesso</Title>
+    <div className="border border-(--ant-color-split) rounded-lg p-6 h-full">
+      <Typography.Title level={5} className="mb-4">Dispositivos de acesso</Typography.Title>
       <div className="flex justify-center mb-4">
         <PieChart segments={dispositivos.map((d) => ({ percent: Math.round((d.acessos / totalAcessos) * 100), color: d.color, label: d.dispositivo }))} />
       </div>
-      <Table dataSource={dispositivos} columns={columns} pagination={false} size="small" />
+      <Table dataSource={dispositivos} columns={columns} pagination={false} size="middle" />
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { Typography, Button } from 'antd'
-import { ExportOutlined } from '@ant-design/icons'
+import { Upload } from 'lucide-react'
 import FunilDeConversao from './FunilDeConversao'
 import DraggableKpiCards, { type KpiItem } from './DraggableKpiCards'
 import { RecursosAtivos } from './widgets/RecursosAtivos'
@@ -7,7 +7,7 @@ import DraggableSections, { type SectionItem } from './DraggableSection'
 import { MyEduzzLogo, BlinketLogo } from '../Logos'
 import { WidgetEmpty, KpisEmpty } from './WidgetEmpty'
 
-const { Title, Text } = Typography
+
 
 const kpis: KpiItem[] = [
   { id: 'conversao', label: 'Taxa de conversão', valor: '10%', tooltip: 'Percentual de visitantes que concluíram a compra.\nFórmula: Compras finalizadas ÷ Visitou a página\nEx: 120 compras ÷ 1.000 visitas = 12%' },
@@ -19,25 +19,25 @@ const kpis: KpiItem[] = [
 function LinksExternos() {
   return (
     <div className="flex gap-4">
-      <div className="flex-1 border border-[rgba(0,0,0,0.06)] rounded-lg p-6">
-        <Title level={5} className="!mb-1">Gerenciamento e métricas de Assinaturas</Title>
+      <div className="flex-1 border border-(--ant-color-split) rounded-lg p-6">
+        <Typography.Title level={5} className="mb-1">Gerenciamento e métricas de Assinaturas</Typography.Title>
         <div className="mb-3">
           <MyEduzzLogo />
         </div>
-        <Text type="secondary" className="text-sm block mb-4">
+        <Typography.Text type="secondary" className="block mb-4">
           Gerencie planos, cobranças recorrentes, inadimplência e o ciclo de vida dos assinantes em um só painel.
-        </Text>
-        <Button icon={<ExportOutlined />}>Ir para Assinaturas</Button>
+        </Typography.Text>
+        <Button icon={<Upload size={14}  />}>Ir para Assinaturas</Button>
       </div>
-      <div className="flex-1 border border-[rgba(0,0,0,0.06)] rounded-lg p-6">
-        <Title level={5} className="!mb-1">Métricas de eventos é na Blinket</Title>
+      <div className="flex-1 border border-(--ant-color-split) rounded-lg p-6">
+        <Typography.Title level={5} className="mb-1">Métricas de eventos é na Blinket</Typography.Title>
         <div className="mb-3">
           <BlinketLogo />
         </div>
-        <Text type="secondary" className="text-sm block mb-4">
+        <Typography.Text type="secondary" className="block mb-4">
           Crie uma página de vendas, acompanhe as métricas do evento e organize participantes.
-        </Text>
-        <Button icon={<ExportOutlined />}>Ir para Blinket</Button>
+        </Typography.Text>
+        <Button icon={<Upload size={14}  />}>Ir para Blinket</Button>
       </div>
     </div>
   )

@@ -1,0 +1,26 @@
+/* App-specific overrides — survives `pnpm sync-tokens` (which overwrites src/index.css) */
+
+/* Table header — DS reference shows bolder header weight than the global fontWeightStrong=500 */
+.ant-table-thead > tr > th {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Card / section titles — explicit 600 weight (semibold) for visual hierarchy */
+h1.ant-typography,
+h2.ant-typography,
+h3.ant-typography,
+h4.ant-typography,
+h5.ant-typography {
+  font-weight: 600;
+}
+
+/* Row highlight animation for test result tables */
+@keyframes row-highlight {
+  0% { background-color: #e6f4ff; }
+  100% { background-color: transparent; }
+}
+
+.animate-highlight td {
+  animation: row-highlight 2s ease-out;
+}

@@ -1,8 +1,5 @@
 import { Typography, Tag, Table } from 'antd'
-import { ExportOutlined } from '@ant-design/icons'
-
-const { Title, Text } = Typography
-
+import { Upload } from 'lucide-react'
 const topProdutos = [
   { key: '1', nome: 'Curso de Marketing Digital', tipo: 'Digital', valor: 42500, quantidade: 190, ticket: 223.68 },
   { key: '2', nome: 'Mentoria Elite 2026', tipo: 'Digital', valor: 38200, quantidade: 145, ticket: 263.45 },
@@ -26,8 +23,8 @@ export function TopProdutos() {
       key: 'nome',
       render: (nome: string) => (
         <div className="flex items-center gap-2">
-          <Text className="text-sm">{nome}</Text>
-          <ExportOutlined className="text-[rgba(0,0,0,0.25)] text-xs" />
+          <Typography.Text >{nome}</Typography.Text>
+          <Upload size={14} className="text-(--ant-color-text-quaternary) text-sm" />
         </div>
       ),
     },
@@ -42,33 +39,33 @@ export function TopProdutos() {
       title: 'Valor transacionado',
       dataIndex: 'valor',
       key: 'valor',
-      width: 160,
+      width: 200,
       sorter: (a: typeof topProdutos[0], b: typeof topProdutos[0]) => a.valor - b.valor,
       defaultSortOrder: 'descend' as const,
-      render: (v: number) => <Text strong className="text-sm">R$ {v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</Text>,
+      render: (v: number) => <Typography.Text strong>R$ {v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</Typography.Text>,
     },
     {
       title: 'Ticket médio',
       dataIndex: 'ticket',
       key: 'ticket',
-      width: 120,
+      width: 150,
       sorter: (a: typeof topProdutos[0], b: typeof topProdutos[0]) => a.ticket - b.ticket,
-      render: (v: number) => <Text className="text-sm">R$ {v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</Text>,
+      render: (v: number) => `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
     },
     {
       title: 'Quantidade',
       dataIndex: 'quantidade',
       key: 'quantidade',
-      width: 100,
+      width: 130,
       sorter: (a: typeof topProdutos[0], b: typeof topProdutos[0]) => a.quantidade - b.quantidade,
-      render: (v: number) => <Text type="secondary" className="text-sm">{v}</Text>,
+      render: (v: number) => <Typography.Text type="secondary">{v}</Typography.Text>,
     },
   ]
 
   return (
-    <div className="border border-[rgba(0,0,0,0.06)] rounded-lg p-6">
-      <Title level={5} className="!mb-4">Top 10 produtos</Title>
-      <Table dataSource={topProdutos} columns={columns} pagination={false} size="small" showSorterTooltip={false} />
+    <div className="border border-(--ant-color-split) rounded-lg p-6">
+      <Typography.Title level={5} className="mb-4">Top 10 produtos</Typography.Title>
+      <Table dataSource={topProdutos} columns={columns} pagination={false} size="middle" showSorterTooltip={false} />
     </div>
   )
 }

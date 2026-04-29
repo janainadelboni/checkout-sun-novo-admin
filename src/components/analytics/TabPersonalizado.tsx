@@ -1,24 +1,6 @@
 import { useState } from 'react'
 import { Typography, Button, Modal } from 'antd'
-import {
-  AppstoreOutlined,
-  FundOutlined,
-  SwapOutlined,
-  CreditCardOutlined,
-  GlobalOutlined,
-  BarChartOutlined,
-  PieChartOutlined,
-  DollarOutlined,
-  TeamOutlined,
-  MobileOutlined,
-  AimOutlined,
-  CheckOutlined,
-  PlusOutlined,
-  LineChartOutlined,
-  PercentageOutlined,
-  ShoppingCartOutlined,
-  CloseOutlined,
-} from '@ant-design/icons'
+import { LayoutGrid, TrendingUp, ArrowRightLeft, CreditCard, Globe, BarChart3, PieChart, DollarSign, Users, Smartphone, Target, Check, Plus, LineChart, Percent, ShoppingCart, X } from 'lucide-react'
 import {
   DndContext,
   closestCenter,
@@ -52,7 +34,7 @@ import {
   LocalDeVendas,
 } from './widgets'
 
-const { Title, Text } = Typography
+
 
 type WidgetDef = {
   id: string
@@ -64,20 +46,20 @@ type WidgetDef = {
 }
 
 const widgetsDisponiveis: WidgetDef[] = [
-  { id: 'funil', nome: 'Funil de conversão', descricao: 'Acompanhe etapas e quedas do checkout.', categoria: 'PERFORMANCE', icon: <FundOutlined />, component: FunilDeConversao },
-  { id: 'recursos', nome: 'Recursos ativos', descricao: 'Veja recursos ligados e impacto na conversão.', categoria: 'PERFORMANCE', icon: <BarChartOutlined />, component: RecursosAtivos },
-  { id: 'taxa-conv', nome: 'Taxa de conversão', descricao: 'Percentual de visitas que viram compras.', categoria: 'PERFORMANCE', icon: <PercentageOutlined />, component: TaxaDeConversaoKpis },
-  { id: 'taxas-gerais', nome: 'Taxas gerais', descricao: 'Total de taxas e custos sobre as vendas.', categoria: 'PERFORMANCE', icon: <DollarOutlined />, component: TaxasGerais },
-  { id: 'visao-vendas', nome: 'Visão geral de vendas', descricao: 'Resumo de vendas e tendências no período.', categoria: 'TRANSAÇÕES', icon: <LineChartOutlined />, component: VisaoGeralVendas },
-  { id: 'top-prod', nome: 'Top produtos', descricao: 'Produtos com maior faturamento e volume.', categoria: 'TRANSAÇÕES', icon: <ShoppingCartOutlined />, component: TopProdutos },
-  { id: 'metodos-pag', nome: 'Métodos de pagamento', descricao: 'Distribuição de vendas por forma de pagamento.', categoria: 'PAGAMENTOS', icon: <CreditCardOutlined />, component: MetodosPagamento },
-  { id: 'taxa-metodo', nome: 'Transações (por método)', descricao: 'Conversão segmentada por cartão, Pix e boleto.', categoria: 'PAGAMENTOS', icon: <SwapOutlined />, component: TaxaConversaoMetodo },
-  { id: 'motivos-recusa', nome: 'Motivos de recusa de cartão', descricao: 'Principais erros e causas de não aprovação.', categoria: 'PAGAMENTOS', icon: <PieChartOutlined />, component: MotivosRecusa },
-  { id: 'parcelas', nome: 'Parcelas selecionadas', descricao: 'Parcelamentos mais escolhidos pelos clientes.', categoria: 'PAGAMENTOS', icon: <BarChartOutlined />, component: ParcelasSelecionadas },
-  { id: 'dispositivos', nome: 'Dispositivos de acesso', descricao: 'Acessos por mobile, desktop e tablet.', categoria: 'ORIGEM', icon: <MobileOutlined />, component: DispositivosAcesso },
-  { id: 'origem-vendas', nome: 'Origem das vendas concluídas', descricao: 'De onde vieram as vendas aprovadas.', categoria: 'ORIGEM', icon: <TeamOutlined />, component: OrigemVendasConcluidas },
-  { id: 'rastreamento', nome: 'Rastreamento de vendas', descricao: 'Vendas rastreáveis versus não rastreáveis.', categoria: 'ORIGEM', icon: <AimOutlined />, component: RastreamentoVendas },
-  { id: 'local', nome: 'Local de vendas', descricao: 'Distribuição geográfica das compras realizadas.', categoria: 'ORIGEM', icon: <GlobalOutlined />, component: LocalDeVendas },
+  { id: 'funil', nome: 'Funil de conversão', descricao: 'Acompanhe etapas e quedas do checkout.', categoria: 'PERFORMANCE', icon: <TrendingUp size={14}  />, component: FunilDeConversao },
+  { id: 'recursos', nome: 'Recursos ativos', descricao: 'Veja recursos ligados e impacto na conversão.', categoria: 'PERFORMANCE', icon: <BarChart3 size={14}  />, component: RecursosAtivos },
+  { id: 'taxa-conv', nome: 'Taxa de conversão', descricao: 'Percentual de visitas que viram compras.', categoria: 'PERFORMANCE', icon: <Percent size={14}  />, component: TaxaDeConversaoKpis },
+  { id: 'taxas-gerais', nome: 'Taxas gerais', descricao: 'Total de taxas e custos sobre as vendas.', categoria: 'PERFORMANCE', icon: <DollarSign size={14}  />, component: TaxasGerais },
+  { id: 'visao-vendas', nome: 'Visão geral de vendas', descricao: 'Resumo de vendas e tendências no período.', categoria: 'TRANSAÇÕES', icon: <LineChart size={14}  />, component: VisaoGeralVendas },
+  { id: 'top-prod', nome: 'Top produtos', descricao: 'Produtos com maior faturamento e volume.', categoria: 'TRANSAÇÕES', icon: <ShoppingCart size={14}  />, component: TopProdutos },
+  { id: 'metodos-pag', nome: 'Métodos de pagamento', descricao: 'Distribuição de vendas por forma de pagamento.', categoria: 'PAGAMENTOS', icon: <CreditCard size={14}  />, component: MetodosPagamento },
+  { id: 'taxa-metodo', nome: 'Transações (por método)', descricao: 'Conversão segmentada por cartão, Pix e boleto.', categoria: 'PAGAMENTOS', icon: <ArrowRightLeft size={14}  />, component: TaxaConversaoMetodo },
+  { id: 'motivos-recusa', nome: 'Motivos de recusa de cartão', descricao: 'Principais erros e causas de não aprovação.', categoria: 'PAGAMENTOS', icon: <PieChart size={14}  />, component: MotivosRecusa },
+  { id: 'parcelas', nome: 'Parcelas selecionadas', descricao: 'Parcelamentos mais escolhidos pelos clientes.', categoria: 'PAGAMENTOS', icon: <BarChart3 size={14}  />, component: ParcelasSelecionadas },
+  { id: 'dispositivos', nome: 'Dispositivos de acesso', descricao: 'Acessos por mobile, desktop e tablet.', categoria: 'ORIGEM', icon: <Smartphone size={14}  />, component: DispositivosAcesso },
+  { id: 'origem-vendas', nome: 'Origem das vendas concluídas', descricao: 'De onde vieram as vendas aprovadas.', categoria: 'ORIGEM', icon: <Users size={14}  />, component: OrigemVendasConcluidas },
+  { id: 'rastreamento', nome: 'Rastreamento de vendas', descricao: 'Vendas rastreáveis versus não rastreáveis.', categoria: 'ORIGEM', icon: <Target size={14}  />, component: RastreamentoVendas },
+  { id: 'local', nome: 'Local de vendas', descricao: 'Distribuição geográfica das compras realizadas.', categoria: 'ORIGEM', icon: <Globe size={14}  />, component: LocalDeVendas },
 ]
 
 const categorias = ['PERFORMANCE', 'TRANSAÇÕES', 'PAGAMENTOS', 'ORIGEM']
@@ -92,10 +74,10 @@ function SortableWidget({ id, children, onRemove }: { id: string; children: Reac
       <div
         {...attributes}
         {...listeners}
-        className="absolute top-2 right-10 z-10 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing bg-white rounded border border-[rgba(0,0,0,0.06)] w-7 h-7 flex items-center justify-center shadow-sm"
+        className="absolute top-2 right-10 z-10 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing bg-white rounded border border-(--ant-color-split) w-7 h-7 flex items-center justify-center shadow-sm"
         title="Arrastar para reordenar"
       >
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="rgba(0,0,0,0.25)">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="var(--ant-color-text-quaternary)">
           <circle cx="4" cy="3" r="1.2" /><circle cx="10" cy="3" r="1.2" />
           <circle cx="4" cy="7" r="1.2" /><circle cx="10" cy="7" r="1.2" />
           <circle cx="4" cy="11" r="1.2" /><circle cx="10" cy="11" r="1.2" />
@@ -103,10 +85,10 @@ function SortableWidget({ id, children, onRemove }: { id: string; children: Reac
       </div>
       <button
         onClick={onRemove}
-        className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded border border-[rgba(0,0,0,0.06)] w-7 h-7 flex items-center justify-center shadow-sm cursor-pointer hover:border-red-300"
+        className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded border border-(--ant-color-split) w-7 h-7 flex items-center justify-center shadow-sm cursor-pointer hover:border-red-300"
         title="Remover widget"
       >
-        <CloseOutlined className="text-xs text-[rgba(0,0,0,0.35)]" />
+        <X size={14} className="text-sm text-[rgba(0,0,0,0.35)]" />
       </button>
       {children}
     </div>
@@ -145,11 +127,11 @@ export default function TabPersonalizado() {
     return (
       <>
         <div className="flex flex-col items-center justify-center py-16 gap-4">
-          <AppstoreOutlined className="text-[48px] text-[rgba(0,0,0,0.15)]" />
-          <Title level={4} className="!mb-0 text-[#2B4ACF]">Monte do seu jeito!</Title>
-          <Text type="secondary" className="text-center max-w-[400px]">
+          <LayoutGrid size={14} className="text-[48px] text-[rgba(0,0,0,0.15)]" />
+          <Typography.Title level={4} className="mb-0 text-(--ant-color-primary)">Monte do seu jeito!</Typography.Title>
+          <Typography.Text type="secondary" className="text-center max-w-[400px]">
             Personalize esta aba com as métricas que fazem mais sentido para o seu negócio. Escolha entre opções de transações, performance, pagamentos e origem.
-          </Text>
+          </Typography.Text>
           <Button type="primary" onClick={() => setModalOpen(true)}>
             Personalizar informações
           </Button>
@@ -163,8 +145,8 @@ export default function TabPersonalizado() {
   return (
     <>
       <div className="flex items-center justify-between mb-4">
-        <Title level={5} className="!mb-0">Seus widgets</Title>
-        <Button size="small" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>
+        <Typography.Title level={5} className="mb-0">Seus widgets</Typography.Title>
+        <Button icon={<Plus size={14}  />} onClick={() => setModalOpen(true)}>
           Adicionar widget
         </Button>
       </div>
@@ -196,29 +178,29 @@ function WidgetModal({
   open: boolean; onClose: () => void; adicionados: string[]; onAdicionar: (id: string) => void; onRemover: (id: string) => void
 }) {
   return (
-    <Modal open={open} onCancel={onClose} title={<Title level={4} className="!mb-0">Adicionar widget</Title>} width={560} footer={null}>
+    <Modal open={open} onCancel={onClose} title={<Typography.Title level={4} className="mb-0">Adicionar widget</Typography.Title>} width={560} footer={null}>
       <div className="max-h-[500px] overflow-y-auto -mx-1 px-1">
         {categorias.map((categoria) => {
           const widgets = widgetsDisponiveis.filter((w) => w.categoria === categoria)
           return (
             <div key={categoria} className="mb-2">
-              <Text strong className="text-[11px] tracking-wider text-[rgba(0,0,0,0.45)] block mb-2 mt-4">{categoria}</Text>
+              <Typography.Text strong className="tracking-wider text-(--ant-color-text-tertiary) block mb-2 mt-4">{categoria}</Typography.Text>
               {widgets.map((widget) => {
                 const jaAdicionado = adicionados.includes(widget.id)
                 return (
-                  <div key={widget.id} className="flex items-center gap-3 py-3 border-b border-[rgba(0,0,0,0.06)] last:border-b-0">
-                    <div className="text-[#2B4ACF] text-lg w-5 flex justify-center shrink-0">{widget.icon}</div>
+                  <div key={widget.id} className="flex items-center gap-3 py-3 border-b border-(--ant-color-split) last:border-b-0">
+                    <div className="text-(--ant-color-primary) text-lg w-5 flex justify-center shrink-0">{widget.icon}</div>
                     <div className="flex-1 min-w-0">
-                      <Text strong className="text-sm block">{widget.nome}</Text>
-                      <Text type="secondary" className="text-xs">{widget.descricao}</Text>
+                      <Typography.Text strong className="block">{widget.nome}</Typography.Text>
+                      <Typography.Text type="secondary" >{widget.descricao}</Typography.Text>
                     </div>
                     <div className="shrink-0 ml-2">
                       {jaAdicionado ? (
-                        <Button size="small" type="text" className="!text-[rgba(0,0,0,0.25)]" icon={<CheckOutlined />} onClick={() => onRemover(widget.id)}>
+                        <Button type="text" className="text-(--ant-color-text-quaternary)" icon={<Check size={14}  />} onClick={() => onRemover(widget.id)}>
                           Já adicionado
                         </Button>
                       ) : (
-                        <Button size="small" type="default" icon={<PlusOutlined />} onClick={() => onAdicionar(widget.id)}>
+                        <Button type="default" icon={<Plus size={14}  />} onClick={() => onAdicionar(widget.id)}>
                           Adicionar
                         </Button>
                       )}

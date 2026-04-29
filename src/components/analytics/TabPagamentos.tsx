@@ -21,12 +21,12 @@ export default function TabPagamentos({ isEditing, hasData = true }: { isEditing
     { id: 'metodos-transacoes', label: 'Métodos de pagamento e Transações', component: noData ? (
       <div className="flex gap-4 items-stretch">
         <div className="flex-1"><WidgetEmpty title="Transações por Método de Pagamento" /></div>
-        <div className="w-[380px] shrink-0"><WidgetEmpty title="Transações" /></div>
+        <div className="w-[440px] shrink-0"><WidgetEmpty title="Transações" /></div>
       </div>
     ) : (
       <div className="flex gap-4 items-stretch">
         <div className="flex-1 flex"><div className="flex-1"><MetodosPagamento /></div></div>
-        <div className="w-[380px] shrink-0 flex"><div className="flex-1"><TaxaConversaoMetodo /></div></div>
+        <div className="w-[440px] shrink-0 flex"><div className="flex-1"><TaxaConversaoMetodo /></div></div>
       </div>
     ) },
     { id: 'recusa-parcelas', label: 'Motivos de recusa e Parcelas', component: noData ? (

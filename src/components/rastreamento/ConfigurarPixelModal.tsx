@@ -3,23 +3,18 @@ import {
   Modal,
   Button,
   Checkbox,
+  Divider,
   Input,
   Radio,
   Select,
   Switch,
   TreeSelect,
   Typography,
-  Divider,
   Tag,
   Alert,
   Tooltip,
 } from 'antd'
-import {
-  LeftOutlined,
-  QuestionCircleOutlined,
-} from '@ant-design/icons'
-
-const { Title, Text } = Typography
+import { ChevronLeft, HelpCircle } from 'lucide-react'
 
 /* ─── tipos de pixel disponíveis (RN01) ─── */
 export type PixelProvider = 'meta' | 'ga4' | 'google_ads' | 'gtm'
@@ -361,16 +356,16 @@ export default function ConfigurarPixelModal({
       {step === 'select_provider' && (
         <div className="p-6">
           <div className="text-center mb-6">
-            <Title level={4} className="!mb-1">
+            <Typography.Title level={4} className="mb-1">
               {isBulk
                 ? 'Configurar Pixel em Massa'
                 : isEdit
                   ? 'Configurar Pixel'
                   : 'Configurar Pixel'}
-            </Title>
-            <Text type="secondary">
+            </Typography.Title>
+            <Typography.Text type="secondary">
               Selecione o tipo de pixel que deseja configurar
-            </Text>
+            </Typography.Text>
           </div>
 
           {/* Banner de contexto: quantos produtos selecionados (bulk) ou qual produto (edit) */}
@@ -378,21 +373,21 @@ export default function ConfigurarPixelModal({
             <Alert
               type="info"
               showIcon
-              className="!mb-4"
+              className="mb-4"
               message={
-                <Text className="text-sm">
-                  Configurando pixel para <Text strong>{mode.produtoIds.length} produto(s) / evento(s)</Text> selecionado(s)
-                </Text>
+                <Typography.Text >
+                  Configurando pixel para <Typography.Text strong>{mode.produtoIds.length} produto(s) / evento(s)</Typography.Text> selecionado(s)
+                </Typography.Text>
               }
               description={
                 <div className="flex flex-wrap gap-1 mt-1">
                   {mode.produtoIds.slice(0, 5).map((id) => (
-                    <Tag key={id} className="!text-xs">
+                    <Tag key={id} className="text-sm">
                       {mode.produtoNomes[id] || `Produto ${id}`}
                     </Tag>
                   ))}
                   {mode.produtoIds.length > 5 && (
-                    <Tag className="!text-xs">+{mode.produtoIds.length - 5} mais</Tag>
+                    <Tag className="text-sm">+{mode.produtoIds.length - 5} mais</Tag>
                   )}
                 </div>
               }
@@ -403,11 +398,11 @@ export default function ConfigurarPixelModal({
             <Alert
               type="info"
               showIcon
-              className="!mb-4"
+              className="mb-4"
               message={
-                <Text className="text-sm">
-                  Configurando pixel para: <Text strong>{mode.produtoNome}</Text>
-                </Text>
+                <Typography.Text >
+                  Configurando pixel para: <Typography.Text strong>{mode.produtoNome}</Typography.Text>
+                </Typography.Text>
               }
             />
           )}
@@ -417,9 +412,9 @@ export default function ConfigurarPixelModal({
               <button
                 key={option.key}
                 onClick={() => handleSelectProvider(option.key)}
-                className="flex items-center gap-4 p-4 border border-[#d9d9d9] rounded-lg hover:border-[#2B4ACF] hover:bg-[#f5f7ff] transition-all cursor-pointer bg-white text-left w-full"
+                className="flex items-center gap-4 p-4 border border-(--ant-color-border) rounded-lg hover:border-(--ant-color-primary) hover:bg-[#f5f7ff] transition-all cursor-pointer bg-white text-left w-full"
               >
-                <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-[#f5f5f5] shrink-0 overflow-hidden">
+                <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-(--ant-color-fill-tertiary) shrink-0 overflow-hidden">
                   <img
                     src={option.logo}
                     alt={option.label}
@@ -427,9 +422,9 @@ export default function ConfigurarPixelModal({
                   />
                 </div>
                 <div className="flex-1">
-                  <Text strong className="text-base">{option.label}</Text>
+                  <Typography.Text strong >{option.label}</Typography.Text>
                 </div>
-                <LeftOutlined className="rotate-180 text-[rgba(0,0,0,0.25)]" />
+                <ChevronLeft size={14} className="rotate-180 text-(--ant-color-text-quaternary)" />
               </button>
             ))}
           </div>
@@ -440,39 +435,39 @@ export default function ConfigurarPixelModal({
       {step === 'configure' && providerInfo && (
         <div className="flex flex-col">
           {/* Header */}
-          <div className="px-6 pt-6 pb-4 border-b border-[#f0f0f0]">
+          <div className="px-6 pt-6 pb-4 border-b border-(--ant-color-split)">
             <div className="flex items-center gap-3">
               {/* No modo configure/bulk com provider/edit com provider, não tem "voltar" para step 1 */}
               {mode.type !== 'configure' && !(mode.type === 'bulk' && mode.provider) && !(isEdit && mode.type === 'edit' && (mode.existing || mode.provider)) && (
                 <>
                   <Button
                     type="text"
-                    icon={<LeftOutlined />}
+                    icon={<ChevronLeft size={14} />}
                     onClick={handleBackToSelect}
-                    className="!p-0 !h-auto"
+                    className="p-0 h-auto"
                   >
                     Voltar
                   </Button>
-                  <Divider type="vertical" className="!h-5" />
+                  <Divider type="vertical" className="h-5" />
                 </>
               )}
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 flex items-center justify-center rounded bg-[#f5f5f5] overflow-hidden">
+                <div className="w-8 h-8 flex items-center justify-center rounded bg-(--ant-color-fill-tertiary) overflow-hidden">
                   <img
                     src={providerInfo.logo}
                     alt={providerInfo.label}
                     className="w-5 h-5 object-contain"
                   />
                 </div>
-                <Title level={5} className="!mb-0">
+                <Typography.Title level={5} className="mb-0">
                   Configurar {providerInfo.label}
-                </Title>
+                </Typography.Title>
               </div>
             </div>
             {/* Contexto de bulk no step 2 */}
             {isBulk && mode.type === 'bulk' && (
               <div className="mt-3 px-0">
-                <Tag color="blue" className="!text-xs">
+                <Tag color="blue" className="text-sm">
                   {mode.produtoIds.length} produto(s) / evento(s) selecionado(s)
                 </Tag>
               </div>
@@ -484,7 +479,7 @@ export default function ConfigurarPixelModal({
 
             {/* ── Nome do pixel ── */}
             <div className="flex flex-col gap-2">
-              <Text strong>Nome do pixel</Text>
+              <Typography.Text strong>Nome do pixel</Typography.Text>
               <Input
                 placeholder={`Ex: ${providerInfo.label} - Principal`}
                 value={nomePixel}
@@ -494,19 +489,16 @@ export default function ConfigurarPixelModal({
                 }}
                 status={errors.nomePixel ? 'error' : undefined}
               />
-              <Text type="secondary" className="text-xs">
+              <Typography.Text type="secondary" >
                 Dê um nome para identificar este pixel (ex: "Facebook - Remarketing", "GA4 - Loja Principal")
-              </Text>
+              </Typography.Text>
               {errors.nomePixel && (
-                <Text type="danger" className="text-xs">{errors.nomePixel}</Text>
+                <Typography.Text type="danger" >{errors.nomePixel}</Typography.Text>
               )}
             </div>
-
-            <Divider className="!my-0" />
-
             {/* ── RN02: ID do pixel ── */}
             <div className="flex flex-col gap-2">
-              <Text strong>{providerInfo.idLabel}</Text>
+              <Typography.Text strong>{providerInfo.idLabel}</Typography.Text>
               <Input
                 placeholder={providerInfo.idPlaceholder}
                 value={pixelId}
@@ -518,23 +510,19 @@ export default function ConfigurarPixelModal({
                 disabled={isBulk || (isEdit && mode.type === 'edit' && !!mode.provider)}
               />
               {errors.pixelId && (
-                <Text type="danger" className="text-xs">{errors.pixelId}</Text>
+                <Typography.Text type="danger" >{errors.pixelId}</Typography.Text>
               )}
             </div>
-
-            <Divider className="!my-0" />
-
             {/* ── RN04: Seleção de eventos (RF03) ── */}
             <div className="flex flex-col gap-3">
-              <div>
-                <Text strong>Eventos que serão enviados</Text>
-                <br />
-                <Text type="secondary" className="text-xs">
+              <div className="flex flex-col gap-1">
+                <Typography.Text strong>Eventos que serão enviados</Typography.Text>
+                <Typography.Text type="secondary">
                   Selecione os eventos que deseja rastrear. Pelo menos um evento deve ser selecionado.
-                </Text>
+                </Typography.Text>
               </div>
               {errors.events && (
-                <Text type="danger" className="text-xs">{errors.events}</Text>
+                <Typography.Text type="danger" >{errors.events}</Typography.Text>
               )}
               <div className="grid grid-cols-2 gap-3">
                 {EVENTS.map((event) => (
@@ -542,23 +530,20 @@ export default function ConfigurarPixelModal({
                     key={event.key}
                     className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-all ${
                       selectedEvents.includes(event.key)
-                        ? 'border-[#2B4ACF] bg-[#f5f7ff]'
-                        : 'border-[#d9d9d9] hover:border-[#2B4ACF]/40'
+                        ? 'border-(--ant-color-primary) bg-[#f5f7ff]'
+                        : 'border-(--ant-color-border) hover:border-(--ant-color-primary)/40'
                     }`}
                   >
                     <Checkbox
                       checked={selectedEvents.includes(event.key)}
                       onChange={() => toggleEvent(event.key)}
-                      className="!mt-0.5"
+                      className="mt-0.5"
                     />
-                    <div className="flex-1">
-                      <Text strong className="text-sm">
-                        <Tag className="!text-xs">{event.key}</Tag>
-                      </Text>
-                      <br />
-                      <Text type="secondary" className="text-xs">
+                    <div className="flex-1 flex flex-col gap-1 items-start">
+                      <Tag color="blue">{event.key}</Tag>
+                      <Typography.Text type="secondary">
                         {event.description}
-                      </Text>
+                      </Typography.Text>
                     </div>
                   </label>
                 ))}
@@ -567,69 +552,71 @@ export default function ConfigurarPixelModal({
 
             {/* ── RF04: Configs avançadas de Purchase ── */}
             {hasPurchase && (
-              <>
-                <Divider className="!my-0" />
-                <div className="flex flex-col gap-4">
-                  <div>
-                    <Text strong>Configurações de Purchase</Text>
-                    <br />
-                    <Text type="secondary" className="text-xs">
+              <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-1">
+                    <Typography.Text strong>Configurações de Purchase</Typography.Text>
+                    <Typography.Text type="secondary">
                       Configure como os eventos de venda serão enviados.
-                    </Text>
+                    </Typography.Text>
                   </div>
 
                   {/* Deseja receber evento de */}
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-1.5">
-                      <Text className="text-sm">Deseja receber evento de:</Text>
+                      <Typography.Text >Deseja receber evento de:</Typography.Text>
                       <Tooltip title="Define em qual momento o evento de Purchase será disparado para a plataforma de anúncios. Isso impacta diretamente a otimização das suas campanhas.">
-                        <QuestionCircleOutlined className="text-[rgba(0,0,0,0.45)] text-xs cursor-help" />
+                        <HelpCircle size={14} className="text-(--ant-color-text-tertiary) text-sm cursor-help" />
                       </Tooltip>
                     </div>
                     <Radio.Group
                       value={receberEvento}
                       onChange={(e) => setReceberEvento(e.target.value)}
-                      className="flex flex-col gap-3"
+                      className="block w-full"
                     >
-                      <div className="p-3 border border-[#d9d9d9] rounded-lg hover:border-[#2B4ACF]/40 transition-all">
-                        <Radio value="imediatos">
-                          <Text strong className="text-sm">Pagamentos imediatos</Text>
-                        </Radio>
-                        <Text type="secondary" className="text-xs block ml-6">
-                          O evento é disparado assim que o pagamento é confirmado. Aplica-se a: Pix, Cartão de crédito e Saldo Eduzz.
-                        </Text>
-                      </div>
-                      <div className="p-3 border border-[#d9d9d9] rounded-lg hover:border-[#2B4ACF]/40 transition-all">
-                        <Radio value="nao_imediato">
-                          <Text strong className="text-sm">Pagamento não imediato</Text>
-                        </Radio>
-                        <Text type="secondary" className="text-xs block ml-6">
-                          O evento é disparado quando o boleto é gerado (antes da compensação). Útil para rastrear a intenção de compra mesmo antes da confirmação do pagamento.
-                        </Text>
-                      </div>
-                      <div className="p-3 border border-[#d9d9d9] rounded-lg hover:border-[#2B4ACF]/40 transition-all">
-                        <Radio value="todos">
-                          <Text strong className="text-sm">Todos</Text>
-                        </Radio>
-                        <Text type="secondary" className="text-xs block ml-6">
-                          Dispara o evento para todas as formas de pagamento (imediatos + boleto). Recomendado para ter a visão completa de conversões.
-                        </Text>
+                      <div className="flex flex-col gap-3">
+                        <label className="p-4 border border-(--ant-color-border) rounded-lg hover:border-(--ant-color-primary)/40 transition-all flex items-start gap-3 cursor-pointer">
+                          <Radio value="imediatos" className="m-0" />
+                          <div className="flex flex-col gap-1 flex-1">
+                            <Typography.Text strong>Pagamentos imediatos</Typography.Text>
+                            <Typography.Text type="secondary">
+                              O evento é disparado assim que o pagamento é confirmado. Aplica-se a: Pix, Cartão de crédito e Saldo Eduzz.
+                            </Typography.Text>
+                          </div>
+                        </label>
+                        <label className="p-4 border border-(--ant-color-border) rounded-lg hover:border-(--ant-color-primary)/40 transition-all flex items-start gap-3 cursor-pointer">
+                          <Radio value="nao_imediato" className="m-0" />
+                          <div className="flex flex-col gap-1 flex-1">
+                            <Typography.Text strong>Pagamento não imediato</Typography.Text>
+                            <Typography.Text type="secondary">
+                              O evento é disparado quando o boleto é gerado (antes da compensação). Útil para rastrear a intenção de compra mesmo antes da confirmação do pagamento.
+                            </Typography.Text>
+                          </div>
+                        </label>
+                        <label className="p-4 border border-(--ant-color-border) rounded-lg hover:border-(--ant-color-primary)/40 transition-all flex items-start gap-3 cursor-pointer">
+                          <Radio value="todos" className="m-0" />
+                          <div className="flex flex-col gap-1 flex-1">
+                            <Typography.Text strong>Todos</Typography.Text>
+                            <Typography.Text type="secondary">
+                              Dispara o evento para todas as formas de pagamento (imediatos + boleto). Recomendado para ter a visão completa de conversões.
+                            </Typography.Text>
+                          </div>
+                        </label>
                       </div>
                     </Radio.Group>
                   </div>
 
                   {/* RF19: Diferenciar boleto */}
-                  <div className="flex items-center justify-between p-3 border border-[#d9d9d9] rounded-lg">
-                    <div className="flex-1">
+                  <div className="flex items-center justify-between gap-4 p-4 border border-(--ant-color-border) rounded-lg">
+                    <div className="flex-1 flex flex-col gap-1">
                       <div className="flex items-center gap-1.5">
-                        <Text className="text-sm">Diferenciar pagamento não imediato (boleto)</Text>
+                        <Typography.Text>Diferenciar pagamento não imediato (boleto)</Typography.Text>
                         <Tooltip title="Quando ativado, a geração do boleto dispara um evento separado (ex: ViewBoleto) antes do evento de Purchase. Isso permite distinguir quem gerou boleto de quem efetivamente pagou.">
-                          <QuestionCircleOutlined className="text-[rgba(0,0,0,0.45)] text-xs cursor-help" />
+                          <HelpCircle size={14} className="text-(--ant-color-text-tertiary) cursor-help" />
                         </Tooltip>
                       </div>
-                      <Text type="secondary" className="text-xs">
+                      <Typography.Text type="secondary">
                         Se ativado, boletos gerados enviam evento intermediário antes do Purchase.
-                      </Text>
+                      </Typography.Text>
                     </div>
                     <Switch
                       checked={diferenciarBoleto}
@@ -639,7 +626,7 @@ export default function ConfigurarPixelModal({
 
                   {/* RF20: Valor customizado */}
                   <div className="flex flex-col gap-2">
-                    <Text className="text-sm">Envio do valor da compra</Text>
+                    <Typography.Text >Envio do valor da compra</Typography.Text>
                     <Select
                       value={valorCustomizado}
                       onChange={setValorCustomizado}
@@ -650,9 +637,9 @@ export default function ConfigurarPixelModal({
                       ]}
                     />
                     {valorCustomizado === 'customizado' && (
-                      <div className="flex flex-col gap-3 mt-1 p-4 bg-[#fafafa] rounded-lg border border-[rgba(0,0,0,0.06)]">
+                      <div className="flex flex-col gap-3 mt-1 p-4 bg-(--ant-color-fill-quaternary) rounded-lg border border-(--ant-color-split)">
                         <div className="flex flex-col gap-1.5">
-                          <Text className="text-xs font-medium">Método de pagamento</Text>
+                          <Typography.Text className="font-medium">Método de pagamento</Typography.Text>
                           <Select
                             placeholder="Selecione o método de pagamento"
                             options={[
@@ -664,24 +651,20 @@ export default function ConfigurarPixelModal({
                           />
                         </div>
                         <div className="flex flex-col gap-1.5">
-                          <Text className="text-xs font-medium">Novo valor</Text>
+                          <Typography.Text className="font-medium">Novo valor</Typography.Text>
                           <Input placeholder="Ex: 99.90" prefix="R$" />
                         </div>
                       </div>
                     )}
                   </div>
                 </div>
-              </>
             )}
-
-            <Divider className="!my-0" />
-
             {/* ── RN03: Associação a produtos (após eventos) ── */}
             <div className="flex flex-col gap-3">
-              <Text strong>Vincular produto(s) / evento(s)</Text>
+              <Typography.Text strong>Vincular produto(s) / evento(s)</Typography.Text>
 
               {errors.produtos && (
-                <Text type="danger" className="text-xs">{errors.produtos}</Text>
+                <Typography.Text type="danger" >{errors.produtos}</Typography.Text>
               )}
 
               {/* TreeSelect de produtos */}
@@ -709,7 +692,7 @@ export default function ConfigurarPixelModal({
                   {selectedProdutos.map((val) => {
                     const title = getNodeTitle(produtosTree, val) || (mode.type === 'edit' ? `${mode.produtoId} - ${mode.produtoNome}` : val)
                     return (
-                      <Tag key={val} className="!flex items-center gap-1 !py-1 !px-2">
+                      <Tag key={val} className="!flex items-center gap-1 py-1 px-2">
                         {title}
                       </Tag>
                     )
@@ -717,18 +700,15 @@ export default function ConfigurarPixelModal({
                 </div>
               )}
             </div>
-
-            <Divider className="!my-0" />
-
             {/* ── RN05: API de conversão ── */}
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <Text strong>API de Conversão</Text>
+                  <Typography.Text strong>API de Conversão</Typography.Text>
                   <br />
-                  <Text type="secondary" className="text-xs">
+                  <Typography.Text type="secondary" >
                     Envio via servidor para maior precisão no rastreamento.
-                  </Text>
+                  </Typography.Text>
                 </div>
                 <Switch
                   checked={apiConversao}
@@ -743,8 +723,8 @@ export default function ConfigurarPixelModal({
               </div>
 
               {apiConversao && (
-                <div className="p-4 bg-[#fafafa] rounded-lg flex flex-col gap-2">
-                  <Text strong className="text-sm">Token API de Conversão</Text>
+                <div className="p-4 bg-(--ant-color-fill-quaternary) rounded-lg flex flex-col gap-2">
+                  <Typography.Text strong >Token API de Conversão</Typography.Text>
                   <Input.Password
                     placeholder="Cole o token da API de conversão aqui"
                     value={tokenApi}
@@ -755,17 +735,17 @@ export default function ConfigurarPixelModal({
                     status={errors.tokenApi ? 'error' : undefined}
                   />
                   {errors.tokenApi && (
-                    <Text type="danger" className="text-xs">{errors.tokenApi}</Text>
+                    <Typography.Text type="danger" >{errors.tokenApi}</Typography.Text>
                   )}
                   <Alert
                     type="info"
                     showIcon
                     message={
-                      <Text className="text-xs">
+                      <Typography.Text >
                         Dentro das configurações do seu Pixel do Facebook, vá na aba Configurações e em API de Conversões, dentro da sessão Configurar Manualmente, clique em Gerar Token de Acesso.
-                      </Text>
+                      </Typography.Text>
                     }
-                    className="!mt-1"
+                    className="mt-1"
                   />
                 </div>
               )}
@@ -774,7 +754,7 @@ export default function ConfigurarPixelModal({
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 border-t border-[#f0f0f0] flex justify-end gap-3 sticky bottom-0 bg-white z-10">
+          <div className="px-6 py-4 border-t border-(--ant-color-split) flex justify-end gap-3 sticky bottom-0 bg-white z-10">
             <Button onClick={handleClose}>Cancelar</Button>
             <Button type="primary" onClick={handleSave}>
               {isBulk

@@ -1,12 +1,30 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@layer antd, theme, base, components, utilities;
 
-@keyframes row-highlight {
-  0% { background-color: #e6f4ff; }
-  100% { background-color: transparent; }
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@theme {
+  --font-sans: "Google Sans";
 }
 
-.animate-highlight td {
-  animation: row-highlight 2s ease-out;
+@layer base {
+  h1, h2 {
+    @apply tracking-normal;
+  }
+
+  p, h1, h2, h3, h4, h5, h6, code, pre, blockquote {
+    @apply m-0 leading-normal;
+  }
+
+  input, button {
+    @apply tracking-wide;
+  }
+}
+
+* {
+  @apply box-border;
+}
+
+body {
+  @apply font-sans text-base m-0 p-0 tracking-wide;
 }

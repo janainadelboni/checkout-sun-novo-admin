@@ -2,7 +2,6 @@ import { useRef, useState } from 'react'
 import {
   Breadcrumb,
   Button,
-  ConfigProvider,
   Input,
   Layout,
   Menu,
@@ -15,23 +14,12 @@ import {
   Tooltip,
   Typography,
 } from 'antd'
-import {
-  HomeOutlined,
-  LeftOutlined,
-  PlusOutlined,
-  SearchOutlined,
-
-  DeleteOutlined,
-  QuestionCircleOutlined,
-  CaretRightOutlined,
-  SettingOutlined,
-} from '@ant-design/icons'
+import { Home, ChevronLeft, Plus, Search, Trash2, HelpCircle, ChevronRight, Settings } from 'lucide-react'
 import ConfigurarPixelModal, { type ModalMode, type PixelConfig } from './ConfigurarPixelModal'
 import { EduzzLogo, CheckoutSunLogo } from '../Logos'
-import antdTheme from '../../theme/antd'
 
 const { Sider, Content } = Layout
-const { Title, Text } = Typography
+
 
 type Produto = {
   id: number
@@ -373,9 +361,9 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
   // Mapa de cores dos eventos (mesma ordem e cor do funil)
   const eventoCores: Record<string, string> = {
     'PageView': '#1890FF',
-    'FormInteraction': '#FAAD14',
+    'FormInteraction': 'var(--ant-color-warning)',
     'Lead': '#13C2C2',
-    'AddPaymentInfo': '#52C41A',
+    'AddPaymentInfo': 'var(--ant-color-success)',
     'Initiatecheckout': '#EB2F96',
     'Purchase': '#722ED1',
   }
@@ -442,9 +430,9 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
   // Etapas do funil usando os mesmos eventos cadastráveis (topo → fundo)
   const funilEtapas = [
     { label: 'PageView', valor: 10200, cor: '#1890FF' },
-    { label: 'FormInteraction', valor: 4590, cor: '#FAAD14' },
+    { label: 'FormInteraction', valor: 4590, cor: 'var(--ant-color-warning)' },
     { label: 'Lead', valor: 2856, cor: '#13C2C2' },
-    { label: 'AddPaymentInfo', valor: 1820, cor: '#52C41A' },
+    { label: 'AddPaymentInfo', valor: 1820, cor: 'var(--ant-color-success)' },
     { label: 'Initiatecheckout', valor: 1224, cor: '#EB2F96' },
     { label: 'Purchase', valor: 380, cor: '#722ED1' },
   ]
@@ -487,17 +475,17 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
   }
 
   return (
-    <ConfigProvider theme={antdTheme(false)}>
-      <Layout className="min-h-screen bg-white">
+    <>
+      <Layout className="min-h-screen bg-(--ant-color-bg-container)">
         {/* Header */}
-        <div className="h-[78px] bg-[#fafafa] flex items-center justify-center border-b border-[rgba(0,0,0,0.06)]">
+        <div className="h-[78px] bg-(--ant-color-fill-quaternary) flex items-center justify-center border-b border-(--ant-color-split)">
           <EduzzLogo />
         </div>
 
         <Layout>
           {/* Sidebar */}
-          <Sider width={288} className="!bg-white border-r border-[rgba(0,0,0,0.06)]">
-            <div className="px-4 py-[10px]">
+          <Sider theme="light" width={288} className="border-r border-(--ant-color-split)">
+            <div className="px-4 py-2.5">
               <CheckoutSunLogo />
             </div>
             <Menu
@@ -522,7 +510,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
             {/* Breadcrumb */}
             <Breadcrumb
               items={[
-                { title: <HomeOutlined /> },
+                { title: <Home size={14} /> },
                 { title: 'Checkout Sun' },
                 { title: 'Rastreamento' },
                 { title: PROVIDER_NAMES[provider] || 'Pixel' },
@@ -531,7 +519,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
 
             {/* Back button */}
             <div>
-              <Button icon={<LeftOutlined />} onClick={onVoltar}>Voltar</Button>
+              <Button icon={<ChevronLeft size={14} />} onClick={onVoltar}>Voltar</Button>
             </div>
 
             {/* Title + Actions */}
@@ -541,17 +529,17 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                   <img src={PROVIDER_LOGOS[provider]} alt="" className="h-8 object-contain" />
                 )}
                 <div>
-                  <Title level={3} className="!mb-1">
+                  <Typography.Title level={3} className="mb-1">
                     {PROVIDER_NAMES[provider] || 'Pixel'}
-                  </Title>
-                  <Text type="secondary">
+                  </Typography.Title>
+                  <Typography.Text type="secondary">
                     Acompanhe e configure seu pixel de rastreamento
-                  </Text>
+                  </Typography.Text>
                 </div>
               </div>
               <Button
-                style={{ backgroundColor: '#FAAD14', borderColor: '#FAAD14', color: '#fff' }}
-                icon={<PlusOutlined />}
+                type="primary"
+                icon={<Plus size={14} />}
                 onClick={handleOpenNew}
               >
                 Configurar e vincular produtos
@@ -574,9 +562,9 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                   children: (
                     <div className="flex flex-col gap-6">
                       {/* Search / filter area */}
-                      <div className="bg-[#fafafa] rounded-lg p-5 flex flex-col gap-4">
+                      <div className="bg-(--ant-color-fill-quaternary) rounded-lg p-5 flex flex-col gap-4">
                         <div className="flex flex-col gap-1.5">
-                          <Text strong className="text-sm">Filtrar por produto</Text>
+                          <Typography.Text strong >Filtrar por produto</Typography.Text>
                           <Select
                             mode="multiple"
                             allowClear
@@ -591,7 +579,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                             filterOption={(input, option) =>
                               (option?.label as string ?? '').toLowerCase().includes(input.toLowerCase())
                             }
-                            suffixIcon={<SearchOutlined className="text-[rgba(0,0,0,0.45)]" />}
+                            suffixIcon={<Search size={14} className="text-(--ant-color-text-tertiary)" />}
                             className="w-full"
                             maxTagCount="responsive"
                           />
@@ -599,23 +587,23 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
 
                         {/* Active filter tags */}
                         <div className="flex items-center gap-2 flex-wrap">
-                          <Text type="secondary" className="text-xs">Filtros ativos:</Text>
+                          <Typography.Text type="secondary" >Filtros ativos:</Typography.Text>
                           {produtoFilter.length > 0 ? (
                             produtoFilter.map((id) => {
                               const p = produtosIniciais.find((pr) => pr.id === id)
                               return (
-                                <Tag key={`prod-${id}`} closable onClose={() => setProdutoFilter((prev) => prev.filter((x) => x !== id))} className="!text-xs">
+                                <Tag key={`prod-${id}`} closable onClose={() => setProdutoFilter((prev) => prev.filter((x) => x !== id))} className="text-sm">
                                   Produto: {id} - {p?.nome || id}
                                 </Tag>
                               )
                             })
                           ) : (
-                            <Tag className="!text-xs !font-medium">Produtos: Todos ({produtos.length})</Tag>
+                            <Tag className="text-sm font-medium">Produtos: Todos ({produtos.length})</Tag>
                           )}
                           {produtoFilter.length > 0 && (
                             <a
                               href="#"
-                              className="text-[rgba(0,0,0,0.45)] text-xs hover:text-[rgba(0,0,0,0.65)]"
+                              className="text-(--ant-color-text-tertiary) text-sm hover:text-(--ant-color-text-secondary)"
                               onClick={(e) => {
                                 e.preventDefault()
                                 handleClearProductFilters()
@@ -632,9 +620,9 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                         {/* Título + filtro de período */}
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <Title level={5} className="!mb-0">Funil de eventos</Title>
+                            <Typography.Title level={5} className="mb-0">Funil de eventos</Typography.Title>
                             <Tooltip title="Taxa calculada com base no PageView (base = 100%). Valores variam conforme produtos e período filtrados.">
-                              <QuestionCircleOutlined className="text-[rgba(0,0,0,0.45)] text-sm cursor-help" />
+                              <HelpCircle size={14} className="text-(--ant-color-text-tertiary) text-sm cursor-help" />
                             </Tooltip>
                           </div>
                           <Select
@@ -647,7 +635,6 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                               { value: 'ultimos_90', label: 'Últimos 90 dias' },
                             ]}
                             className="w-[170px]"
-                            size="small"
                           />
                         </div>
 
@@ -658,44 +645,34 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                             <div className="flex items-center justify-end gap-0 mb-1">
                               <Tooltip title="Taxa calculada com base no PageView do período selecionado.">
                                 <div className="w-[50px] text-right cursor-help">
-                                  <Text type="secondary" className="text-[11px] font-medium whitespace-nowrap">Taxa</Text>
+                                  <Typography.Text type="secondary" className="font-medium whitespace-nowrap">Taxa</Typography.Text>
                                 </div>
                               </Tooltip>
                               <div className="w-[70px] text-right">
-                                <Text type="secondary" className="text-[11px] font-medium whitespace-nowrap">Qtd.</Text>
+                                <Typography.Text type="secondary" className="font-medium whitespace-nowrap">Qtd.</Typography.Text>
                               </div>
                             </div>
 
                             {/* Etapas */}
                             {funilComPercent.map((etapa) => (
-                              <div key={etapa.label} className="flex items-center gap-2">
-                                <div className="w-[140px] shrink-0">
-                                  <Tag
-                                    className="!text-xs !font-semibold !px-2 !py-0.5 !rounded"
-                                    style={{
-                                      color: '#2B4ACF',
-                                      borderColor: '#2B4ACF',
-                                      backgroundColor: 'transparent',
-                                    }}
-                                  >
-                                    {etapa.label}
-                                  </Tag>
+                              <div key={etapa.label} className="flex items-center gap-3">
+                                <div className="w-[180px] shrink-0">
+                                  <Tag color="blue">{etapa.label}</Tag>
                                 </div>
-                                <div className="flex-1 h-6 bg-[#f5f5f5] rounded overflow-hidden">
+                                <div className="flex-1 h-6 bg-(--ant-color-fill-tertiary) rounded overflow-hidden">
                                   <div
-                                    className="h-full rounded transition-all"
+                                    className="h-full rounded transition-all min-w-1"
                                     style={{
                                       width: `${etapa.topoFundo}%`,
                                       backgroundColor: etapa.cor,
-                                      minWidth: '4px',
                                     }}
                                   />
                                 </div>
                                 <div className="w-[50px] text-right shrink-0">
-                                  <Text strong className="text-xs">{etapa.topoFundo}%</Text>
+                                  <Typography.Text strong >{etapa.topoFundo}%</Typography.Text>
                                 </div>
                                 <div className="w-[70px] text-right shrink-0">
-                                  <Text type="secondary" className="text-xs">{etapa.valor.toLocaleString('pt-BR')}</Text>
+                                  <Typography.Text type="secondary" >{etapa.valor.toLocaleString('pt-BR')}</Typography.Text>
                                 </div>
                               </div>
                             ))}
@@ -704,22 +681,22 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                           {/* Cards - Direita */}
                           <div className="w-[240px] shrink-0 flex flex-col gap-3">
                             {/* Saúde do pixel */}
-                            <div className="border border-[rgba(0,0,0,0.06)] rounded-lg p-4 flex flex-col gap-2.5">
-                              <Text type="secondary" className="text-xs font-medium">Saúde do pixel</Text>
+                            <div className="border border-(--ant-color-split) rounded-lg p-4 flex flex-col gap-2.5">
+                              <Typography.Text type="secondary" className="font-medium">Saúde do pixel</Typography.Text>
                               <div className="flex items-center justify-between">
-                                <Text className="text-xs">Último evento</Text>
-                                <Tag color="success" className="!text-xs !border-solid !m-0">há 12 min</Tag>
+                                <Typography.Text >Último evento</Typography.Text>
+                                <Tag color="success" className="text-sm border-solid m-0">há 12 min</Tag>
                               </div>
                               <div className="flex items-center justify-between">
-                                <Text className="text-xs">Eventos com erro</Text>
-                                <Tag color="error" className="!text-xs !border-solid !m-0">4 (20%)</Tag>
+                                <Typography.Text >Eventos com erro</Typography.Text>
+                                <Tag color="error" className="text-sm border-solid m-0">4 (20%)</Tag>
                               </div>
                             </div>
 
                             {/* Cobertura por evento */}
-                            <div className="border border-[rgba(0,0,0,0.06)] rounded-lg p-4 flex flex-col gap-2">
+                            <div className="border border-(--ant-color-split) rounded-lg p-4 flex flex-col gap-2">
                               <Tooltip title="Quantos produtos/eventos atrelados possuem cada evento configurado.">
-                                <Text type="secondary" className="text-xs font-medium mb-0.5 cursor-help">Cobertura de evento por produto</Text>
+                                <Typography.Text type="secondary" className="font-medium mb-0.5 cursor-help">Cobertura de evento por produto</Typography.Text>
                               </Tooltip>
                               {ordemEventos.map((eventoName) => {
                                 const produtosComEvento = produtosFiltrados.filter((p) => {
@@ -735,7 +712,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                                 return (
                                   <Tooltip
                                     key={eventoName}
-                                    title={<span style={{ whiteSpace: 'pre-line' }}>{tooltipText}</span>}
+                                    title={<span className="whitespace-pre-line">{tooltipText}</span>}
                                   >
                                     <div
                                       className="flex items-center justify-between cursor-pointer hover:bg-[rgba(0,0,0,0.04)] rounded px-1 -mx-1"
@@ -746,11 +723,11 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                                     >
                                       <div className="flex items-center gap-1.5">
                                         <span className="inline-block w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: cor }} />
-                                        <Text className="text-xs">{eventoName}</Text>
+                                        <Typography.Text >{eventoName}</Typography.Text>
                                       </div>
-                                      <Text strong className={`text-xs ${com < total ? '!text-[#FAAD14]' : '!text-[#52C41A]'}`}>
+                                      <Typography.Text strong className={`text-sm ${com < total ? 'text-(--ant-color-warning)' : 'text-(--ant-color-success)'}`}>
                                         {com}/{total}
-                                      </Text>
+                                      </Typography.Text>
                                     </div>
                                   </Tooltip>
                                 )
@@ -765,7 +742,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                         <div className="flex justify-end gap-3">
                           <Button
                             danger
-                            icon={<DeleteOutlined />}
+                            icon={<Trash2 size={14} />}
                             onClick={handleDeleteSelected}
                           >
                             Excluir selecionado(s)
@@ -774,9 +751,9 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                       )}
 
                       {/* Simple table */}
-                      <div className="border border-[#f0f0f0] rounded-lg bg-white">
+                      <div>
                         {/* Header */}
-                        <div className="flex bg-[rgba(0,0,0,0.02)] border-b border-[rgba(0,0,0,0.06)] h-[46px] items-center rounded-t-lg">
+                        <div className="flex bg-(--ant-color-fill-alter) border-b border-(--ant-color-split) h-[46px] items-center">
                           <div className="w-[48px] flex items-center justify-center">
                             <input
                               type="checkbox"
@@ -785,20 +762,20 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                                 if (el) el.indeterminate = indeterminate
                               }}
                               onChange={toggleSelectAll}
-                              className="w-4 h-4 cursor-pointer accent-[#2B4ACF]"
+                              className="w-4 h-4 cursor-pointer accent-(--ant-color-primary)"
                             />
                           </div>
                           <div className="flex-1 px-4 flex items-center gap-1">
-                            <Text strong className="text-sm">Produtos</Text>
+                            <Typography.Text strong >Produtos</Typography.Text>
                             <Tooltip title="Essa tela se refere aos produtos, em caso de eventos Blinket, se refere a cada ingresso ou lote individualmente.">
-                              <QuestionCircleOutlined className="text-xs text-[rgba(0,0,0,0.45)] cursor-help" />
+                              <HelpCircle size={14} className="text-sm text-(--ant-color-text-tertiary) cursor-help" />
                             </Tooltip>
                           </div>
                           <div className="w-[140px] px-4 flex items-center justify-center shrink-0">
-                            <Text strong className="text-sm whitespace-nowrap">Configuração</Text>
+                            <Typography.Text strong className="whitespace-nowrap">Configuração</Typography.Text>
                           </div>
                           <div className="w-[120px] px-4 flex items-center justify-center shrink-0">
-                            <Text strong className="text-sm">Detalhes</Text>
+                            <Typography.Text strong >Detalhes</Typography.Text>
                           </div>
                         </div>
 
@@ -815,7 +792,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                             <div key={produto.id}>
                               {/* Main row */}
                               <div
-                                className={`flex border-b border-[#f0f0f0] min-h-[56px] items-center hover:bg-[#fafafa] cursor-pointer ${isExpanded ? 'bg-[#fafafa]' : ''}`}
+                                className={`flex border-b border-(--ant-color-split) min-h-[56px] items-center hover:bg-(--ant-color-fill-quaternary) cursor-pointer ${isExpanded ? 'bg-(--ant-color-fill-quaternary)' : ''}`}
                                 onClick={() => toggleExpand(produto.id)}
                               >
                                 <div className="w-[48px] flex items-center justify-center">
@@ -824,7 +801,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                                     checked={selectedIds.includes(produto.id)}
                                     onChange={() => toggleSelect(produto.id)}
                                     onClick={(e) => e.stopPropagation()}
-                                    className="w-4 h-4 cursor-pointer accent-[#2B4ACF]"
+                                    className="w-4 h-4 cursor-pointer accent-(--ant-color-primary)"
                                   />
                                 </div>
                                 <div className="flex-1 px-4">
@@ -836,9 +813,9 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                                   <Tooltip title="Configurar eventos e pixel deste produto individualmente">
                                     <Button
                                       type="text"
-                                      icon={<SettingOutlined />}
+                                      icon={<Settings size={14} />}
                                       onClick={(e) => { e.stopPropagation(); handleConfigIndividual(produto.id) }}
-                                      className="!text-[rgba(0,0,0,0.45)] hover:!text-[#2B4ACF] !whitespace-nowrap"
+                                      className="text-(--ant-color-text-tertiary) hover:text-(--ant-color-primary) !whitespace-nowrap"
                                     >
                                       Configurar
                                     </Button>
@@ -861,18 +838,18 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
 
                               {/* Expanded content */}
                               {isExpanded && (
-                                <div className="border-b border-[#f0f0f0] bg-white px-12 py-6">
+                                <div className="border-b border-(--ant-color-split) bg-white px-12 py-6">
                                   {/* Events table - simple format */}
-                                  <div className="border border-[#f0f0f0] rounded-lg overflow-hidden mb-4">
-                                    <div className="flex bg-[rgba(0,0,0,0.02)] border-b border-[rgba(0,0,0,0.06)] h-[40px] items-center">
+                                  <div className="border border-(--ant-color-split) rounded-lg overflow-hidden mb-4">
+                                    <div className="flex bg-[rgba(0,0,0,0.02)] border-b border-(--ant-color-split) h-[40px] items-center">
                                       <div className="flex-1 px-4">
-                                        <Text strong className="text-sm">Eventos cadastrados</Text>
+                                        <Typography.Text strong >Eventos cadastrados</Typography.Text>
                                       </div>
                                       <div className="w-[140px] px-4 text-right">
-                                        <Text strong className="text-sm">Percentual</Text>
+                                        <Typography.Text strong >Percentual</Typography.Text>
                                       </div>
                                       <div className="w-[140px] px-4 text-right">
-                                        <Text strong className="text-sm">Quantidade</Text>
+                                        <Typography.Text strong >Quantidade</Typography.Text>
                                       </div>
                                     </div>
                                     {eventos.map((ev, i) => {
@@ -880,13 +857,13 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                                       const percentual = ((ev.disparados / maxDisparados) * 100).toFixed(0)
                                       const cor = eventoCores[ev.nome] || '#8c8c8c'
                                       return (
-                                        <div key={i} className="flex border-b border-[#f0f0f0] h-12 items-center">
+                                        <div key={i} className="flex border-b border-(--ant-color-split) h-12 items-center">
                                           <div className="flex-1 px-4">
                                             <Tag
-                                              className="!text-xs !font-semibold !px-2 !py-0.5 !rounded"
+                                              className="text-sm font-semibold px-2 py-0.5 !rounded"
                                               style={{
-                                                color: '#2B4ACF',
-                                                borderColor: '#2B4ACF',
+                                                color: 'var(--ant-color-primary)',
+                                                borderColor: 'var(--ant-color-primary)',
                                                 backgroundColor: 'transparent',
                                               }}
                                             >
@@ -898,10 +875,10 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                                             </Tag>
                                           </div>
                                           <div className="w-[140px] px-4 text-right">
-                                            <Text className="text-sm">{percentual}%</Text>
+                                            <Typography.Text >{percentual}%</Typography.Text>
                                           </div>
                                           <div className="w-[140px] px-4 text-right">
-                                            <Text className="text-sm">{ev.disparados.toLocaleString('pt-BR')}</Text>
+                                            <Typography.Text >{ev.disparados.toLocaleString('pt-BR')}</Typography.Text>
                                           </div>
                                         </div>
                                       )
@@ -946,9 +923,9 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                   children: (
                     <div className="flex flex-col gap-6">
                       {/* Filtros */}
-                      <div className="bg-[#fafafa] rounded-lg p-5 flex flex-col gap-5">
+                      <div className="bg-(--ant-color-fill-quaternary) rounded-lg p-5 flex flex-col gap-5">
                         <div className="flex flex-col gap-1.5">
-                          <Text strong className="text-sm">Filtrar por produto</Text>
+                          <Typography.Text strong >Filtrar por produto</Typography.Text>
                           <Select
                             mode="multiple"
                             allowClear
@@ -963,7 +940,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                             filterOption={(input, option) =>
                               (option?.label as string ?? '').toLowerCase().includes(input.toLowerCase())
                             }
-                            suffixIcon={<SearchOutlined className="text-[rgba(0,0,0,0.45)]" />}
+                            suffixIcon={<Search size={14} className="text-(--ant-color-text-tertiary)" />}
                             className="w-full"
                             maxTagCount="responsive"
                           />
@@ -971,7 +948,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
 
                         <div className="grid grid-cols-4 gap-4">
                           <div className="flex flex-col gap-1.5">
-                            <Text type="secondary" className="text-xs">Periodo</Text>
+                            <Typography.Text type="secondary" >Periodo</Typography.Text>
                             <Select
                               value={logPeriodoFilter}
                               onChange={setLogPeriodoFilter}
@@ -985,7 +962,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                             />
                           </div>
                           <div className="flex flex-col gap-1.5">
-                            <Text type="secondary" className="text-xs">Origem</Text>
+                            <Typography.Text type="secondary" >Origem</Typography.Text>
                             <Select
                               allowClear
                               placeholder="Todos"
@@ -999,7 +976,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                             />
                           </div>
                           <div className="flex flex-col gap-1.5">
-                            <Text type="secondary" className="text-xs">Evento</Text>
+                            <Typography.Text type="secondary" >Evento</Typography.Text>
                             <Select
                               allowClear
                               placeholder="Todos"
@@ -1010,7 +987,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                             />
                           </div>
                           <div className="flex flex-col gap-1.5">
-                            <Text type="secondary" className="text-xs">Status</Text>
+                            <Typography.Text type="secondary" >Status</Typography.Text>
                             <Select
                               allowClear
                               placeholder="Todos"
@@ -1026,25 +1003,25 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                         </div>
 
                         <div className="flex items-center gap-2 flex-wrap">
-                          <Text type="secondary" className="text-xs">Filtros ativos:</Text>
+                          <Typography.Text type="secondary" >Filtros ativos:</Typography.Text>
                           {logProdutoFilter.length > 0 ? (
                             logProdutoFilter.map((id) => {
                               const p = produtosIniciais.find((pr) => pr.id === id)
                               return (
-                                <Tag key={`prod-${id}`} closable onClose={() => setLogProdutoFilter((prev) => prev.filter((x) => x !== id))} className="!text-xs">
+                                <Tag key={`prod-${id}`} closable onClose={() => setLogProdutoFilter((prev) => prev.filter((x) => x !== id))} className="text-sm">
                                   Produto/Evento: {id} - {p?.nome || id}
                                 </Tag>
                               )
                             })
                           ) : (
-                            <Tag className="!text-xs">Produtos: Todos</Tag>
+                            <Tag className="text-sm">Produtos: Todos</Tag>
                           )}
-                          <Tag className="!text-xs">Últimos 30 dias</Tag>
-                          <Tag className="!text-xs">Origem: {logOrigemFilter === 'Navegador' ? 'Pixel' : logOrigemFilter === 'Servidor' ? 'API' : 'Todos'}</Tag>
-                          <Tag className="!text-xs">Eventos: {logEventoFilter ?? 'todos'}</Tag>
-                          <Tag className="!text-xs">Status: {logStatusFilter ?? 'todos'}</Tag>
+                          <Tag className="text-sm">Últimos 30 dias</Tag>
+                          <Tag className="text-sm">Origem: {logOrigemFilter === 'Navegador' ? 'Pixel' : logOrigemFilter === 'Servidor' ? 'API' : 'Todos'}</Tag>
+                          <Tag className="text-sm">Eventos: {logEventoFilter ?? 'todos'}</Tag>
+                          <Tag className="text-sm">Status: {logStatusFilter ?? 'todos'}</Tag>
                           {hasAnyLogFilter && (
-                            <a href="#" className="text-[rgba(0,0,0,0.45)] text-xs" onClick={(e) => { e.preventDefault(); handleClearAllLogFilters() }}>
+                            <a href="#" className="text-(--ant-color-text-tertiary) text-sm" onClick={(e) => { e.preventDefault(); handleClearAllLogFilters() }}>
                               Limpar filtros
                             </a>
                           )}
@@ -1053,13 +1030,13 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
 
                       {/* Summary bar */}
                       <div className="flex items-center gap-3 justify-end">
-                        <Text type="secondary" className="text-sm">
+                        <Typography.Text type="secondary" >
                           {logsFiltrados.length} evento(s) encontrado(s)
-                        </Text>
-                        <Tag color="success" className="!border-solid">
+                        </Typography.Text>
+                        <Tag color="success" >
                           {logsFiltrados.filter((l) => l.status === 'Sucesso').length} sucesso(s)
                         </Tag>
-                        <Tag color="error" className="!border-solid">
+                        <Tag color="error" >
                           {logsFiltrados.filter((l) => l.status === 'Erro').length} erro(s)
                         </Tag>
                       </div>
@@ -1074,11 +1051,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                             key: 'produtoId',
                             render: (produtoId: number) => {
                               const p = produtosIniciais.find((pr) => pr.id === produtoId)
-                              return (
-                                <Text className="text-xs text-[rgba(0,0,0,0.65)]">
-                                  {produtoId} - {p?.nome || 'Desconhecido'}
-                                </Text>
-                              )
+                              return `${produtoId} - ${p?.nome || 'Desconhecido'}`
                             },
                           },
                           {
@@ -1086,7 +1059,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                             dataIndex: 'nomeEvento',
                             key: 'nomeEvento',
                             render: (evento: string) => (
-                              <Tag className="!border-solid !bg-transparent !text-[#2B4ACF] !border-[#d9d9d9] !font-medium">{evento}</Tag>
+                              <Tag color="blue">{evento}</Tag>
                             ),
                           },
                           {
@@ -1100,7 +1073,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                                 : 'API: evento enviado diretamente pelo servidor via API de conversões, sem depender do navegador do usuário.'
                               return (
                                 <Tooltip title={tip}>
-                                  <Tag color={origem === 'Navegador' ? 'warning' : 'processing'} className="!border-solid cursor-help">{label}</Tag>
+                                  <Tag color={origem === 'Navegador' ? 'warning' : 'processing'} className="cursor-help">{label}</Tag>
                                 </Tooltip>
                               )
                             },
@@ -1112,11 +1085,11 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                             key: 'status',
                             render: (status: string) => {
                               if (status === 'Sucesso') {
-                                return <Tag color="success" className="!border-solid">Sucesso</Tag>
+                                return <Tag color="success" >Sucesso</Tag>
                               }
                               return (
                                 <Tooltip title="O evento não foi enviado. Possíveis causas: ID do pixel incorreto, token da API inválido, timeout na conexão ou bloqueio por ad-blocker. Verifique as configurações do pixel e tente novamente.">
-                                  <Tag color="error" className="!border-solid cursor-help">Não enviado</Tag>
+                                  <Tag color="error" className="cursor-help">Não enviado</Tag>
                                 </Tooltip>
                               )
                             },
@@ -1140,9 +1113,9 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                     return (
                     <div className="flex flex-col gap-6">
                       {/* Filtrar por produto */}
-                      <div className="bg-[#fafafa] rounded-lg p-5 flex flex-col gap-4">
+                      <div className="bg-(--ant-color-fill-quaternary) rounded-lg p-5 flex flex-col gap-4">
                         <div className="flex flex-col gap-1.5">
-                          <Text strong className="text-sm">Filtrar por produto</Text>
+                          <Typography.Text strong >Filtrar por produto</Typography.Text>
                           <Select
                             allowClear
                             placeholder="Selecione um produto para testar"
@@ -1162,22 +1135,22 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                             filterOption={(input, option) =>
                               (option?.label as string ?? '').toLowerCase().includes(input.toLowerCase())
                             }
-                            suffixIcon={<SearchOutlined className="text-[rgba(0,0,0,0.45)]" />}
+                            suffixIcon={<Search size={14} className="text-(--ant-color-text-tertiary)" />}
                             className="w-full"
                           />
                         </div>
 
                         <div className="flex items-center gap-2 flex-wrap">
-                          <Text type="secondary" className="text-xs">Filtros ativos:</Text>
+                          <Typography.Text type="secondary" >Filtros ativos:</Typography.Text>
                           {hasTestProduct && testProdutoInfo ? (
-                            <Tag closable onClose={handleClearTestFilter} className="!text-xs !font-medium">
+                            <Tag closable onClose={handleClearTestFilter} className="text-sm font-medium">
                               Produto: {testProdutoFilter} - {testProdutoInfo.nome}
                             </Tag>
                           ) : (
-                            <Tag className="!text-xs">Produto: Nenhum selecionado</Tag>
+                            <Tag className="text-sm">Produto: Nenhum selecionado</Tag>
                           )}
                           {hasTestProduct && (
-                            <a href="#" className="text-[rgba(0,0,0,0.45)] text-xs" onClick={(e) => { e.preventDefault(); handleClearTestFilter() }}>
+                            <a href="#" className="text-(--ant-color-text-tertiary) text-sm" onClick={(e) => { e.preventDefault(); handleClearTestFilter() }}>
                               Limpar filtros
                             </a>
                           )}
@@ -1185,11 +1158,11 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                       </div>
 
                       {/* Código de teste */}
-                      <div className={`border border-[#d9d9d9] rounded-lg p-6 flex flex-col gap-3 ${codeDisabled}`}>
-                        <Title level={5} className="!mb-0">Código de teste da Meta</Title>
-                        <Text type="secondary" className="text-sm">
+                      <div className={`border border-(--ant-color-border) rounded-lg p-6 flex flex-col gap-3 ${codeDisabled}`}>
+                        <Typography.Title level={5} className="mb-0">Código de teste da Meta</Typography.Title>
+                        <Typography.Text type="secondary" >
                           Copie o código de teste do Gerenciador da Meta e cole aqui. O botão "testar" ficará disponível após o preenchimento. O código será enviado como parâmetro no link do checkout para que a Meta identifique o evento como teste.
-                        </Text>
+                        </Typography.Text>
                         <div className="flex gap-2 mt-1">
                           <Input
                             placeholder="Cole o código de teste da Meta aqui (ex: TESTE1234)"
@@ -1207,9 +1180,9 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                         </div>
                         {/* Warning banner */}
                         <div className="bg-[#E6F4FF] border border-[#91CAFF] rounded-lg px-4 py-2.5 mt-1">
-                          <Text className="text-sm !text-[#0958D9]">
+                          <Typography.Text className="text-[#0958D9]">
                             Para habilitar os botões "Testar", insira e valide o código de teste acima.
-                          </Text>
+                          </Typography.Text>
                         </div>
                       </div>
 
@@ -1217,31 +1190,25 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                       <div className={`grid grid-cols-2 gap-4 ${cardsDisabled}`}>
                         {[
                           { name: 'PageView', desc: 'Quando o comprador acessa a página do checkout', cor: '#1890FF' },
-                          { name: 'FormInteraction', desc: 'Ao preencher nome, e-mail ou outro campo inicial', cor: '#FAAD14' },
+                          { name: 'FormInteraction', desc: 'Ao preencher nome, e-mail ou outro campo inicial', cor: 'var(--ant-color-warning)' },
                           { name: 'Lead', desc: 'Ao preencher nome, email e telefone', cor: '#13C2C2' },
-                          { name: 'AddPaymentInfo', desc: 'Ao interagir com formas de pagamento', cor: '#52C41A' },
+                          { name: 'AddPaymentInfo', desc: 'Ao interagir com formas de pagamento', cor: 'var(--ant-color-success)' },
                           { name: 'Initiatecheckout', desc: 'Ao interagir com o botão de finalizar compra', cor: '#EB2F96' },
                           { name: 'Purchase', desc: 'Quando o pagamento é confirmado', cor: '#722ED1' },
                         ].map((ev) => (
-                          <div key={ev.name} className="border border-[#d9d9d9] rounded-lg p-4 flex flex-col gap-2">
+                          <div key={ev.name} className="border border-(--ant-color-border) rounded-lg p-4 flex flex-col gap-2">
                             <div className="flex items-center justify-between">
-                              <Tag
-                                className="!text-xs !font-semibold !px-2.5 !py-0.5 !rounded !bg-transparent"
-                                style={{ color: '#2B4ACF', borderColor: '#2B4ACF' }}
-                              >
-                                {ev.name}
-                              </Tag>
+                              <Tag color="blue">{ev.name}</Tag>
                               <Button
                                 type="text"
-                                size="small"
                                 disabled={!testValidated}
                                 onClick={() => handleTestarEvento(ev.name)}
-                                className="!text-[rgba(0,0,0,0.45)] flex items-center gap-1"
+                                className="text-(--ant-color-text-tertiary) flex items-center gap-1"
                               >
-                                <CaretRightOutlined /> Testar
+                                <ChevronRight size={14} /> Testar
                               </Button>
                             </div>
-                            <Text type="secondary" className="text-xs">{ev.desc}</Text>
+                            <Typography.Text type="secondary" >{ev.desc}</Typography.Text>
                           </div>
                         ))}
                       </div>
@@ -1250,16 +1217,16 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                       {testResults.length > 0 && (
                         <div ref={testResultsRef}>
                           {/* Summary bar */}
-                          <div className="flex items-center justify-end gap-3 bg-[#fafafa] rounded-lg px-4 py-2.5">
-                            <Text type="secondary" className="text-sm">Últimas 24h</Text>
-                            <Tag className="!border-solid !bg-transparent !font-medium">{testResults.length} evento(s)</Tag>
-                            <Tag color="success" className="!border-solid">
+                          <div className="flex items-center justify-end gap-3 bg-(--ant-color-fill-quaternary) rounded-lg px-4 py-2.5">
+                            <Typography.Text type="secondary" >Últimas 24h</Typography.Text>
+                            <Tag>{testResults.length} evento(s)</Tag>
+                            <Tag color="success" >
                               {testResults.filter((r) => r.status === 'Sucesso').length} sucesso(s)
                             </Tag>
-                            <Tag color="error" className="!border-solid">
+                            <Tag color="error" >
                               {testResults.filter((r) => r.status === 'Erro').length} erro(s)
                             </Tag>
-                            <Button size="small" type="text" className="!text-xs" onClick={handleLimparTestes}>Limpar</Button>
+                            <Button type="text" className="text-sm" onClick={handleLimparTestes}>Limpar</Button>
                           </div>
 
                           {/* Results table */}
@@ -1271,7 +1238,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                                 dataIndex: 'evento',
                                 key: 'evento',
                                 render: (evento: string) => (
-                                  <Tag className="!border-solid !bg-transparent !text-[#2B4ACF] !border-[#d9d9d9] !font-medium">{evento}</Tag>
+                                  <Tag color="blue">{evento}</Tag>
                                 ),
                               },
                               {
@@ -1285,7 +1252,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                                     : 'API: evento enviado diretamente pelo servidor via API de conversões, sem depender do navegador do usuário.'
                                   return (
                                     <Tooltip title={tip}>
-                                      <Tag color={origem === 'Navegador' ? 'warning' : 'processing'} className="!border-solid cursor-help">{label}</Tag>
+                                      <Tag color={origem === 'Navegador' ? 'warning' : 'processing'} className="cursor-help">{label}</Tag>
                                     </Tooltip>
                                   )
                                 },
@@ -1298,11 +1265,11 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                                 key: 'status',
                                 render: (status: string) => {
                                   if (status === 'Sucesso') {
-                                    return <Tag color="success" className="!border-solid">Sucesso</Tag>
+                                    return <Tag color="success" >Sucesso</Tag>
                                   }
                                   return (
                                     <Tooltip title="O evento não foi enviado. Possíveis causas: ID do pixel incorreto, token da API inválido, timeout na conexão ou bloqueio por ad-blocker. Verifique as configurações do pixel e tente novamente.">
-                                      <Tag color="error" className="!border-solid cursor-help">Não enviado</Tag>
+                                      <Tag color="error" className="cursor-help">Não enviado</Tag>
                                     </Tooltip>
                                   )
                                 },
@@ -1343,11 +1310,11 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
         {pendingBulkConfig && (
           <div className="flex flex-col gap-6 py-2">
             <div>
-              <Title level={4} className="!mb-2">Atenção: configuração em massa</Title>
-              <Text>
-                Essa ação irá <Text strong>sobrescrever todas as configurações individuais</Text> dos{' '}
+              <Typography.Title level={4} className="mb-2">Atenção: configuração em massa</Typography.Title>
+              <Typography.Text>
+                Essa ação irá <Typography.Text strong>sobrescrever todas as configurações individuais</Typography.Text> dos{' '}
                 {pendingBulkConfig.produtos.length} produtos selecionados. Configurações anteriores serão perdidas.
-              </Text>
+              </Typography.Text>
             </div>
 
             <div className="flex justify-end gap-3">
@@ -1373,18 +1340,18 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
       >
         <div className="flex flex-col gap-6 py-2">
           <div>
-            <Title level={4} className="!mb-2">Excluir produto(s) / evento(s)</Title>
-            <Text type="secondary">
+            <Typography.Title level={4} className="mb-2">Excluir produto(s) / evento(s)</Typography.Title>
+            <Typography.Text type="secondary">
               Tem certeza que deseja excluir {selectedIds.length} item(ns) selecionado(s)?
               Esta ação não pode ser desfeita.
-            </Text>
+            </Typography.Text>
           </div>
 
-          <div className="flex flex-wrap gap-1.5 p-3 bg-[#fafafa] rounded-lg border border-[#f0f0f0]">
+          <div className="flex flex-wrap gap-1.5 p-3 bg-(--ant-color-fill-quaternary) rounded-lg border border-(--ant-color-split)">
             {selectedIds.map((id) => {
               const p = produtos.find((pr) => pr.id === id)
               return (
-                <Tag key={id} className="!text-xs">
+                <Tag key={id} className="text-sm">
                   {p?.nome || `Produto ${id}`}
                 </Tag>
               )
@@ -1399,6 +1366,6 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
           </div>
         </div>
       </Modal>
-    </ConfigProvider>
+    </>
   )
 }

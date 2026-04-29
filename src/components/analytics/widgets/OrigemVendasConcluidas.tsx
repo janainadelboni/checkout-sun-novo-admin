@@ -1,6 +1,6 @@
 import { Typography, Table } from 'antd'
 
-const { Title, Text } = Typography
+
 
 function PieChart({ segments, size = 160 }: { segments: { percent: number; color: string; label: string }[]; size?: number }) {
   const cx = size / 2; const cy = size / 2; const r = size / 2 - 10; let cum = 0
@@ -23,7 +23,7 @@ function PieChart({ segments, size = 160 }: { segments: { percent: number; color
 
 const origemVendas = [
   { key: '1', origem: 'Produtor', color: '#13C2C2', quantidade: 190 },
-  { key: '2', origem: 'Afiliado', color: '#FAAD14', quantidade: 223 },
+  { key: '2', origem: 'Afiliado', color: 'var(--ant-color-warning)', quantidade: 223 },
   { key: '3', origem: 'Coprodutor', color: '#1890FF', quantidade: 19 },
   { key: '4', origem: 'Outros', color: '#D9D9D9', quantidade: 8 },
 ]
@@ -39,7 +39,7 @@ export function OrigemVendasConcluidas() {
       render: (nome: string, r: typeof origemVendas[0]) => (
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: r.color }} />
-          <Text className="text-sm">{nome}</Text>
+          <Typography.Text >{nome}</Typography.Text>
         </div>
       ),
     },
@@ -51,19 +51,19 @@ export function OrigemVendasConcluidas() {
       render: (v: number) => (
         <span>
           {v.toLocaleString('pt-BR')}
-          <Text type="secondary" className="text-xs ml-1">({((v / total) * 100).toFixed(0)}%)</Text>
+          <Typography.Text type="secondary" className="ml-1">({((v / total) * 100).toFixed(0)}%)</Typography.Text>
         </span>
       ),
     },
   ]
 
   return (
-    <div className="border border-[rgba(0,0,0,0.06)] rounded-lg p-6 h-full">
-      <Title level={5} className="!mb-4">Origem das vendas concluídas</Title>
+    <div className="border border-(--ant-color-split) rounded-lg p-6 h-full">
+      <Typography.Title level={5} className="mb-4">Origem das vendas concluídas</Typography.Title>
       <div className="flex justify-center mb-4">
         <PieChart segments={origemVendas.map((d) => ({ percent: Math.round((d.quantidade / total) * 100), color: d.color, label: d.origem }))} />
       </div>
-      <Table dataSource={origemVendas} columns={columns} pagination={false} size="small" />
+      <Table dataSource={origemVendas} columns={columns} pagination={false} size="middle" />
     </div>
   )
 }

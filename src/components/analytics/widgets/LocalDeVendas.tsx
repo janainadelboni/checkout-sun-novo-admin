@@ -1,26 +1,26 @@
 import { useState } from 'react'
 import { Typography, Segmented, Tooltip } from 'antd'
 
-const { Title, Text } = Typography
+
 
 const localVendas: Record<string, { label: string; valor: string; quantidade: number; cor: string }[]> = {
   País: [
-    { label: 'Brasil', valor: 'R$ 85.000,00', quantidade: 8500, cor: '#2B4ACF' },
+    { label: 'Brasil', valor: 'R$ 85.000,00', quantidade: 8500, cor: 'var(--ant-color-primary)' },
     { label: 'Portugal', valor: 'R$ 12.300,00', quantidade: 1200, cor: '#1890FF' },
     { label: 'EUA', valor: 'R$ 8.500,00', quantidade: 450, cor: '#13C2C2' },
-    { label: 'Angola', valor: 'R$ 3.200,00', quantidade: 280, cor: '#FAAD14' },
+    { label: 'Angola', valor: 'R$ 3.200,00', quantidade: 280, cor: 'var(--ant-color-warning)' },
   ],
   Estado: [
-    { label: 'São Paulo', valor: 'R$ 32.000,00', quantidade: 3200, cor: '#2B4ACF' },
+    { label: 'São Paulo', valor: 'R$ 32.000,00', quantidade: 3200, cor: 'var(--ant-color-primary)' },
     { label: 'Rio de Janeiro', valor: 'R$ 18.000,00', quantidade: 1800, cor: '#1890FF' },
     { label: 'Minas Gerais', valor: 'R$ 12.000,00', quantidade: 1200, cor: '#13C2C2' },
-    { label: 'Paraná', valor: 'R$ 8.000,00', quantidade: 800, cor: '#FAAD14' },
+    { label: 'Paraná', valor: 'R$ 8.000,00', quantidade: 800, cor: 'var(--ant-color-warning)' },
   ],
   Cidade: [
-    { label: 'São Paulo', valor: 'R$ 18.000,00', quantidade: 1800, cor: '#2B4ACF' },
+    { label: 'São Paulo', valor: 'R$ 18.000,00', quantidade: 1800, cor: 'var(--ant-color-primary)' },
     { label: 'Rio de Janeiro', valor: 'R$ 12.000,00', quantidade: 1200, cor: '#1890FF' },
     { label: 'Belo Horizonte', valor: 'R$ 6.000,00', quantidade: 600, cor: '#13C2C2' },
-    { label: 'Curitiba', valor: 'R$ 4.500,00', quantidade: 450, cor: '#FAAD14' },
+    { label: 'Curitiba', valor: 'R$ 4.500,00', quantidade: 450, cor: 'var(--ant-color-warning)' },
   ],
 }
 
@@ -71,33 +71,33 @@ export function LocalDeVendas() {
   const maxQtd = Math.max(...data.map((d) => d.quantidade))
 
   return (
-    <div className="border border-[rgba(0,0,0,0.06)] rounded-lg p-6">
+    <div className="border border-(--ant-color-split) rounded-lg p-6">
       <div className="flex items-center justify-between mb-4">
-        <Title level={5} className="!mb-0">Local de vendas</Title>
-        <Segmented value={tab} onChange={(v) => setTab(v as string)} options={['País', 'Estado', 'Cidade']} size="small" />
+        <Typography.Title level={5} className="mb-0">Local de vendas</Typography.Title>
+        <Segmented size="small" value={tab} onChange={(v) => setTab(v as string)} options={['País', 'Estado', 'Cidade']} />
       </div>
       <div className="flex gap-6">
-        <div className="w-[320px] h-[220px] bg-[#fafafa] rounded-lg shrink-0 overflow-hidden">
+        <div className="w-[320px] h-[220px] bg-(--ant-color-fill-quaternary) rounded-lg shrink-0 overflow-hidden">
           <MapVisualization data={data} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center py-1">
-            <div className="w-[100px] shrink-0" /><div className="flex-1" />
-            <div className="w-[100px] text-right shrink-0 pl-4"><Text type="secondary" className="text-[11px] whitespace-nowrap">Valor</Text></div>
-            <div className="w-[80px] text-right shrink-0 pl-4"><Text type="secondary" className="text-[11px] whitespace-nowrap">Quantidade</Text></div>
+            <div className="w-[120px] shrink-0" /><div className="flex-1" />
+            <div className="w-[110px] text-right shrink-0 pl-4"><Typography.Text type="secondary" className="whitespace-nowrap">Valor</Typography.Text></div>
+            <div className="w-[90px] text-right shrink-0 pl-4"><Typography.Text type="secondary" className="whitespace-nowrap">Quantidade</Typography.Text></div>
           </div>
           {data.map((item) => (
             <Tooltip key={item.label} title={`${item.label}: ${item.valor} (${item.quantidade.toLocaleString('pt-BR')} vendas)`}>
-            <div className="flex items-center py-2.5 border-b border-[rgba(0,0,0,0.06)] last:border-b-0 cursor-default hover:bg-[rgba(0,0,0,0.02)] rounded transition-colors">
+            <div className="flex items-center py-2.5 border-b border-(--ant-color-split) last:border-b-0 cursor-default hover:bg-(--ant-color-fill-quaternary) rounded transition-colors">
               <div className="w-[120px] shrink-0 flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.cor }} />
-                <Text className="text-sm whitespace-nowrap">{item.label}</Text>
+                <Typography.Text className="truncate block">{item.label}</Typography.Text>
               </div>
-              <div className="flex-1 h-4 bg-[#f5f5f5] rounded overflow-hidden mx-2">
-                <div className="h-full rounded" style={{ width: `${(item.quantidade / maxQtd) * 100}%`, backgroundColor: item.cor, minWidth: '4px' }} />
+              <div className="flex-1 h-4 bg-(--ant-color-fill-tertiary) rounded overflow-hidden mx-2 min-w-[60px]">
+                <div className="h-full rounded min-w-1" style={{ width: `${(item.quantidade / maxQtd) * 100}%`, backgroundColor: item.cor }} />
               </div>
-              <div className="w-[100px] text-right shrink-0 pl-4"><Text strong className="text-xs whitespace-nowrap">{item.valor}</Text></div>
-              <div className="w-[80px] text-right shrink-0 pl-4"><Text type="secondary" className="text-xs whitespace-nowrap">{item.quantidade.toLocaleString('pt-BR')}</Text></div>
+              <div className="w-[110px] text-right shrink-0 pl-4"><Typography.Text strong className="whitespace-nowrap">{item.valor}</Typography.Text></div>
+              <div className="w-[90px] text-right shrink-0 pl-4"><Typography.Text type="secondary" className="whitespace-nowrap">{item.quantidade.toLocaleString('pt-BR')}</Typography.Text></div>
             </div>
             </Tooltip>
           ))}

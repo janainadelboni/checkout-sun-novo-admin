@@ -27,3 +27,8 @@ dist-ssr
 # Local Netlify folder
 .netlify
 .claude/
+
+# Environment variables
+.env
+.env.local
+.env.*.local

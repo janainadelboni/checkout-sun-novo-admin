@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import {
   Button,
-  ConfigProvider,
   Layout,
   Menu,
   Modal,
@@ -11,13 +10,13 @@ import {
   Timeline,
   Typography,
 } from 'antd'
-import { EyeOutlined, SettingOutlined, PlusOutlined, HistoryOutlined } from '@ant-design/icons'
+import { Eye, Settings, Plus, History } from "lucide-react"
 import { EduzzLogo, CheckoutSunLogo } from '../Logos'
 import ConfigurarPixelModal, { type ModalMode, type PixelProvider } from './ConfigurarPixelModal'
-import antdTheme from '../../theme/antd'
+
 
 const { Sider, Content } = Layout
-const { Title, Text } = Typography
+
 
 interface PaginaRastreamentoProps {
   onVerDetalhes: (pixelProvider: string) => void
@@ -145,8 +144,8 @@ function BrandLogo({ card }: { card: PixelCard }) {
     return (
       <div className="flex items-center gap-2">
         <img src={card.logo} alt={card.provider} className="h-8 w-8 object-contain" />
-        <span className="text-base font-medium text-gray-800 leading-tight">
-          Google <span className="text-gray-800">Analytics</span>{' '}
+        <span className="text-base font-medium text-(--ant-color-text) leading-tight">
+          Google <span className="text-(--ant-color-text)">Analytics</span>{' '}
           <span style={{ color: '#E37400' }}>4</span>
         </span>
       </div>
@@ -156,7 +155,7 @@ function BrandLogo({ card }: { card: PixelCard }) {
     return (
       <div className="flex items-center gap-2">
         <img src={card.logo} alt={card.provider} className="h-8 w-8 object-contain" />
-        <span className="text-base font-medium text-gray-800 leading-tight">
+        <span className="text-base font-medium text-(--ant-color-text) leading-tight">
           Google Tag Manager
         </span>
       </div>
@@ -179,7 +178,7 @@ function BrandLogo({ card }: { card: PixelCard }) {
     return (
       <div className="flex items-center gap-2">
         <img src={card.logo} alt={card.provider} className="h-8 w-8 object-contain" />
-        <span className="text-base font-medium text-gray-400 leading-tight">
+        <span className="text-base font-medium text-(--ant-color-text-tertiary) leading-tight">
           Google AdWords
         </span>
       </div>
@@ -188,7 +187,7 @@ function BrandLogo({ card }: { card: PixelCard }) {
   return (
     <div className="flex items-center gap-2">
       <img src={card.logo} alt={card.provider} className="h-8 object-contain" />
-      <span className="text-base font-medium text-gray-800">{card.provider}</span>
+      <span className="text-base font-medium text-(--ant-color-text)">{card.provider}</span>
     </div>
   )
 }
@@ -224,17 +223,17 @@ export default function PaginaRastreamento({
   }
 
   return (
-    <ConfigProvider theme={antdTheme(false)}>
-      <Layout className="min-h-screen bg-white">
+    <>
+      <Layout className="min-h-screen bg-(--ant-color-bg-container)">
         {/* Header */}
-        <div className="h-[78px] bg-[#fafafa] flex items-center justify-center border-b border-[rgba(0,0,0,0.06)]">
+        <div className="h-[78px] bg-(--ant-color-fill-quaternary) flex items-center justify-center border-b border-(--ant-color-split)">
           <EduzzLogo />
         </div>
 
         <Layout>
           {/* Sidebar */}
-          <Sider width={288} className="!bg-white border-r border-[rgba(0,0,0,0.06)]">
-            <div className="px-4 py-[10px]">
+          <Sider theme="light" width={288} className="border-r border-(--ant-color-split)">
+            <div className="px-4 py-2.5">
               <CheckoutSunLogo />
             </div>
             <Menu
@@ -258,16 +257,16 @@ export default function PaginaRastreamento({
             {/* Title + Subtitle + Add button */}
             <div className="flex items-start justify-between">
               <div>
-                <Title level={3} className="!mb-1">
+                <Typography.Title level={3} className="mb-1">
                   Rastreamento
-                </Title>
-                <Text type="secondary">
+                </Typography.Title>
+                <Typography.Text type="secondary">
                   Acompanhe e crie campanhas de pixel e rastreamento
-                </Text>
+                </Typography.Text>
               </div>
               <Button
                 type="primary"
-                icon={<PlusOutlined />}
+                icon={<Plus size={14} />}
                 onClick={handleAddPixel}
               >
                 Adicionar pixel
@@ -285,21 +284,20 @@ export default function PaginaRastreamento({
                     <div className="flex flex-col gap-4">
                       {/* Toggle para demo */}
                       <div className="flex items-center gap-2">
-                        <input type="checkbox" checked={emptyState} onChange={(e) => setEmptyState(e.target.checked)} className="accent-[#2B4ACF]" />
-                        <Text type="secondary" className="!text-xs">Simular primeiro acesso (sem pixels)</Text>
+                        <input type="checkbox" checked={emptyState} onChange={(e) => setEmptyState(e.target.checked)} className="accent-(--ant-color-primary)" />
+                        <Typography.Text type="secondary" >Simular primeiro acesso (sem pixels)</Typography.Text>
                       </div>
 
                       {pixelCards.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-16 px-8 border border-dashed border-[#d9d9d9] rounded-lg bg-[#fafafa]">
+                        <div className="flex flex-col items-center justify-center py-16 px-8 border border-dashed border-(--ant-color-border) rounded-lg bg-(--ant-color-fill-quaternary)">
                           <div className="text-4xl mb-4">📡</div>
-                          <Title level={4} className="!mb-2">Nenhum pixel configurado</Title>
-                          <Text type="secondary" className="text-center max-w-[420px] mb-6">
+                          <Typography.Title level={4} className="mb-2">Nenhum pixel configurado</Typography.Title>
+                          <Typography.Text type="secondary" className="text-center max-w-[420px] mb-6">
                             Configure seu primeiro pixel para começar a rastrear eventos de conversão dos seus produtos. O pixel permite acompanhar ações dos compradores no checkout.
-                          </Text>
+                          </Typography.Text>
                           <Button
                             type="primary"
-                            icon={<PlusOutlined />}
-                            size="large"
+                            icon={<Plus size={14} />}
                             onClick={handleAddPixel}
                           >
                             Configurar primeiro pixel
@@ -312,8 +310,8 @@ export default function PaginaRastreamento({
                           key={card.key}
                           className={`flex items-center p-4 border rounded-lg w-full transition-all ${
                             card.configured
-                              ? 'border-[#d9d9d9] hover:border-[#2B4ACF]/40 hover:shadow-sm cursor-pointer'
-                              : 'border-dashed border-[#d9d9d9] bg-[#fafafa]'
+                              ? 'border-(--ant-color-border) hover:border-(--ant-color-primary)/40 hover:shadow-sm cursor-pointer'
+                              : 'border-dashed border-(--ant-color-border) bg-(--ant-color-fill-quaternary)'
                           }`}
                           onClick={() => card.configured && onVerDetalhes(card.providerKey)}
                         >
@@ -321,16 +319,16 @@ export default function PaginaRastreamento({
                           <div className="w-[260px] shrink-0 flex flex-col gap-1">
                             <BrandLogo card={card} />
                             {card.label && (
-                              <Text className="!text-xs !text-[#2B4ACF] font-medium">
+                              <Typography.Text className="text-(--ant-color-primary) font-medium">
                                 {card.label}
-                              </Text>
+                              </Typography.Text>
                             )}
                             {card.historico && card.historico.length > 0 && (
                               <span
-                                className="text-xs text-[rgba(0,0,0,0.45)] hover:text-[#2B4ACF] cursor-pointer inline-flex items-center gap-1"
+                                className="text-sm text-(--ant-color-text-tertiary) hover:text-(--ant-color-primary) cursor-pointer inline-flex items-center gap-1"
                                 onClick={(e) => { e.stopPropagation(); setHistoricoPagina(1); setHistoricoModal({ open: true, card }) }}
                               >
-                                <HistoryOutlined />
+                                <History size={14} />
                                 Última edição: {card.historico[card.historico.length - 1].data.split(' ')[0]}
                               </span>
                             )}
@@ -338,32 +336,29 @@ export default function PaginaRastreamento({
 
                           {/* Middle: ID + Status */}
                           <div className="w-[200px] shrink-0 flex flex-col gap-1">
-                            <Text
-                              className="text-sm"
-                              style={{
-                                opacity: card.configured ? 1 : 0.35,
-                              }}
+                            <Typography.Text
+                              className={card.configured ? '' : 'opacity-35'}
                             >
                               ID: {card.pixelId}
-                            </Text>
+                            </Typography.Text>
                             {card.configured ? (
-                              <Tag color="success" className="!text-xs !w-fit !m-0">Ativo</Tag>
+                              <Tag color="success" className="text-sm w-fit m-0">Ativo</Tag>
                             ) : (
-                              <Tag className="!text-xs !w-fit !m-0 !text-[rgba(0,0,0,0.25)]">Não configurado</Tag>
+                              <Tag className="text-sm w-fit m-0 text-(--ant-color-text-quaternary)">Não configurado</Tag>
                             )}
                           </div>
 
                           {/* Right: Products badge + actions */}
                           <div className="flex-1 flex items-center justify-end gap-3">
                             {card.produtosCount !== null && (
-                              <Tag className="!border-[#d9d9d9] !bg-transparent !m-0">
+                              <Tag className="border-(--ant-color-border) bg-transparent m-0">
                                 {card.produtosCount} Produto(s) / Evento(s)
                               </Tag>
                             )}
 
                             {!card.configured && (
                               <Button
-                                icon={<SettingOutlined />}
+                                icon={<Settings size={14} />}
                                 onClick={(e) => { e.stopPropagation(); handleConfigurar(card.providerKey) }}
                               >
                                 Configurar
@@ -372,9 +367,7 @@ export default function PaginaRastreamento({
 
                             {card.configured && (
                               <Button
-                                type="primary"
-                                ghost
-                                icon={<EyeOutlined />}
+                                icon={<Eye size={14} />}
                                 onClick={(e) => { e.stopPropagation(); onVerDetalhes(card.providerKey) }}
                               >
                                 Ver detalhes
@@ -391,9 +384,9 @@ export default function PaginaRastreamento({
                   label: 'Criação de UTM',
                   children: (
                     <div className="py-12 text-center">
-                      <Text type="secondary">
+                      <Typography.Text type="secondary">
                         Em breve
-                      </Text>
+                      </Typography.Text>
                     </div>
                   ),
                 },
@@ -402,9 +395,9 @@ export default function PaginaRastreamento({
                   label: 'Encurtador de URL',
                   children: (
                     <div className="py-12 text-center">
-                      <Text type="secondary">
+                      <Typography.Text type="secondary">
                         Em breve
-                      </Text>
+                      </Typography.Text>
                     </div>
                   ),
                 },
@@ -413,6 +406,7 @@ export default function PaginaRastreamento({
           </Content>
         </Layout>
       </Layout>
+
       <ConfigurarPixelModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -437,27 +431,25 @@ export default function PaginaRastreamento({
             <div className="flex flex-col gap-4">
               <div className="h-[400px] overflow-y-auto">
                 <Timeline
-                  className="!mt-6"
+                  className="mt-6"
                   items={paginados.map((h) => ({
                     children: (
-                      <div>
-                        <Text className="!text-sm">{h.descricao}</Text>
-                        <br />
-                        <Text type="secondary" className="!text-xs">{h.data}</Text>
+                      <div className="flex flex-col gap-1">
+                        <Typography.Text>{h.descricao}</Typography.Text>
+                        <Typography.Text type="secondary">{h.data}</Typography.Text>
                       </div>
                     ),
                   }))}
                 />
               </div>
               {total > HISTORICO_POR_PAGINA && (
-                <div className="flex justify-center border-t border-[#f0f0f0] pt-3">
+                <div className="flex justify-center border-t border-(--ant-color-split) pt-3">
                   <Pagination
                     current={historicoPagina}
                     pageSize={HISTORICO_POR_PAGINA}
                     total={total}
                     onChange={(page) => setHistoricoPagina(page)}
-                    size="small"
-                    showTotal={(total) => <Text type="secondary" className="!text-xs">{total} alterações</Text>}
+                    showTotal={(total) => <Typography.Text type="secondary" >{total} alterações</Typography.Text>}
                   />
                 </div>
               )}
@@ -465,6 +457,6 @@ export default function PaginaRastreamento({
           )
         })()}
       </Modal>
-    </ConfigProvider>
+    </>
   )
 }

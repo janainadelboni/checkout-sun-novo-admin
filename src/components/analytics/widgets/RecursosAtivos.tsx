@@ -1,6 +1,6 @@
-import { Typography, Tag, Table } from 'antd'
+import { Tooltip, Typography, Tag, Table } from 'antd'
 
-const { Title, Text } = Typography
+
 
 type Recurso = {
   key: string
@@ -31,8 +31,6 @@ const tipoColors: Record<string, string> = {
   'Recuperação': 'blue',
 }
 
-const maxValor = Math.max(...recursosAtivos.map((r) => r.valorTransacionado))
-
 export function RecursosAtivos() {
   const columns = [
     {
@@ -40,7 +38,7 @@ export function RecursosAtivos() {
       dataIndex: 'nome',
       key: 'nome',
       width: 160,
-      render: (nome: string) => <Text strong className="text-sm">{nome}</Text>,
+      render: (nome: string) => <Typography.Text strong>{nome}</Typography.Text>,
     },
     {
       title: 'Tipo',
@@ -55,14 +53,7 @@ export function RecursosAtivos() {
       key: 'valorTransacionado',
       width: 180,
       sorter: (a: Recurso, b: Recurso) => a.valorTransacionado - b.valorTransacionado,
-      render: (valor: number) => (
-        <div>
-          <Text strong className="text-sm">R$ {valor.toLocaleString('pt-BR')}</Text>
-          <div className="h-1.5 bg-[#f0f0f0] rounded mt-1 w-full max-w-[120px]">
-            <div className="h-full rounded bg-[#1890FF]" style={{ width: `${(valor / maxValor) * 100}%` }} />
-          </div>
-        </div>
-      ),
+      render: (valor: number) => `R$ ${valor.toLocaleString('pt-BR')}`,
     },
     {
       title: 'Participação nas vendas',
@@ -70,10 +61,9 @@ export function RecursosAtivos() {
       width: 160,
       sorter: (a: Recurso, b: Recurso) => parseFloat(a.participacaoPercent) - parseFloat(b.participacaoPercent),
       render: (_: unknown, r: Recurso) => (
-        <div>
-          <Text strong className="text-sm">{r.participacaoPercent}</Text>
-          <Text type="secondary" className="text-xs block">{r.participacaoCompras.toLocaleString('pt-BR')} compras</Text>
-        </div>
+        <Tooltip title={`${r.participacaoCompras.toLocaleString('pt-BR')} compras`}>
+          <span>{r.participacaoPercent}</span>
+        </Tooltip>
       ),
     },
     {
@@ -83,10 +73,9 @@ export function RecursosAtivos() {
       width: 130,
       sorter: (a: Recurso, b: Recurso) => parseFloat(a.taxaAceitacao) - parseFloat(b.taxaAceitacao),
       render: (taxa: string) => (
-        <div>
-          <Text strong className="text-sm">{taxa}</Text>
-          <Text type="secondary" className="text-xs block">das exibições</Text>
-        </div>
+        <Tooltip title="das exibições">
+          <span>{taxa}</span>
+        </Tooltip>
       ),
     },
     {
@@ -95,22 +84,22 @@ export function RecursosAtivos() {
       key: 'impacto',
       width: 120,
       sorter: (a: Recurso, b: Recurso) => parseFloat(a.impacto) - parseFloat(b.impacto),
-      render: (impacto: string) => <Text strong className="text-sm">{impacto}</Text>,
+      render: (impacto: string) => impacto,
     },
   ]
 
   return (
-    <div className="border border-[rgba(0,0,0,0.06)] rounded-lg p-6">
+    <div className="border border-(--ant-color-split) rounded-lg p-6">
       <div className="mb-1">
-        <Title level={5} className="!mb-0">Conversão de Recursos Ativos</Title>
+        <Typography.Title level={5} className="mb-0">Conversão de Recursos Ativos</Typography.Title>
       </div>
-      <Text type="secondary" className="text-xs block mb-4">Recursos ranqueados por valor transacionado. Clique no cabeçalho para reordenar.</Text>
+      <Typography.Text type="secondary" className="block mb-4">Recursos ranqueados por valor transacionado. Clique no cabeçalho para reordenar.</Typography.Text>
 
       <Table
         dataSource={recursosAtivos}
         columns={columns}
         pagination={false}
-        size="small"
+        size="middle"
         showSorterTooltip={false}
       />
     </div>

@@ -1,8 +1,5 @@
 import { Typography } from 'antd'
-import { BarChartOutlined } from '@ant-design/icons'
-
-const { Title, Text } = Typography
-
+import { BarChart3 } from 'lucide-react'
 const descricoes: Record<string, string> = {
   // Performance
   'Funil de conversão': 'Visualize cada etapa da jornada de compra no checkout — do acesso à compra finalizada — e identifique onde os compradores estão desistindo.',
@@ -28,14 +25,14 @@ const descricoes: Record<string, string> = {
 export function WidgetEmpty({ title }: { title: string }) {
   const descricao = descricoes[title]
   return (
-    <div className="border border-[rgba(0,0,0,0.06)] rounded-lg p-6">
-      <Title level={5} className="!mb-0">{title}</Title>
+    <div className="border border-(--ant-color-split) rounded-lg p-6">
+      <Typography.Title level={5} className="mb-0">{title}</Typography.Title>
       <div className="flex flex-col items-center justify-center py-8 gap-3 max-w-[360px] mx-auto">
-        <BarChartOutlined className="text-[28px] text-[rgba(0,0,0,0.1)]" />
+        <BarChart3 size={14} className="text-[28px] text-[rgba(0,0,0,0.1)]" />
         {descricao && (
-          <Text type="secondary" className="text-xs text-center leading-relaxed">
+          <Typography.Text type="secondary" className="text-center leading-relaxed">
             {descricao}
-          </Text>
+          </Typography.Text>
         )}
       </div>
     </div>
@@ -54,8 +51,8 @@ export function KpisEmpty() {
     <div className="flex gap-3 items-stretch">
       {kpiDescricoes.map((label, i) => (
         <div key={i} className="flex-1 min-w-0 rounded-lg px-4 py-3 bg-[#f5f7fa] flex flex-col gap-1">
-          <Text type="secondary" className="text-xs">{label}</Text>
-          <Text className="text-2xl font-semibold text-[rgba(0,0,0,0.1)]">—</Text>
+          <Typography.Text type="secondary" >{label}</Typography.Text>
+          <Typography.Text className="text-[rgba(0,0,0,0.1)]">—</Typography.Text>
         </div>
       ))}
     </div>

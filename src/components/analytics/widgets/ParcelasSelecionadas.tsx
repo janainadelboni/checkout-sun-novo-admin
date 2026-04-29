@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Typography, Tooltip, Segmented } from 'antd'
 
-const { Title, Text } = Typography
+
 
 const parcelasData: Record<string, { label: string; percent: string }[]> = {
   'Cartão de crédito': [
@@ -27,28 +27,28 @@ export function ParcelasSelecionadas() {
   const parcelas = parcelasData[tab] || []
 
   return (
-    <div className="border border-[rgba(0,0,0,0.06)] rounded-lg p-6">
-      <Title level={5} className="!mb-3">Parcelas mais selecionadas</Title>
-      <Segmented
+    <div className="border border-(--ant-color-split) rounded-lg p-6">
+      <Typography.Title level={5} className="mb-3">Parcelas mais selecionadas</Typography.Title>
+      <Segmented size="small"
         value={tab}
         onChange={(v) => setTab(v as string)}
         options={['Cartão de crédito', 'PSL', 'Boleto parcelado']}
-        size="small"
         className="mb-4"
       />
-      <div className="flex items-center py-1">
-        <div className="w-[40px] shrink-0" /><div className="flex-1" />
-        <div className="w-[70px] text-right shrink-0 pl-4"><Text type="secondary" className="text-[11px] whitespace-nowrap">Percentual</Text></div>
+      <div className="flex items-center py-1 gap-3">
+        <div className="w-[36px] shrink-0" />
+        <div className="flex-1 min-w-[120px]" />
+        <div className="w-[70px] text-right shrink-0"><Typography.Text type="secondary" className="whitespace-nowrap">Percentual</Typography.Text></div>
       </div>
       <div className="max-h-[250px] overflow-y-auto">
         {parcelas.map((p) => (
           <Tooltip key={p.label} title={`${p.label}: ${p.percent}`}>
-          <div className="flex items-center py-2.5 border-b border-[rgba(0,0,0,0.06)] last:border-b-0 cursor-default hover:bg-[rgba(0,0,0,0.02)] rounded transition-colors">
-            <div className="w-[40px] shrink-0"><Text className="text-sm whitespace-nowrap">{p.label}</Text></div>
-            <div className="flex-1 h-4 bg-[#f5f5f5] rounded overflow-hidden mx-2">
-              <div className="h-full rounded" style={{ width: p.percent, backgroundColor: '#1890FF', minWidth: '4px' }} />
+          <div className="flex items-center py-2.5 gap-3 border-b border-(--ant-color-split) last:border-b-0 cursor-default hover:bg-(--ant-color-fill-quaternary) rounded transition-colors">
+            <div className="w-[36px] shrink-0"><Typography.Text className="whitespace-nowrap">{p.label}</Typography.Text></div>
+            <div className="flex-1 h-4 bg-(--ant-color-fill-tertiary) rounded overflow-hidden min-w-[120px]">
+              <div className="h-full rounded min-w-1" style={{ width: p.percent, backgroundColor: '#1890FF' }} />
             </div>
-            <div className="w-[70px] text-right shrink-0 pl-4"><Text className="text-xs whitespace-nowrap">{p.percent}</Text></div>
+            <div className="w-[70px] text-right shrink-0"><Typography.Text className="whitespace-nowrap">{p.percent}</Typography.Text></div>
           </div>
           </Tooltip>
         ))}

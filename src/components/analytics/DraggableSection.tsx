@@ -1,9 +1,6 @@
 import { useState } from 'react'
 import { Button, Dropdown, message } from 'antd'
-import {
-  CloseOutlined,
-  PlusOutlined,
-} from '@ant-design/icons'
+import { X, Plus } from 'lucide-react'
 import {
   DndContext,
   closestCenter,
@@ -65,7 +62,7 @@ function SortableItem({
             className="bg-white rounded border border-[rgba(0,0,0,0.1)] w-7 h-7 flex items-center justify-center cursor-pointer shadow-sm hover:border-red-300"
             title="Remover"
           >
-            <CloseOutlined className="text-xs text-red-400" />
+            <X size={14} className="text-sm text-red-400" />
           </button>
         </div>
       )}
@@ -152,7 +149,7 @@ export default function DraggableSections({
             >
               <Button
                 type="dashed"
-                icon={<PlusOutlined />}
+                icon={<Plus size={14}  />}
                 className="w-full"
               >
                 Restaurar seção ({removedSections.length})
