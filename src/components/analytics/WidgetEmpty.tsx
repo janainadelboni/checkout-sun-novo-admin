@@ -1,5 +1,4 @@
 import { Typography } from 'antd'
-import { BarChart3 } from 'lucide-react'
 const descricoes: Record<string, string> = {
   // Performance
   'Funil de conversão': 'Visualize cada etapa da jornada de compra no checkout — do acesso à compra finalizada — e identifique onde os compradores estão desistindo.',
@@ -28,7 +27,6 @@ export function WidgetEmpty({ title }: { title: string }) {
     <div className="border border-(--ant-color-split) rounded-lg p-6">
       <Typography.Title level={5} className="mb-0">{title}</Typography.Title>
       <div className="flex flex-col items-center justify-center py-8 gap-3 max-w-[360px] mx-auto">
-        <BarChart3 size={14} className="text-[28px] text-[rgba(0,0,0,0.1)]" />
         {descricao && (
           <Typography.Text type="secondary" className="text-center leading-relaxed">
             {descricao}

@@ -6,20 +6,20 @@ import { Typography, Segmented, Tooltip } from 'antd'
 const localVendas: Record<string, { label: string; valor: string; quantidade: number; cor: string }[]> = {
   País: [
     { label: 'Brasil', valor: 'R$ 85.000,00', quantidade: 8500, cor: 'var(--ant-color-primary)' },
-    { label: 'Portugal', valor: 'R$ 12.300,00', quantidade: 1200, cor: '#1890FF' },
-    { label: 'EUA', valor: 'R$ 8.500,00', quantidade: 450, cor: '#13C2C2' },
+    { label: 'Portugal', valor: 'R$ 12.300,00', quantidade: 1200, cor: '#2B4ACF' },
+    { label: 'EUA', valor: 'R$ 8.500,00', quantidade: 450, cor: '#2BBCCF' },
     { label: 'Angola', valor: 'R$ 3.200,00', quantidade: 280, cor: 'var(--ant-color-warning)' },
   ],
   Estado: [
     { label: 'São Paulo', valor: 'R$ 32.000,00', quantidade: 3200, cor: 'var(--ant-color-primary)' },
-    { label: 'Rio de Janeiro', valor: 'R$ 18.000,00', quantidade: 1800, cor: '#1890FF' },
-    { label: 'Minas Gerais', valor: 'R$ 12.000,00', quantidade: 1200, cor: '#13C2C2' },
+    { label: 'Rio de Janeiro', valor: 'R$ 18.000,00', quantidade: 1800, cor: '#2B4ACF' },
+    { label: 'Minas Gerais', valor: 'R$ 12.000,00', quantidade: 1200, cor: '#2BBCCF' },
     { label: 'Paraná', valor: 'R$ 8.000,00', quantidade: 800, cor: 'var(--ant-color-warning)' },
   ],
   Cidade: [
     { label: 'São Paulo', valor: 'R$ 18.000,00', quantidade: 1800, cor: 'var(--ant-color-primary)' },
-    { label: 'Rio de Janeiro', valor: 'R$ 12.000,00', quantidade: 1200, cor: '#1890FF' },
-    { label: 'Belo Horizonte', valor: 'R$ 6.000,00', quantidade: 600, cor: '#13C2C2' },
+    { label: 'Rio de Janeiro', valor: 'R$ 12.000,00', quantidade: 1200, cor: '#2B4ACF' },
+    { label: 'Belo Horizonte', valor: 'R$ 6.000,00', quantidade: 600, cor: '#2BBCCF' },
     { label: 'Curitiba', valor: 'R$ 4.500,00', quantidade: 450, cor: 'var(--ant-color-warning)' },
   ],
 }

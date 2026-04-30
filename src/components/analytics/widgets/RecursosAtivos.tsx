@@ -37,8 +37,8 @@ export function RecursosAtivos() {
       title: 'Recurso',
       dataIndex: 'nome',
       key: 'nome',
-      width: 160,
-      render: (nome: string) => <Typography.Text strong>{nome}</Typography.Text>,
+      width: 200,
+      render: (nome: string) => <Typography.Text strong className="whitespace-nowrap">{nome}</Typography.Text>,
     },
     {
       title: 'Tipo',

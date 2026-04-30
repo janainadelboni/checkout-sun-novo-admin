@@ -3,11 +3,11 @@ import { Typography, Tooltip } from 'antd'
 
 
 const motivos = [
-  { label: 'Saldo insuficiente', quantidade: 10000, cor: '#1890FF' },
-  { label: 'Segurança', quantidade: 4500, cor: '#1890FF' },
+  { label: 'Saldo insuficiente', quantidade: 10000, cor: '#2B4ACF' },
+  { label: 'Segurança', quantidade: 4500, cor: '#2B4ACF' },
   { label: 'Banco recusou', quantidade: 2800, cor: 'var(--ant-color-success)' },
   { label: 'Operadora recusou', quantidade: 2800, cor: 'var(--ant-color-warning)' },
-  { label: 'Cartão inválido', quantidade: 1200, cor: '#EB2F96' },
+  { label: 'Cartão inválido', quantidade: 1200, cor: '#CF2B9E' },
 ]
 
 const totalRecusas = motivos.reduce((s, m) => s + m.quantidade, 0)
@@ -33,7 +33,7 @@ export function MotivosRecusa() {
             </div>
             <div className="w-[120px] text-right shrink-0 pl-4 whitespace-nowrap">
               <Typography.Text>{m.quantidade.toLocaleString('pt-BR')}</Typography.Text>
-              <Typography.Text type="secondary" className="ml-1">({pct}%)</Typography.Text>
+              <Typography.Text type="secondary" className="ml-1 !text-[14px]">({pct}%)</Typography.Text>
             </div>
           </div>
           </Tooltip>

@@ -10,7 +10,7 @@ import {
   Timeline,
   Typography,
 } from 'antd'
-import { Eye, Settings, Plus, History } from "lucide-react"
+import { Settings, Plus, History } from "lucide-react"
 import { EduzzLogo, CheckoutSunLogo } from '../Logos'
 import ConfigurarPixelModal, { type ModalMode, type PixelProvider } from './ConfigurarPixelModal'
 
@@ -367,7 +367,6 @@ export default function PaginaRastreamento({
 
                             {card.configured && (
                               <Button
-                                icon={<Eye size={14} />}
                                 onClick={(e) => { e.stopPropagation(); onVerDetalhes(card.providerKey) }}
                               >
                                 Ver detalhes

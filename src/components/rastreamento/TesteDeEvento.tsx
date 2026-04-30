@@ -164,8 +164,8 @@ export default function TesteDeEvento({ produtoId, produtoNome, onVoltar }: Test
           {/* Event cards */}
           <div className={`flex flex-col gap-4 ${!codigoTeste ? 'opacity-50 pointer-events-none' : ''}`}>
             {!codigoTeste && (
-              <div className="flex items-center gap-2 px-4 py-3 bg-[#fff7e6] border border-[#ffd591] rounded-lg">
-                <Typography.Text className="text-[#d46b08]">
+              <div className="flex items-center gap-2 px-4 py-3 bg-(--ant-color-warning-bg) border border-(--ant-color-warning-border) rounded-lg">
+                <Typography.Text className="!text-(--ant-color-warning-text)">
                   Insira o código de teste acima para habilitar os botões de teste.
                 </Typography.Text>
               </div>
@@ -232,7 +232,7 @@ export default function TesteDeEvento({ produtoId, produtoNome, onVoltar }: Test
               logs.map((item, i) => (
                 <div
                   key={i}
-                  className={`flex border-b border-(--ant-color-split) h-16 items-center transition-colors duration-700 ${i === highlightIndex ? 'bg-[#e6f4ff]' : ''}`}
+                  className={`flex border-b border-(--ant-color-split) h-16 items-center transition-colors duration-700 ${i === highlightIndex ? 'bg-(--ant-color-info-bg)' : ''}`}
                 >
                   <div className="flex-[2] px-4">
                     <Tag>{item.evento}</Tag>

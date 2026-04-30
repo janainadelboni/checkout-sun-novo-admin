@@ -412,7 +412,7 @@ export default function ConfigurarPixelModal({
               <button
                 key={option.key}
                 onClick={() => handleSelectProvider(option.key)}
-                className="flex items-center gap-4 p-4 border border-(--ant-color-border) rounded-lg hover:border-(--ant-color-primary) hover:bg-[#f5f7ff] transition-all cursor-pointer bg-white text-left w-full"
+                className="flex items-center gap-4 p-4 border border-(--ant-color-border) rounded-lg hover:border-(--ant-color-text-tertiary) hover:bg-(--ant-color-fill-quaternary) transition-all cursor-pointer bg-white text-left w-full"
               >
                 <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-(--ant-color-fill-tertiary) shrink-0 overflow-hidden">
                   <img
@@ -435,7 +435,7 @@ export default function ConfigurarPixelModal({
       {step === 'configure' && providerInfo && (
         <div className="flex flex-col">
           {/* Header */}
-          <div className="px-6 pt-6 pb-4 border-b border-(--ant-color-split)">
+          <div className="px-6 pt-6 pb-4">
             <div className="flex items-center gap-3">
               {/* No modo configure/bulk com provider/edit com provider, não tem "voltar" para step 1 */}
               {mode.type !== 'configure' && !(mode.type === 'bulk' && mode.provider) && !(isEdit && mode.type === 'edit' && (mode.existing || mode.provider)) && (
@@ -473,6 +473,7 @@ export default function ConfigurarPixelModal({
               </div>
             )}
           </div>
+          <div className="mx-6 border-t border-(--ant-color-split)" />
 
           {/* Body - scrollable */}
           <div className="px-6 py-5 flex flex-col gap-6 max-h-[60vh] overflow-y-auto">
@@ -530,8 +531,8 @@ export default function ConfigurarPixelModal({
                     key={event.key}
                     className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-all ${
                       selectedEvents.includes(event.key)
-                        ? 'border-(--ant-color-primary) bg-[#f5f7ff]'
-                        : 'border-(--ant-color-border) hover:border-(--ant-color-primary)/40'
+                        ? 'border-(--ant-color-text-secondary) bg-(--ant-color-fill-tertiary)'
+                        : 'border-(--ant-color-border) hover:border-(--ant-color-text-tertiary)'
                     }`}
                   >
                     <Checkbox
@@ -574,7 +575,7 @@ export default function ConfigurarPixelModal({
                       className="block w-full"
                     >
                       <div className="flex flex-col gap-3">
-                        <label className="p-4 border border-(--ant-color-border) rounded-lg hover:border-(--ant-color-primary)/40 transition-all flex items-start gap-3 cursor-pointer">
+                        <label className="p-4 border border-(--ant-color-border) rounded-lg hover:border-(--ant-color-text-tertiary) transition-all flex items-start gap-3 cursor-pointer">
                           <Radio value="imediatos" className="m-0" />
                           <div className="flex flex-col gap-1 flex-1">
                             <Typography.Text strong>Pagamentos imediatos</Typography.Text>
@@ -583,7 +584,7 @@ export default function ConfigurarPixelModal({
                             </Typography.Text>
                           </div>
                         </label>
-                        <label className="p-4 border border-(--ant-color-border) rounded-lg hover:border-(--ant-color-primary)/40 transition-all flex items-start gap-3 cursor-pointer">
+                        <label className="p-4 border border-(--ant-color-border) rounded-lg hover:border-(--ant-color-text-tertiary) transition-all flex items-start gap-3 cursor-pointer">
                           <Radio value="nao_imediato" className="m-0" />
                           <div className="flex flex-col gap-1 flex-1">
                             <Typography.Text strong>Pagamento não imediato</Typography.Text>
@@ -592,7 +593,7 @@ export default function ConfigurarPixelModal({
                             </Typography.Text>
                           </div>
                         </label>
-                        <label className="p-4 border border-(--ant-color-border) rounded-lg hover:border-(--ant-color-primary)/40 transition-all flex items-start gap-3 cursor-pointer">
+                        <label className="p-4 border border-(--ant-color-border) rounded-lg hover:border-(--ant-color-text-tertiary) transition-all flex items-start gap-3 cursor-pointer">
                           <Radio value="todos" className="m-0" />
                           <div className="flex flex-col gap-1 flex-1">
                             <Typography.Text strong>Todos</Typography.Text>

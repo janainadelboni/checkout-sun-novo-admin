@@ -360,12 +360,12 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
 
   // Mapa de cores dos eventos (mesma ordem e cor do funil)
   const eventoCores: Record<string, string> = {
-    'PageView': '#1890FF',
+    'PageView': '#2B4ACF',
     'FormInteraction': 'var(--ant-color-warning)',
-    'Lead': '#13C2C2',
+    'Lead': '#2BBCCF',
     'AddPaymentInfo': 'var(--ant-color-success)',
-    'Initiatecheckout': '#EB2F96',
-    'Purchase': '#722ED1',
+    'Initiatecheckout': '#CF2B9E',
+    'Purchase': '#6D2BCF',
   }
   const ordemEventos = ['PageView', 'FormInteraction', 'Lead', 'AddPaymentInfo', 'Initiatecheckout', 'Purchase']
 
@@ -429,12 +429,12 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
 
   // Etapas do funil usando os mesmos eventos cadastráveis (topo → fundo)
   const funilEtapas = [
-    { label: 'PageView', valor: 10200, cor: '#1890FF' },
+    { label: 'PageView', valor: 10200, cor: '#2B4ACF' },
     { label: 'FormInteraction', valor: 4590, cor: 'var(--ant-color-warning)' },
-    { label: 'Lead', valor: 2856, cor: '#13C2C2' },
+    { label: 'Lead', valor: 2856, cor: '#2BBCCF' },
     { label: 'AddPaymentInfo', valor: 1820, cor: 'var(--ant-color-success)' },
-    { label: 'Initiatecheckout', valor: 1224, cor: '#EB2F96' },
-    { label: 'Purchase', valor: 380, cor: '#722ED1' },
+    { label: 'Initiatecheckout', valor: 1224, cor: '#CF2B9E' },
+    { label: 'Purchase', valor: 380, cor: '#6D2BCF' },
   ]
   const funilTopo = funilEtapas[0].valor || 1
   const funilComPercent = funilEtapas.map((etapa, i) => {
@@ -824,7 +824,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                                 <div className="w-[120px] px-4 flex justify-center shrink-0">
                                   <a
                                     href="#"
-                                    className="text-[#1677ff] text-sm hover:underline"
+                                    className="text-(--ant-color-primary) text-sm hover:underline"
                                     onClick={(e) => {
                                       e.preventDefault()
                                       e.stopPropagation()
@@ -1179,8 +1179,8 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                           </Button>
                         </div>
                         {/* Warning banner */}
-                        <div className="bg-[#E6F4FF] border border-[#91CAFF] rounded-lg px-4 py-2.5 mt-1">
-                          <Typography.Text className="text-[#0958D9]">
+                        <div className="bg-(--ant-color-info-bg) border border-(--ant-color-info-border) rounded-lg px-4 py-2.5 mt-1">
+                          <Typography.Text className="!text-(--ant-color-info-text)">
                             Para habilitar os botões "Testar", insira e valide o código de teste acima.
                           </Typography.Text>
                         </div>
@@ -1189,12 +1189,12 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                       {/* Event cards - 2 columns */}
                       <div className={`grid grid-cols-2 gap-4 ${cardsDisabled}`}>
                         {[
-                          { name: 'PageView', desc: 'Quando o comprador acessa a página do checkout', cor: '#1890FF' },
+                          { name: 'PageView', desc: 'Quando o comprador acessa a página do checkout', cor: '#2B4ACF' },
                           { name: 'FormInteraction', desc: 'Ao preencher nome, e-mail ou outro campo inicial', cor: 'var(--ant-color-warning)' },
-                          { name: 'Lead', desc: 'Ao preencher nome, email e telefone', cor: '#13C2C2' },
+                          { name: 'Lead', desc: 'Ao preencher nome, email e telefone', cor: '#2BBCCF' },
                           { name: 'AddPaymentInfo', desc: 'Ao interagir com formas de pagamento', cor: 'var(--ant-color-success)' },
-                          { name: 'Initiatecheckout', desc: 'Ao interagir com o botão de finalizar compra', cor: '#EB2F96' },
-                          { name: 'Purchase', desc: 'Quando o pagamento é confirmado', cor: '#722ED1' },
+                          { name: 'Initiatecheckout', desc: 'Ao interagir com o botão de finalizar compra', cor: '#CF2B9E' },
+                          { name: 'Purchase', desc: 'Quando o pagamento é confirmado', cor: '#6D2BCF' },
                         ].map((ev) => (
                           <div key={ev.name} className="border border-(--ant-color-border) rounded-lg p-4 flex flex-col gap-2">
                             <div className="flex items-center justify-between">

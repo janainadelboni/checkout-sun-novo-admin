@@ -61,13 +61,13 @@ export function VisaoGeralVendas() {
         ))}
         {/* Lines */}
         <path d={pathValor} fill="none" stroke="var(--ant-color-warning)" strokeWidth="2.5" />
-        <path d={pathVolume} fill="none" stroke="#13C2C2" strokeWidth="2.5" />
+        <path d={pathVolume} fill="none" stroke="#2BBCCF" strokeWidth="2.5" />
         {/* Hover */}
         {hoverIndex !== null && (
           <>
             <line x1={toX(hoverIndex)} y1={padY} x2={toX(hoverIndex)} y2={padY + chartH} stroke="rgba(0,0,0,0.15)" strokeWidth="1" strokeDasharray="4 2" />
             <circle cx={toX(hoverIndex)} cy={toYValor(valorTransacionado[hoverIndex])} r="4" fill="var(--ant-color-warning)" stroke="#fff" strokeWidth="2" />
-            <circle cx={toX(hoverIndex)} cy={toYVolume(volumeTransacoes[hoverIndex])} r="4" fill="#13C2C2" stroke="#fff" strokeWidth="2" />
+            <circle cx={toX(hoverIndex)} cy={toYVolume(volumeTransacoes[hoverIndex])} r="4" fill="#2BBCCF" stroke="#fff" strokeWidth="2" />
           </>
         )}
         {/* Tooltip */}
@@ -83,7 +83,7 @@ export function VisaoGeralVendas() {
               <text x={tooltipX + 8} y={tooltipY + 16} fill="#fff" fontSize="10" fontWeight="600">{meses[hoverIndex]}</text>
               <circle cx={tooltipX + 12} cy={tooltipY + 30} r="3" fill="var(--ant-color-warning)" />
               <text x={tooltipX + 20} y={tooltipY + 33} fill="rgba(255,255,255,0.8)" fontSize="9">Valor: {formatCurrency(valorTransacionado[hoverIndex])}</text>
-              <circle cx={tooltipX + 12} cy={tooltipY + 44} r="3" fill="#13C2C2" />
+              <circle cx={tooltipX + 12} cy={tooltipY + 44} r="3" fill="#2BBCCF" />
               <text x={tooltipX + 20} y={tooltipY + 47} fill="rgba(255,255,255,0.8)" fontSize="9">Volume: {volumeTransacoes[hoverIndex]} transações</text>
             </g>
           )
@@ -94,8 +94,8 @@ export function VisaoGeralVendas() {
         ))}
       </svg>
       <div className="flex gap-6 mt-2">
-        <div className="flex items-center gap-1.5"><div className="w-3 h-0.5 bg-[#FAAD14] rounded" /><Typography.Text type="secondary" >Valor transacionado (R$)</Typography.Text></div>
-        <div className="flex items-center gap-1.5"><div className="w-3 h-0.5 bg-[#13C2C2] rounded" /><Typography.Text type="secondary" >Volume de transações (qtd)</Typography.Text></div>
+        <div className="flex items-center gap-1.5"><div className="w-3 h-0.5 bg-[#F59E0B] rounded" /><Typography.Text type="secondary" >Valor transacionado (R$)</Typography.Text></div>
+        <div className="flex items-center gap-1.5"><div className="w-3 h-0.5 bg-[#2BBCCF] rounded" /><Typography.Text type="secondary" >Volume de transações (qtd)</Typography.Text></div>
       </div>
     </div>
   )

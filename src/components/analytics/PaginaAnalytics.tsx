@@ -426,17 +426,21 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { o
                 }
               })}
               renderTabBar={(tabBarProps, DefaultTabBar) => (
-                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleTabDragEnd}>
-                  <SortableContext items={tabs} strategy={horizontalListSortingStrategy}>
-                    <DefaultTabBar {...tabBarProps}>
-                      {(node) => (
-                        <DraggableTabNode key={node.key} nodeKey={String(node.key)}>
-                          {node}
-                        </DraggableTabNode>
-                      )}
-                    </DefaultTabBar>
-                  </SortableContext>
-                </DndContext>
+                isEditing ? (
+                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleTabDragEnd}>
+                    <SortableContext items={tabs} strategy={horizontalListSortingStrategy}>
+                      <DefaultTabBar {...tabBarProps}>
+                        {(node) => (
+                          <DraggableTabNode key={node.key} nodeKey={String(node.key)}>
+                            {node}
+                          </DraggableTabNode>
+                        )}
+                      </DefaultTabBar>
+                    </SortableContext>
+                  </DndContext>
+                ) : (
+                  <DefaultTabBar {...tabBarProps} />
+                )
               )}
             />
             </div>

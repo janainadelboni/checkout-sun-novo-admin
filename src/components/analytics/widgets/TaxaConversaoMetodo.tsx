@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Typography, Segmented } from 'antd'
+import { Typography, Segmented, Tooltip } from 'antd'
 
 
 
@@ -13,9 +13,9 @@ function PieChart({ segments, size = 160 }: { segments: { percent: number; color
         const x1 = cx + r * Math.cos(s - Math.PI / 2); const y1 = cy + r * Math.sin(s - Math.PI / 2)
         const x2 = cx + r * Math.cos(e - Math.PI / 2); const y2 = cy + r * Math.sin(e - Math.PI / 2)
         return (
-          <path key={i} d={`M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${la} 1 ${x2} ${y2} Z`} fill={seg.color} className="cursor-pointer hover:opacity-80 transition-opacity">
-            <title>{`${seg.label}: ${seg.detail}`}</title>
-          </path>
+          <Tooltip key={i} title={`${seg.label}: ${seg.detail} (${seg.percent}%)`}>
+            <path d={`M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${la} 1 ${x2} ${y2} Z`} fill={seg.color} className="cursor-pointer hover:opacity-80 transition-opacity" />
+          </Tooltip>
         )
       })}
     </svg>
@@ -23,8 +23,8 @@ function PieChart({ segments, size = 160 }: { segments: { percent: number; color
 }
 
 const transacoes = [
-  { label: 'Transações geradas', color: '#1890FF', valor: 'R$ 9.324,01', quantidade: 1247 },
-  { label: 'Transações em aberto', color: '#EB2F96', valor: 'R$ 9.324,01', quantidade: 1200 },
+  { label: 'Transações geradas', color: '#2B4ACF', valor: 'R$ 9.324,01', quantidade: 1247 },
+  { label: 'Transações em aberto', color: '#CF2B9E', valor: 'R$ 9.324,01', quantidade: 1200 },
   { label: 'Transações pagas', color: 'var(--ant-color-warning)', valor: 'R$ 300,00', quantidade: 800 },
 ]
 
@@ -41,7 +41,7 @@ export function TaxaConversaoMetodo() {
           percent: Math.round((t.quantidade / totalQtd) * 100),
           color: t.color,
           label: t.label,
-          detail: `${t.valor} (${t.quantidade})`,
+          detail: `${t.valor} — ${t.quantidade.toLocaleString('pt-BR')} transações`,
         }))} />
       </div>
       <div className="flex flex-col">
@@ -58,7 +58,7 @@ export function TaxaConversaoMetodo() {
               </div>
               <div className="w-[110px] text-right shrink-0 pl-3 whitespace-nowrap">
                 <Typography.Text>{t.quantidade.toLocaleString('pt-BR')}</Typography.Text>
-                <Typography.Text type="secondary" className="ml-1">({pct}%)</Typography.Text>
+                <Typography.Text type="secondary" className="ml-1 !text-[14px]">({pct}%)</Typography.Text>
               </div>
             </div>
           )

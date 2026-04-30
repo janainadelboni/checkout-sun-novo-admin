@@ -4,12 +4,12 @@ import { Typography, Segmented, Tooltip } from 'antd'
 
 
 const metodos = [
-  { label: 'Cartão de crédito', valor: 'R$ 9.324,01', quantidade: 190, cor: '#1890FF' },
+  { label: 'Cartão de crédito', valor: 'R$ 9.324,01', quantidade: 190, cor: '#2B4ACF' },
   { label: 'Pix', valor: 'R$ 9.324,01', quantidade: 190, cor: 'var(--ant-color-success)' },
   { label: 'Boleto', valor: 'R$ 9.324,01', quantidade: 190, cor: 'var(--ant-color-success)' },
   { label: 'Múltiplos cartões', valor: 'R$ 9.324,01', quantidade: 190, cor: 'var(--ant-color-warning)' },
-  { label: 'Boleto parcelado', valor: 'R$ 9.324,01', quantidade: 190, cor: '#1890FF' },
-  { label: 'Pagamento combinado', valor: 'R$ 9.324,01', quantidade: 190, cor: '#EB2F96' },
+  { label: 'Boleto parcelado', valor: 'R$ 9.324,01', quantidade: 190, cor: '#2B4ACF' },
+  { label: 'Pagamento combinado', valor: 'R$ 9.324,01', quantidade: 190, cor: '#CF2B9E' },
 ]
 
 const totalQtd = metodos.reduce((s, m) => s + m.quantidade, 0)
@@ -39,7 +39,7 @@ export function MetodosPagamento() {
             <div className="w-[110px] text-right shrink-0 pl-3"><Typography.Text strong className="whitespace-nowrap">{m.valor}</Typography.Text></div>
             <div className="w-[110px] text-right shrink-0 pl-3 whitespace-nowrap">
               <Typography.Text>{m.quantidade}</Typography.Text>
-              <Typography.Text type="secondary" className="ml-1">({pct}%)</Typography.Text>
+              <Typography.Text type="secondary" className="ml-1 !text-[14px]">({pct}%)</Typography.Text>
             </div>
           </div>
           </Tooltip>

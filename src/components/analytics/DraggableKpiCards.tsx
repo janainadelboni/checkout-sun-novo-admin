@@ -68,15 +68,15 @@ function SortableCard({
           </button>
         </>
       )}
-      <div className="flex items-center gap-1">
-        <Typography.Text type="secondary" >{item.label}</Typography.Text>
-        {item.tooltip && (
-          <Tooltip title={item.tooltip}>
-            <HelpCircle size={14} className="text-(--ant-color-text-quaternary) text-sm cursor-help" />
-          </Tooltip>
-        )}
+      {item.tooltip && !isEditing && (
+        <Tooltip title={item.tooltip}>
+          <HelpCircle size={14} className="absolute top-2.5 right-2.5 text-(--ant-color-text-quaternary) text-sm cursor-help" />
+        </Tooltip>
+      )}
+      <div className="pr-5">
+        <Typography.Text type="secondary" className="text-[11px] leading-tight">{item.label}</Typography.Text>
       </div>
-      <Typography.Title level={3} className="mb-0 mt-0">{item.valor}</Typography.Title>
+      <Typography.Title level={4} className="mb-0 mt-auto">{item.valor}</Typography.Title>
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { Typography, Button } from 'antd'
-import { Upload } from 'lucide-react'
+import { ExternalLink } from 'lucide-react'
 import FunilDeConversao from './FunilDeConversao'
 import DraggableKpiCards, { type KpiItem } from './DraggableKpiCards'
 import { RecursosAtivos } from './widgets/RecursosAtivos'
@@ -27,7 +27,7 @@ function LinksExternos() {
         <Typography.Text type="secondary" className="block mb-4">
           Gerencie planos, cobranças recorrentes, inadimplência e o ciclo de vida dos assinantes em um só painel.
         </Typography.Text>
-        <Button icon={<Upload size={14}  />}>Ir para Assinaturas</Button>
+        <Button icon={<ExternalLink size={14} />}>Ir para Assinaturas</Button>
       </div>
       <div className="flex-1 border border-(--ant-color-split) rounded-lg p-6">
         <Typography.Title level={5} className="mb-1">Métricas de eventos é na Blinket</Typography.Title>
@@ -37,7 +37,7 @@ function LinksExternos() {
         <Typography.Text type="secondary" className="block mb-4">
           Crie uma página de vendas, acompanhe as métricas do evento e organize participantes.
         </Typography.Text>
-        <Button icon={<Upload size={14}  />}>Ir para Blinket</Button>
+        <Button icon={<ExternalLink size={14} />}>Ir para Blinket</Button>
       </div>
     </div>
   )
