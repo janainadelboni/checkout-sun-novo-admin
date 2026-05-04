@@ -186,7 +186,7 @@ function SavedFiltersDropdown({
   }
 
   return (
-    <div className="py-1" className="min-w-[300px]">
+    <div className="py-1 min-w-[300px]">
       {filters.map((f) => (
         <div
           key={f.id}
@@ -196,7 +196,7 @@ function SavedFiltersDropdown({
           }`}
         >
           <div className="flex-1 min-w-0">
-            <Text
+            <Typography.Text
               strong
               className={`block text-sm truncate ${appliedId === f.id ? 'text-(--ant-color-primary)' : ''}`}
             >

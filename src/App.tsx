@@ -21,7 +21,7 @@ export default function App() {
   return (
     <ConfigProvider
       theme={{
-        cssVar: true,
+        cssVar: { key: 'ant' },
         hashed: false,
         algorithm: isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
         token: {
