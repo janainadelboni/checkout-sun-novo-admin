@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Modal,
   Button,
@@ -70,6 +70,7 @@ const EVENTS: EventOption[] = [
   { key: 'FormInteraction', label: 'FormInteraction', description: 'Ao preencher nome, e-mail ou outro campo inicial' },
   { key: 'Lead', label: 'Lead', description: 'Ao preencher nome, email e telefone' },
   { key: 'AddPaymentInfo', label: 'AddPaymentInfo', description: 'Ao interagir com formas de pagamento' },
+  { key: 'Initiatecheckout', label: 'Initiatecheckout', description: 'Sinaliza intenção de compra · você escolhe o momento do disparo' },
   { key: 'Purchase', label: 'Purchase', description: 'Quando o pagamento é confirmado' },
   { key: 'ViewBoleto', label: 'Visualização de boleto', description: 'Quando o boleto gerado for visualizado' },
 ]
@@ -129,7 +130,7 @@ type Step = 'select_provider' | 'configure'
 export type ModalMode =
   | { type: 'new' }                                         // Configurar novo pixel (fluxo completo com seleção de provider)
   | { type: 'configure'; provider: PixelProvider }           // Modal Configurar (pula seleção de provider, produtos livres)
-  | { type: 'bulk'; produtoIds: number[]; produtoNomes: Record<number, string>; provider?: PixelProvider }  // Configurar e vincular produtos (produtos pré-selecionados)
+  | { type: 'bulk'; produtoIds: number[]; produtoNomes: Record<number, string>; provider?: PixelProvider; existing?: PixelConfig }  // Configurar e vincular produtos (produtos pré-selecionados)
   | { type: 'edit'; produtoId: number; produtoNome: string; existing?: PixelConfig; provider?: PixelProvider } // Editar/criar por produto específico
 
 /* ─── Props ─── */
@@ -139,6 +140,8 @@ interface ConfigurarPixelModalProps {
   onSave?: (config: PixelConfig) => void
   mode?: ModalMode
 }
+
+export type InitiateCheckoutTrigger = 'pageview' | 'button' | null
 
 export interface PixelConfig {
   provider: PixelProvider
@@ -150,6 +153,7 @@ export interface PixelConfig {
   produtos: string[]
   diferenciarBoleto: boolean
   valorCustomizado: 'nunca' | 'customizado' | 'sempre'
+  initiateCheckoutTrigger: InitiateCheckoutTrigger
 }
 
 export default function ConfigurarPixelModal({
@@ -171,9 +175,30 @@ export default function ConfigurarPixelModal({
   const [receberEvento, setReceberEvento] = useState<'imediatos' | 'nao_imediato' | 'todos'>('imediatos')
   const [diferenciarBoleto, setDiferenciarBoleto] = useState(false)
   const [valorCustomizado, setValorCustomizado] = useState<'nunca' | 'customizado' | 'sempre'>('nunca')
+  const [initiateCheckoutTrigger, setInitiateCheckoutTrigger] = useState<InitiateCheckoutTrigger>(null)
 
   // Erros de validação
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // Estados de feedback de salvamento (item 13)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [simulateSaveError, setSimulateSaveError] = useState(false)
+  const bodyRef = useRef<HTMLDivElement | null>(null)
+
+  // Quando um erro aparece (banner ou de validação), sobe o scroll do modal pro topo
+  useEffect(() => {
+    const hasError = saveError || Object.values(errors).some((e) => !!e)
+    if (hasError && bodyRef.current) {
+      bodyRef.current.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }, [saveError, errors])
+
+  // IDs de pixel já em uso no sistema (mock — em prod viria da API).
+  // Usado para alerta de duplicidade (item 12).
+  const KNOWN_PIXEL_IDS: { id: string; usedBy: string }[] = [
+    { id: '7644657994596', usedBy: 'Facebook - Principal · GA4 · HubSpot' },
+    { id: '9988776655443', usedBy: 'Facebook - Remarketing' },
+  ]
 
   // Determina se os produtos são fixos (apenas edit com existing)
   const isProductsLocked = mode.type === 'edit'
@@ -195,6 +220,10 @@ export default function ConfigurarPixelModal({
         const info = PIXEL_OPTIONS.find((p) => p.key === mode.provider)
         if (info) setNomePixel(`${info.label} - Principal`)
         setPixelId('7644657994596') // ID já configurado
+        // Restaura o trigger do Initiatecheckout do pixel já configurado, se houver
+        if (mode.existing?.initiateCheckoutTrigger) {
+          setInitiateCheckoutTrigger(mode.existing.initiateCheckoutTrigger)
+        }
         setStep('configure')
       } else {
         setStep('select_provider')
@@ -211,6 +240,7 @@ export default function ConfigurarPixelModal({
         setTokenApi(mode.existing.tokenApi)
         setDiferenciarBoleto(mode.existing.diferenciarBoleto)
         setValorCustomizado(mode.existing.valorCustomizado)
+        setInitiateCheckoutTrigger(mode.existing.initiateCheckoutTrigger ?? null)
         setStep('configure')
       } else if (mode.provider) {
         // Configurar individualmente — provider conhecido, pula seleção
@@ -252,7 +282,10 @@ export default function ConfigurarPixelModal({
     setReceberEvento('imediatos')
     setDiferenciarBoleto(false)
     setValorCustomizado('nunca')
+    setInitiateCheckoutTrigger(null)
     setErrors({})
+    setSaveError(null)
+    setSimulateSaveError(false)
   }
 
   const handleClose = () => {
@@ -283,7 +316,7 @@ export default function ConfigurarPixelModal({
         ? prev.filter((e) => e !== eventKey)
         : [...prev, eventKey]
     )
-    setErrors((prev) => ({ ...prev, events: '' }))
+    setErrors((prev) => ({ ...prev, events: '', initiateCheckoutTrigger: '' }))
   }
 
   const handleProdutosChange = (values: string[]) => {
@@ -303,6 +336,9 @@ export default function ConfigurarPixelModal({
     if (selectedEvents.length === 0) {
       newErrors.events = 'Selecione pelo menos um evento'
     }
+    if (selectedEvents.includes('Initiatecheckout') && !initiateCheckoutTrigger) {
+      newErrors.initiateCheckoutTrigger = 'Escolha quando o evento de Initiatecheckout será disparado'
+    }
     if (selectedProdutos.length === 0) {
       newErrors.produtos = 'Selecione pelo menos um produto'
     }
@@ -314,8 +350,25 @@ export default function ConfigurarPixelModal({
     return Object.keys(newErrors).length === 0
   }
 
+  // Detecta se o ID atual é duplicado (já usado em outro pixel)
+  const duplicateIdInfo = (() => {
+    if (!pixelId.trim()) return null
+    const match = KNOWN_PIXEL_IDS.find((k) => k.id === pixelId.trim())
+    if (!match) return null
+    // Se estamos editando o pixel que tem esse ID, não é duplicidade
+    if (isEdit && mode.type === 'edit' && mode.existing?.pixelId === match.id) return null
+    return match
+  })()
+
   const handleSave = () => {
     if (!validate() || !selectedProvider) return
+
+    // Item 13: erro de salvamento simulado
+    if (simulateSaveError) {
+      setSaveError('Não foi possível salvar a configuração. Verifique sua conexão e tente novamente.')
+      return
+    }
+    setSaveError(null)
 
     const config: PixelConfig = {
       provider: selectedProvider,
@@ -327,6 +380,7 @@ export default function ConfigurarPixelModal({
       produtos: selectedProdutos,
       diferenciarBoleto,
       valorCustomizado,
+      initiateCheckoutTrigger: selectedEvents.includes('Initiatecheckout') ? initiateCheckoutTrigger : null,
     }
 
     onSave?.(config)
@@ -336,6 +390,12 @@ export default function ConfigurarPixelModal({
   const providerInfo = PIXEL_OPTIONS.find((p) => p.key === selectedProvider)
 
   const hasPurchase = selectedEvents.includes('Purchase')
+  const hasInitiateCheckout = selectedEvents.includes('Initiatecheckout')
+
+  const handleSelectInitiateTrigger = (value: 'pageview' | 'button') => {
+    setInitiateCheckoutTrigger(value)
+    setErrors((prev) => ({ ...prev, initiateCheckoutTrigger: '' }))
+  }
 
   return (
     <Modal
@@ -476,7 +536,24 @@ export default function ConfigurarPixelModal({
           <div className="mx-6 border-t border-(--ant-color-split)" />
 
           {/* Body - scrollable */}
-          <div className="px-6 py-5 flex flex-col gap-6 max-h-[60vh] overflow-y-auto">
+          <div ref={bodyRef} className="px-6 py-5 flex flex-col gap-6 max-h-[60vh] overflow-y-auto">
+
+            {/* Banner de erro de salvamento (item 13) */}
+            {saveError && (
+              <Alert
+                type="error"
+                showIcon
+                closable
+                onClose={() => setSaveError(null)}
+                message="Erro ao salvar"
+                description={saveError}
+                action={
+                  <Button size="small" danger onClick={handleSave}>
+                    Tentar novamente
+                  </Button>
+                }
+              />
+            )}
 
             {/* ── Nome do pixel ── */}
             <div className="flex flex-col gap-2">
@@ -507,11 +584,19 @@ export default function ConfigurarPixelModal({
                   setPixelId(e.target.value)
                   setErrors((prev) => ({ ...prev, pixelId: '' }))
                 }}
-                status={errors.pixelId ? 'error' : undefined}
+                status={errors.pixelId ? 'error' : (duplicateIdInfo ? 'warning' : undefined)}
                 disabled={isBulk || (isEdit && mode.type === 'edit' && !!mode.provider)}
               />
               {errors.pixelId && (
                 <Typography.Text type="danger" >{errors.pixelId}</Typography.Text>
+              )}
+              {!errors.pixelId && duplicateIdInfo && (
+                <Alert
+                  type="warning"
+                  showIcon
+                  message="Este ID já está em uso"
+                  description={`Já existe um pixel configurado com este ID (${duplicateIdInfo.usedBy}). Você pode continuar, mas a Eduzz recomenda IDs únicos por pixel pra evitar duplicação de eventos.`}
+                />
               )}
             </div>
             {/* ── RN04: Seleção de eventos (RF03) ── */}
@@ -550,6 +635,52 @@ export default function ConfigurarPixelModal({
                 ))}
               </div>
             </div>
+
+            {/* ── Configuração do Initiatecheckout: quando disparar ── */}
+            {hasInitiateCheckout && (
+              <div className="flex flex-col gap-3 p-4 border border-(--ant-color-warning-border) rounded-lg bg-(--ant-color-warning-bg)">
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-1.5">
+                    <Typography.Text strong>Quando disparar o Initiatecheckout?</Typography.Text>
+                    <Tooltip title="Esse evento sinaliza a intenção de compra. Escolher o momento certo impacta a otimização das suas campanhas — quanto mais cedo o evento, maior o volume; quanto mais tarde, maior a qualidade.">
+                      <HelpCircle size={14} className="text-(--ant-color-text-tertiary) cursor-help" />
+                    </Tooltip>
+                  </div>
+                  <Typography.Text type="secondary">
+                    Selecione uma opção para continuar. Essa escolha é obrigatória.
+                  </Typography.Text>
+                </div>
+                {errors.initiateCheckoutTrigger && (
+                  <Typography.Text type="danger">{errors.initiateCheckoutTrigger}</Typography.Text>
+                )}
+                <Radio.Group
+                  value={initiateCheckoutTrigger ?? undefined}
+                  onChange={(e) => handleSelectInitiateTrigger(e.target.value)}
+                  className="block w-full"
+                >
+                  <div className="flex flex-col gap-3">
+                    <label className="p-4 border border-(--ant-color-border) rounded-lg bg-(--ant-color-bg-container) hover:border-(--ant-color-text-tertiary) transition-all flex items-start gap-3 cursor-pointer">
+                      <Radio value="pageview" className="m-0" />
+                      <div className="flex flex-col gap-1 flex-1">
+                        <Typography.Text strong>Ao abrir a página de checkout</Typography.Text>
+                        <Typography.Text type="secondary">
+                          O Initiatecheckout é disparado junto com o PageView, assim que o comprador acessa a página. Gera mais volume e ajuda a otimização logo no início do funil.
+                        </Typography.Text>
+                      </div>
+                    </label>
+                    <label className="p-4 border border-(--ant-color-border) rounded-lg bg-(--ant-color-bg-container) hover:border-(--ant-color-text-tertiary) transition-all flex items-start gap-3 cursor-pointer">
+                      <Radio value="button" className="m-0" />
+                      <div className="flex flex-col gap-1 flex-1">
+                        <Typography.Text strong>Ao clicar no botão de comprar</Typography.Text>
+                        <Typography.Text type="secondary">
+                          O Initiatecheckout é disparado quando o comprador clica no botão de finalizar compra. Gera menos volume, mas com intenção mais qualificada.
+                        </Typography.Text>
+                      </div>
+                    </label>
+                  </div>
+                </Radio.Group>
+              </div>
+            )}
 
             {/* ── RF04: Configs avançadas de Purchase ── */}
             {hasPurchase && (
@@ -755,13 +886,24 @@ export default function ConfigurarPixelModal({
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 border-t border-(--ant-color-split) flex justify-end gap-3 sticky bottom-0 bg-white z-10">
-            <Button onClick={handleClose}>Cancelar</Button>
-            <Button type="primary" onClick={handleSave}>
-              {isBulk
-                ? `Aplicar para ${selectedProdutos.length} item(ns)`
-                : 'Aplicar'}
-            </Button>
+          <div className="px-6 py-4 border-t border-(--ant-color-split) flex items-center justify-between gap-3 sticky bottom-0 bg-white z-10">
+            <label className="flex items-center gap-2 cursor-pointer text-xs text-(--ant-color-text-tertiary)">
+              <input
+                type="checkbox"
+                checked={simulateSaveError}
+                onChange={(e) => setSimulateSaveError(e.target.checked)}
+                className="accent-(--ant-color-primary)"
+              />
+              Demo: simular erro ao salvar
+            </label>
+            <div className="flex gap-3">
+              <Button onClick={handleClose}>Cancelar</Button>
+              <Button type="primary" onClick={handleSave}>
+                {isBulk
+                  ? `Aplicar para ${selectedProdutos.length} item(ns)`
+                  : 'Aplicar'}
+              </Button>
+            </div>
           </div>
         </div>
       )}

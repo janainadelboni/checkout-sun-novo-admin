@@ -2,10 +2,12 @@ import { useState } from 'react'
 import { Tooltip, Typography, Tag, Segmented } from 'antd'
 import { HelpCircle } from 'lucide-react'
 const funilEtapas = [
-  { label: 'Visitou a página', evento: 'pageview', valor: 10200, cor: '#2B4ACF' },
-  { label: 'Preencheu dados', evento: 'lead', valor: 4590, cor: 'var(--ant-color-warning)' },
-  { label: 'Dados de pagamento', evento: 'addpaymentinfo', valor: 2856, cor: 'var(--ant-color-success)' },
-  { label: 'Compra finalizada', evento: 'purchase', valor: 1224, cor: '#CF2B9E' },
+  { label: 'PageView', evento: 'pageview', valor: 10200, cor: '#2B4ACF' },
+  { label: 'FormInteraction', evento: 'forminteraction', valor: 4590, cor: 'var(--ant-color-warning)' },
+  { label: 'Lead', evento: 'lead', valor: 2856, cor: '#2BBCCF' },
+  { label: 'AddPaymentInfo', evento: 'addpaymentinfo', valor: 1820, cor: 'var(--ant-color-success)' },
+  { label: 'Initiatecheckout', evento: 'initiatecheckout', valor: 1224, cor: '#CF2B9E' },
+  { label: 'Purchase', evento: 'purchase', valor: 380, cor: '#6D2BCF' },
 ]
 
 export default function FunilDeConversao() {

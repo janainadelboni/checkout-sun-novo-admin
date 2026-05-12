@@ -14,7 +14,7 @@ import {
   Tooltip,
   Typography,
 } from 'antd'
-import { Home, ChevronLeft, Plus, Search, Trash2, HelpCircle, ChevronRight, Settings } from 'lucide-react'
+import { Home, ChevronLeft, Plus, Search, Trash2, HelpCircle, ChevronRight, Settings, BarChart3, Activity, Package, FilterX } from 'lucide-react'
 import ConfigurarPixelModal, { type ModalMode, type PixelConfig } from './ConfigurarPixelModal'
 import { EduzzLogo, CheckoutSunLogo } from '../Logos'
 
@@ -35,6 +35,7 @@ type LogEnvio = {
   dataHora: string
   status: 'Sucesso' | 'Erro'
   produtoId: number
+  gatilho?: 'pageview' | 'button'
 }
 
 const logsDeEnvio: LogEnvio[] = [
@@ -58,6 +59,11 @@ const logsDeEnvio: LogEnvio[] = [
   { key: 18, nomeEvento: 'Lead', origem: 'Navegador', dataHora: '16/03/2026 12:15:55', status: 'Erro', produtoId: 2704935 },
   { key: 19, nomeEvento: 'PageView', origem: 'Navegador', dataHora: '15/03/2026 22:05:18', status: 'Sucesso', produtoId: 9104452 },
   { key: 20, nomeEvento: 'Purchase', origem: 'Servidor', dataHora: '15/03/2026 19:48:33', status: 'Sucesso', produtoId: 2704934 },
+  { key: 21, nomeEvento: 'Initiatecheckout', origem: 'Navegador', dataHora: '19/03/2026 13:18:02', status: 'Sucesso', produtoId: 2704934, gatilho: 'button' },
+  { key: 22, nomeEvento: 'Initiatecheckout', origem: 'Navegador', dataHora: '18/03/2026 16:25:14', status: 'Sucesso', produtoId: 2030747, gatilho: 'button' },
+  { key: 23, nomeEvento: 'Initiatecheckout', origem: 'Navegador', dataHora: '17/03/2026 16:32:45', status: 'Sucesso', produtoId: 2073333, gatilho: 'pageview' },
+  { key: 24, nomeEvento: 'Initiatecheckout', origem: 'Navegador', dataHora: '17/03/2026 11:58:30', status: 'Erro', produtoId: 2073333, gatilho: 'pageview' },
+  { key: 25, nomeEvento: 'Initiatecheckout', origem: 'Navegador', dataHora: '16/03/2026 20:14:08', status: 'Sucesso', produtoId: 2704934, gatilho: 'button' },
 ]
 
 const produtosIniciais: Produto[] = [
@@ -109,6 +115,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
   const [logEventoFilter, setLogEventoFilter] = useState<string | null>(null)
   const [logStatusFilter, setLogStatusFilter] = useState<string | null>(null)
   const [logPeriodoFilter, setLogPeriodoFilter] = useState<string | null>('ultimos_30')
+  const [demoState, setDemoState] = useState<'normal' | 'no-events'>('normal')
   const [expandedId, setExpandedId] = useState<number | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<ModalMode>({ type: 'new' })
@@ -118,12 +125,12 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
   const [testProdutoFilter, setTestProdutoFilter] = useState<number | null>(null)
   const [testCode, setTestCode] = useState('')
   const [testValidated, setTestValidated] = useState(false)
-  const [testResults, setTestResults] = useState<{ evento: string; origem: string; parametro: string; dataHora: string; status: 'Sucesso' | 'Erro' }[]>([])
+  const [testResults, setTestResults] = useState<{ evento: string; origem: string; parametro: string; dataHora: string; status: 'Sucesso' | 'Erro'; gatilho?: 'pageview' | 'button' }[]>([])
 
   const testResultsRef = useRef<HTMLDivElement>(null)
   const [testHighlight, setTestHighlight] = useState(false)
 
-  const handleTestarEvento = (eventoName: string) => {
+  const handleTestarEvento = (eventoName: string, gatilho?: 'pageview' | 'button') => {
     const origens = ['Navegador', 'Servidor'] as const
     const statuses = ['Sucesso', 'Sucesso', 'Sucesso', 'Erro'] as const // 75% sucesso
     const novoResult = {
@@ -132,6 +139,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
       parametro: 'Valor customizado',
       dataHora: new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', ' às'),
       status: statuses[Math.floor(Math.random() * statuses.length)],
+      gatilho,
     }
     setTestResults((prev) => [novoResult, ...prev])
     setTestHighlight(true)
@@ -164,6 +172,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
       produtos: ['2704934'],
       diferenciarBoleto: false,
       valorCustomizado: 'nunca',
+      initiateCheckoutTrigger: 'button',
     },
     2704935: {
       provider: 'meta',
@@ -175,6 +184,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
       produtos: ['2704935'],
       diferenciarBoleto: false,
       valorCustomizado: 'nunca',
+      initiateCheckoutTrigger: null,
     },
     2411153: {
       provider: 'meta',
@@ -186,6 +196,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
       produtos: ['2411153'],
       diferenciarBoleto: false,
       valorCustomizado: 'nunca',
+      initiateCheckoutTrigger: null,
     },
     2030747: {
       provider: 'meta',
@@ -197,6 +208,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
       produtos: ['2030747'],
       diferenciarBoleto: false,
       valorCustomizado: 'sempre',
+      initiateCheckoutTrigger: 'button',
     },
     2576289: {
       provider: 'meta',
@@ -208,6 +220,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
       produtos: ['2576289'],
       diferenciarBoleto: false,
       valorCustomizado: 'nunca',
+      initiateCheckoutTrigger: null,
     },
     2073333: {
       provider: 'meta',
@@ -219,6 +232,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
       produtos: ['2073333'],
       diferenciarBoleto: true,
       valorCustomizado: 'nunca',
+      initiateCheckoutTrigger: 'pageview',
     },
     9104452: {
       provider: 'meta',
@@ -230,6 +244,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
       produtos: ['9104452'],
       diferenciarBoleto: false,
       valorCustomizado: 'nunca',
+      initiateCheckoutTrigger: null,
     },
     2073334: {
       provider: 'meta',
@@ -241,6 +256,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
       produtos: ['2073334'],
       diferenciarBoleto: false,
       valorCustomizado: 'nunca',
+      initiateCheckoutTrigger: null,
     },
   })
 
@@ -250,7 +266,9 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
     const allProdutoIds = produtos.map(p => p.id)
     const produtoNomes: Record<number, string> = {}
     for (const p of produtos) { produtoNomes[p.id] = p.nome }
-    setModalMode({ type: 'bulk', produtoIds: allProdutoIds, produtoNomes, provider: providerKey })
+    // Pega uma config existente do mesmo provider pra herdar escolhas já feitas (ex: trigger do Initiatecheckout)
+    const existing = Object.values(pixelConfigs).find(c => c.provider === providerKey)
+    setModalMode({ type: 'bulk', produtoIds: allProdutoIds, produtoNomes, provider: providerKey, existing })
     setModalOpen(true)
   }
 
@@ -299,19 +317,44 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
     logEventoFilter !== null ||
     logStatusFilter !== null
 
-  const logsFiltrados = logsDeEnvio.filter((log) => {
+  // Datasets dependentes do estado de demo
+  const logsBase = demoState === 'no-events' ? [] : logsDeEnvio
+  const produtosBase = produtos
+
+  const logsFiltrados = logsBase.filter((log) => {
     if (logProdutoFilter.length > 0 && !logProdutoFilter.includes(log.produtoId)) return false
     if (logOrigemFilter && log.origem !== logOrigemFilter) return false
-    if (logEventoFilter && log.nomeEvento !== logEventoFilter) return false
+    if (logEventoFilter) {
+      const [filterEvent, filterGatilho] = logEventoFilter.split(':')
+      if (log.nomeEvento !== filterEvent) return false
+      if (filterGatilho && log.gatilho !== filterGatilho) return false
+    }
     if (logStatusFilter && log.status !== logStatusFilter) return false
     return true
   })
 
-  // Opcoes de filtro derivadas dos dados
-  const eventosUnicos = [...new Set(logsDeEnvio.map((l) => l.nomeEvento))]
+  // Opcoes do filtro de evento — expande Initiatecheckout em dois itens (pageview / button)
+  const eventoFilterOptions = (() => {
+    const eventos = [...new Set(logsBase.map((l) => l.nomeEvento))]
+    const opts: { value: string; label: string }[] = []
+    for (const ev of eventos) {
+      if (ev === 'Initiatecheckout') {
+        opts.push({ value: 'Initiatecheckout:pageview', label: 'Initiatecheckout · Ao abrir página' })
+        opts.push({ value: 'Initiatecheckout:button', label: 'Initiatecheckout · Ao clicar no botão' })
+      } else {
+        opts.push({ value: ev, label: ev })
+      }
+    }
+    return opts
+  })()
+
+  const logEventoFilterLabel = (() => {
+    if (!logEventoFilter) return 'todos'
+    return eventoFilterOptions.find((o) => o.value === logEventoFilter)?.label ?? logEventoFilter
+  })()
 
   // Filtered products for the table
-  const produtosFiltrados = produtos.filter((p) => {
+  const produtosFiltrados = produtosBase.filter((p) => {
     if (produtoFilter.length > 0 && !produtoFilter.includes(p.id)) return false
     return true
   })
@@ -428,13 +471,14 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
   }
 
   // Etapas do funil usando os mesmos eventos cadastráveis (topo → fundo)
+  const semDadosFunil = demoState === 'no-events'
   const funilEtapas = [
-    { label: 'PageView', valor: 10200, cor: '#2B4ACF' },
-    { label: 'FormInteraction', valor: 4590, cor: 'var(--ant-color-warning)' },
-    { label: 'Lead', valor: 2856, cor: '#2BBCCF' },
-    { label: 'AddPaymentInfo', valor: 1820, cor: 'var(--ant-color-success)' },
-    { label: 'Initiatecheckout', valor: 1224, cor: '#CF2B9E' },
-    { label: 'Purchase', valor: 380, cor: '#6D2BCF' },
+    { label: 'PageView', valor: semDadosFunil ? 0 : 10200, cor: '#2B4ACF' },
+    { label: 'FormInteraction', valor: semDadosFunil ? 0 : 4590, cor: 'var(--ant-color-warning)' },
+    { label: 'Lead', valor: semDadosFunil ? 0 : 2856, cor: '#2BBCCF' },
+    { label: 'AddPaymentInfo', valor: semDadosFunil ? 0 : 1820, cor: 'var(--ant-color-success)' },
+    { label: 'Initiatecheckout', valor: semDadosFunil ? 0 : 1224, cor: '#CF2B9E' },
+    { label: 'Purchase', valor: semDadosFunil ? 0 : 380, cor: '#6D2BCF' },
   ]
   const funilTopo = funilEtapas[0].valor || 1
   const funilComPercent = funilEtapas.map((etapa, i) => {
@@ -537,13 +581,29 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                   </Typography.Text>
                 </div>
               </div>
-              <Button
-                type="primary"
-                icon={<Plus size={14} />}
-                onClick={handleOpenNew}
-              >
-                Configurar e vincular produtos
-              </Button>
+              <div className="flex items-center gap-3">
+                {/* Toggle de demo dos estados */}
+                <div className="flex items-center gap-2">
+                  <Typography.Text type="secondary" className="text-xs">Demo:</Typography.Text>
+                  <Select
+                    size="small"
+                    value={demoState}
+                    onChange={(v) => setDemoState(v)}
+                    options={[
+                      { value: 'normal', label: 'Estado normal' },
+                      { value: 'no-events', label: 'Pixel novo (sem eventos)' },
+                    ]}
+                    className="!w-56"
+                  />
+                </div>
+                <Button
+                  type="primary"
+                  icon={<Plus size={14} />}
+                  onClick={handleOpenNew}
+                >
+                  Configurar e vincular produtos
+                </Button>
+              </div>
             </div>
 
             {/* Tabs: Produtos / Logs de Eventos */}
@@ -641,41 +701,53 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                         <div className="flex gap-6 items-stretch">
                           {/* Funil - Esquerda */}
                           <div className="flex-1 flex flex-col justify-between">
-                            {/* Header do funil */}
-                            <div className="flex items-center justify-end gap-0 mb-1">
-                              <Tooltip title="Taxa calculada com base no PageView do período selecionado.">
-                                <div className="w-[50px] text-right cursor-help">
-                                  <Typography.Text type="secondary" className="font-medium whitespace-nowrap">Taxa</Typography.Text>
-                                </div>
-                              </Tooltip>
-                              <div className="w-[70px] text-right">
-                                <Typography.Text type="secondary" className="font-medium whitespace-nowrap">Qtd.</Typography.Text>
+                            {semDadosFunil ? (
+                              <div className="flex flex-col items-center justify-center py-12 px-6 border border-dashed border-(--ant-color-border) rounded-lg bg-(--ant-color-fill-quaternary) h-full min-h-[280px]">
+                                <BarChart3 size={36} className="text-(--ant-color-text-quaternary) mb-3" />
+                                <Typography.Text strong className="mb-1">Sem dados no período</Typography.Text>
+                                <Typography.Text type="secondary" className="text-center max-w-[360px]">
+                                  Nenhum evento foi disparado nos últimos {funilPeriodo === 'ultimos_7' ? '7' : funilPeriodo === 'ultimos_15' ? '15' : funilPeriodo === 'ultimos_30' ? '30' : '90'} dias. Quando o pixel registrar eventos, eles aparecerão aqui.
+                                </Typography.Text>
                               </div>
-                            </div>
+                            ) : (
+                              <>
+                                {/* Header do funil */}
+                                <div className="flex items-center justify-end gap-0 mb-1">
+                                  <Tooltip title="Taxa calculada com base no PageView do período selecionado.">
+                                    <div className="w-[50px] text-right cursor-help">
+                                      <Typography.Text type="secondary" className="font-medium whitespace-nowrap">Taxa</Typography.Text>
+                                    </div>
+                                  </Tooltip>
+                                  <div className="w-[70px] text-right">
+                                    <Typography.Text type="secondary" className="font-medium whitespace-nowrap">Qtd.</Typography.Text>
+                                  </div>
+                                </div>
 
-                            {/* Etapas */}
-                            {funilComPercent.map((etapa) => (
-                              <div key={etapa.label} className="flex items-center gap-3">
-                                <div className="w-[180px] shrink-0">
-                                  <Tag color="blue">{etapa.label}</Tag>
-                                </div>
-                                <div className="flex-1 h-6 bg-(--ant-color-fill-tertiary) rounded overflow-hidden">
-                                  <div
-                                    className="h-full rounded transition-all min-w-1"
-                                    style={{
-                                      width: `${etapa.topoFundo}%`,
-                                      backgroundColor: etapa.cor,
-                                    }}
-                                  />
-                                </div>
-                                <div className="w-[50px] text-right shrink-0">
-                                  <Typography.Text strong >{etapa.topoFundo}%</Typography.Text>
-                                </div>
-                                <div className="w-[70px] text-right shrink-0">
-                                  <Typography.Text type="secondary" >{etapa.valor.toLocaleString('pt-BR')}</Typography.Text>
-                                </div>
-                              </div>
-                            ))}
+                                {/* Etapas */}
+                                {funilComPercent.map((etapa) => (
+                                  <div key={etapa.label} className="flex items-center gap-3">
+                                    <div className="w-[180px] shrink-0">
+                                      <Tag color="blue">{etapa.label}</Tag>
+                                    </div>
+                                    <div className="flex-1 h-6 bg-(--ant-color-fill-tertiary) rounded overflow-hidden">
+                                      <div
+                                        className="h-full rounded transition-all min-w-1"
+                                        style={{
+                                          width: `${etapa.topoFundo}%`,
+                                          backgroundColor: etapa.cor,
+                                        }}
+                                      />
+                                    </div>
+                                    <div className="w-[50px] text-right shrink-0">
+                                      <Typography.Text strong >{etapa.topoFundo}%</Typography.Text>
+                                    </div>
+                                    <div className="w-[70px] text-right shrink-0">
+                                      <Typography.Text type="secondary" >{etapa.valor.toLocaleString('pt-BR')}</Typography.Text>
+                                    </div>
+                                  </div>
+                                ))}
+                              </>
+                            )}
                           </div>
 
                           {/* Cards - Direita */}
@@ -683,14 +755,25 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                             {/* Saúde do pixel */}
                             <div className="border border-(--ant-color-split) rounded-lg p-4 flex flex-col gap-2.5">
                               <Typography.Text type="secondary" className="font-medium">Saúde do pixel</Typography.Text>
-                              <div className="flex items-center justify-between">
-                                <Typography.Text >Último evento</Typography.Text>
-                                <Tag color="success" className="text-sm border-solid m-0">há 12 min</Tag>
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <Typography.Text >Eventos com erro</Typography.Text>
-                                <Tag color="error" className="text-sm border-solid m-0">4 (20%)</Tag>
-                              </div>
+                              {semDadosFunil ? (
+                                <div className="flex flex-col items-center gap-1.5 py-3">
+                                  <Activity size={20} className="text-(--ant-color-text-quaternary)" />
+                                  <Typography.Text type="secondary" className="text-center text-xs">
+                                    Nenhum evento enviado ainda
+                                  </Typography.Text>
+                                </div>
+                              ) : (
+                                <>
+                                  <div className="flex items-center justify-between">
+                                    <Typography.Text >Último evento</Typography.Text>
+                                    <Tag color="success" className="text-sm border-solid m-0">há 12 min</Tag>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <Typography.Text >Eventos com erro</Typography.Text>
+                                    <Tag color="error" className="text-sm border-solid m-0">4 (20%)</Tag>
+                                  </div>
+                                </>
+                              )}
                             </div>
 
                             {/* Cobertura por evento */}
@@ -902,18 +985,34 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                             </div>
                           )
                         })}
+
+                        {/* Empty state — filtro retorna 0 produtos */}
+                        {paginatedProdutos.length === 0 && (
+                          <div className="flex flex-col items-center justify-center py-12 px-6 gap-3">
+                            <FilterX size={36} className="text-(--ant-color-text-quaternary)" />
+                            <div className="flex flex-col items-center gap-1">
+                              <Typography.Text strong>Nenhum produto encontrado</Typography.Text>
+                              <Typography.Text type="secondary" className="text-center max-w-[420px]">
+                                Ajuste os filtros pra ver outros produtos.
+                              </Typography.Text>
+                            </div>
+                            <Button onClick={handleClearProductFilters}>Limpar filtros</Button>
+                          </div>
+                        )}
                       </div>
 
                       {/* Pagination */}
-                      <div className="flex justify-end">
-                        <Pagination
-                          current={currentPage}
-                          total={produtosFiltrados.length}
-                          pageSize={pageSize}
-                          onChange={setCurrentPage}
-                          showSizeChanger={false}
-                        />
-                      </div>
+                      {paginatedProdutos.length > 0 && (
+                        <div className="flex justify-end">
+                          <Pagination
+                            current={currentPage}
+                            total={produtosFiltrados.length}
+                            pageSize={pageSize}
+                            onChange={setCurrentPage}
+                            showSizeChanger={false}
+                          />
+                        </div>
+                      )}
                     </div>
                   ),
                 },
@@ -982,7 +1081,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                               placeholder="Todos"
                               value={logEventoFilter}
                               onChange={(value) => setLogEventoFilter(value ?? null)}
-                              options={eventosUnicos.map((ev) => ({ value: ev, label: ev }))}
+                              options={eventoFilterOptions}
                               className="w-full"
                             />
                           </div>
@@ -1018,7 +1117,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                           )}
                           <Tag className="text-sm">Últimos 30 dias</Tag>
                           <Tag className="text-sm">Origem: {logOrigemFilter === 'Navegador' ? 'Pixel' : logOrigemFilter === 'Servidor' ? 'API' : 'Todos'}</Tag>
-                          <Tag className="text-sm">Eventos: {logEventoFilter ?? 'todos'}</Tag>
+                          <Tag className="text-sm">Eventos: {logEventoFilterLabel}</Tag>
                           <Tag className="text-sm">Status: {logStatusFilter ?? 'todos'}</Tag>
                           {hasAnyLogFilter && (
                             <a href="#" className="text-(--ant-color-text-tertiary) text-sm" onClick={(e) => { e.preventDefault(); handleClearAllLogFilters() }}>
@@ -1043,6 +1142,34 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
 
                       {/* Logs table */}
                       <Table
+                        locale={{
+                          emptyText: (
+                            <div className="flex flex-col items-center justify-center py-10 px-6 gap-3">
+                              {logsBase.length === 0 ? (
+                                <>
+                                  <Activity size={36} className="text-(--ant-color-text-quaternary)" />
+                                  <div className="flex flex-col items-center gap-1">
+                                    <Typography.Text strong>Nenhum evento registrado ainda</Typography.Text>
+                                    <Typography.Text type="secondary" className="text-center max-w-[420px]">
+                                      Os eventos enviados pelos seus produtos vão aparecer aqui assim que o pixel começar a registrá-los.
+                                    </Typography.Text>
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <FilterX size={36} className="text-(--ant-color-text-quaternary)" />
+                                  <div className="flex flex-col items-center gap-1">
+                                    <Typography.Text strong>Nenhum log encontrado</Typography.Text>
+                                    <Typography.Text type="secondary" className="text-center max-w-[420px]">
+                                      Ajuste os filtros pra ver outros eventos.
+                                    </Typography.Text>
+                                  </div>
+                                  <Button onClick={handleClearAllLogFilters}>Limpar filtros</Button>
+                                </>
+                              )}
+                            </div>
+                          ),
+                        }}
                         dataSource={logsFiltrados}
                         columns={[
                           {
@@ -1058,9 +1185,13 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                             title: 'Evento',
                             dataIndex: 'nomeEvento',
                             key: 'nomeEvento',
-                            render: (evento: string) => (
-                              <Tag color="blue">{evento}</Tag>
-                            ),
+                            render: (evento: string, record: LogEnvio) => {
+                              if (evento === 'Initiatecheckout' && record.gatilho) {
+                                const sub = record.gatilho === 'pageview' ? 'PageView' : 'Botão'
+                                return <Tag color="blue">Initiatecheckout · {sub}</Tag>
+                              }
+                              return <Tag color="blue">{evento}</Tag>
+                            },
                           },
                           {
                             title: 'Origem',
@@ -1188,21 +1319,22 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
 
                       {/* Event cards - 2 columns */}
                       <div className={`grid grid-cols-2 gap-4 ${cardsDisabled}`}>
-                        {[
-                          { name: 'PageView', desc: 'Quando o comprador acessa a página do checkout', cor: '#2B4ACF' },
-                          { name: 'FormInteraction', desc: 'Ao preencher nome, e-mail ou outro campo inicial', cor: 'var(--ant-color-warning)' },
-                          { name: 'Lead', desc: 'Ao preencher nome, email e telefone', cor: '#2BBCCF' },
-                          { name: 'AddPaymentInfo', desc: 'Ao interagir com formas de pagamento', cor: 'var(--ant-color-success)' },
-                          { name: 'Initiatecheckout', desc: 'Ao interagir com o botão de finalizar compra', cor: '#CF2B9E' },
-                          { name: 'Purchase', desc: 'Quando o pagamento é confirmado', cor: '#6D2BCF' },
-                        ].map((ev) => (
-                          <div key={ev.name} className="border border-(--ant-color-border) rounded-lg p-4 flex flex-col gap-2">
+                        {([
+                          { name: 'PageView', label: 'PageView', desc: 'Quando o comprador acessa a página do checkout', cor: '#2B4ACF' },
+                          { name: 'FormInteraction', label: 'FormInteraction', desc: 'Ao preencher nome, e-mail ou outro campo inicial', cor: 'var(--ant-color-warning)' },
+                          { name: 'Lead', label: 'Lead', desc: 'Ao preencher nome, email e telefone', cor: '#2BBCCF' },
+                          { name: 'AddPaymentInfo', label: 'AddPaymentInfo', desc: 'Ao interagir com formas de pagamento', cor: 'var(--ant-color-success)' },
+                          { name: 'Initiatecheckout', label: 'Initiatecheckout · PageView', desc: 'Disparado ao abrir a página de checkout (junto com o PageView)', cor: '#CF2B9E', gatilho: 'pageview' as const },
+                          { name: 'Initiatecheckout', label: 'Initiatecheckout · Botão', desc: 'Disparado ao clicar no botão de finalizar compra', cor: '#CF2B9E', gatilho: 'button' as const },
+                          { name: 'Purchase', label: 'Purchase', desc: 'Quando o pagamento é confirmado', cor: '#6D2BCF' },
+                        ]).map((ev) => (
+                          <div key={ev.label} className="border border-(--ant-color-border) rounded-lg p-4 flex flex-col gap-2">
                             <div className="flex items-center justify-between">
-                              <Tag color="blue">{ev.name}</Tag>
+                              <Tag color="blue">{ev.label}</Tag>
                               <Button
                                 type="text"
                                 disabled={!testValidated}
-                                onClick={() => handleTestarEvento(ev.name)}
+                                onClick={() => handleTestarEvento(ev.name, ev.gatilho)}
                                 className="text-(--ant-color-text-tertiary) flex items-center gap-1"
                               >
                                 <ChevronRight size={14} /> Testar
@@ -1237,9 +1369,13 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                                 title: 'Evento',
                                 dataIndex: 'evento',
                                 key: 'evento',
-                                render: (evento: string) => (
-                                  <Tag color="blue">{evento}</Tag>
-                                ),
+                                render: (evento: string, record: { gatilho?: 'pageview' | 'button' }) => {
+                                  if (evento === 'Initiatecheckout' && record.gatilho) {
+                                    const sub = record.gatilho === 'pageview' ? 'PageView' : 'Botão'
+                                    return <Tag color="blue">Initiatecheckout · {sub}</Tag>
+                                  }
+                                  return <Tag color="blue">{evento}</Tag>
+                                },
                               },
                               {
                                 title: 'Origem',

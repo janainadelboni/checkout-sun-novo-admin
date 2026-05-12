@@ -8,6 +8,7 @@ import {
   Layout,
   Menu,
   Modal,
+  Popover,
   Segmented,
   Select,
   Switch,
@@ -25,6 +26,7 @@ import {
   Bold,
   Italic,
   Underline,
+  Smile,
   HelpCircle,
   ChevronLeft,
   Home,
@@ -38,6 +40,7 @@ import {
   Link as LinkIcon,
   QrCode,
   ExternalLink,
+  Sparkles,
 } from 'lucide-react'
 import {
   DndContext,
@@ -148,6 +151,8 @@ function buildBumpOptions(allProducts, mainType, existingBumpProductIds) {
 const MAX_BUMPS_PER_PRODUCT = 5
 const MAX_COPY_LENGTH = 500
 
+const EMOJI_PICKER = ['🔥', '⚡', '✨', '🎁', '🚀', '💎', '⭐', '🏆', '💡', '✅', '❤️', '👏', '🙌', '💰', '⏰', '📈', '🎯', '🛒', '🎉', '👀', '🤩', '💪', '👇', '⚠️']
+
 // ── HELPERS ──────────────────────────────────────────────────────────
 function fmtBRL(cents) {
   if (cents == null) return '—'
@@ -224,6 +229,24 @@ function RichTextEditor({ value, onChange, placeholder, maxLength = MAX_COPY_LEN
     onChange(editorRef.current?.innerHTML || '')
   }
 
+  const insertEmoji = (emoji) => {
+    editorRef.current?.focus()
+    const inserted = document.execCommand('insertText', false, emoji)
+    if (!inserted) {
+      // Fallback caso o execCommand não esteja disponível
+      const sel = window.getSelection()
+      if (sel && sel.rangeCount > 0) {
+        const range = sel.getRangeAt(0)
+        range.deleteContents()
+        range.insertNode(document.createTextNode(emoji))
+        range.collapse(false)
+        sel.removeAllRanges()
+        sel.addRange(range)
+      }
+    }
+    handleInput()
+  }
+
   const handleInput = () => {
     const html = editorRef.current?.innerHTML || ''
     const plain = stripHtml(html)
@@ -261,6 +284,29 @@ function RichTextEditor({ value, onChange, placeholder, maxLength = MAX_COPY_LEN
           <Tooltip title="Sublinhado (Cmd+U)">
             <Button type="text" icon={<Underline size={14} />} onMouseDown={e => e.preventDefault()} onClick={() => handleCommand('underline')} />
           </Tooltip>
+          <Popover
+            trigger="click"
+            placement="bottomLeft"
+            content={
+              <div className="grid grid-cols-6 gap-1 w-56">
+                {EMOJI_PICKER.map((e) => (
+                  <button
+                    key={e}
+                    type="button"
+                    onMouseDown={(ev) => ev.preventDefault()}
+                    onClick={() => insertEmoji(e)}
+                    className="text-lg p-1 rounded hover:bg-(--ant-color-fill-tertiary) cursor-pointer"
+                  >
+                    {e}
+                  </button>
+                ))}
+              </div>
+            }
+          >
+            <Tooltip title="Inserir emoji">
+              <Button type="text" icon={<Smile size={14} />} onMouseDown={e => e.preventDefault()} />
+            </Tooltip>
+          </Popover>
         </div>
         <div className="ml-auto tabular-nums">
           <Typography.Text type="secondary">{charCount}/{maxLength}</Typography.Text>
@@ -356,7 +402,7 @@ function BumpCard({ bumpProduct, priceCents, copy, salesLimit, draft = false }) 
 }
 
 // ── CHECKOUT PREVIEW (entire checkout flow for the main product) ─────
-function CheckoutPreview({ mainProduct, allProducts, activeBumps, draftBump }) {
+function CheckoutPreview({ mainProduct, allProducts, activeBumps, draftBump, sticky = true }) {
   const [device, setDevice] = useState('desktop')
   const draftProduct = draftBump?.bumpProductId ? findProduct(allProducts, draftBump.bumpProductId) : null
   const hasAnyBump = activeBumps.length > 0 || draftProduct
@@ -369,7 +415,7 @@ function CheckoutPreview({ mainProduct, allProducts, activeBumps, draftBump }) {
   const installments = Math.round(mainProduct.priceCents / 12)
 
   return (
-    <div className="border border-(--ant-color-split) rounded-lg bg-(--ant-color-bg-container) overflow-hidden sticky top-6">
+    <div className={`border border-(--ant-color-split) rounded-lg bg-(--ant-color-bg-container) overflow-hidden ${sticky ? 'sticky top-6' : ''}`}>
       {/* Header */}
       <div className="px-4 py-2.5 border-b border-(--ant-color-split) flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -494,6 +540,7 @@ function BumpForm({ mainProduct, allProducts, existingBumpProductIds, editing, o
   const [hasLimit, setHasLimit] = useState(!!editing?.salesLimit)
   const [salesLimit, setSalesLimit] = useState(editing?.salesLimit || null)
   const [copy, setCopy] = useState(editing?.copy || '')
+  const [includeOnThankYouPage, setIncludeOnThankYouPage] = useState(editing?.includeOnThankYouPage !== false)
 
   useEffect(() => {
     onDraftChange?.({ bumpProductId, priceCents, salesLimit: hasLimit ? salesLimit : null, copy })
@@ -522,130 +569,147 @@ function BumpForm({ mainProduct, allProducts, existingBumpProductIds, editing, o
       salesCount: editing?.salesCount || 0,
       copy,
       active: editing?.active !== false,
+      includeOnThankYouPage,
     })
   }
 
   return (
-    <div className="border border-(--ant-color-split) rounded-lg bg-(--ant-color-fill-quaternary)">
-      <div className="px-5 py-3">
-        <Typography.Text strong>{editing ? 'Editar bump' : 'Novo bump'}</Typography.Text>
-      </div>
-      <div className="mx-5 border-t border-(--ant-color-split)" />
-
-      {/* Bump product selector */}
-      <div className="flex flex-col gap-1.5 px-5 py-4">
-        <div className="flex items-center gap-1">
-          <label className="font-medium text-(--ant-color-text)">
-            Produto do bump<span className="text-(--ant-color-error) ml-0.5">*</span>
-          </label>
-          <Tooltip title={`Apenas produtos compatíveis com ${PRODUCT_TYPES[mainProduct.type]} aparecem na lista`}>
-            <HelpCircle size={14} className="text-(--ant-color-text-quaternary) cursor-help" />
-          </Tooltip>
+    <div className="flex flex-col">
+      {/* Body */}
+      <div className="px-6 py-5 flex flex-col gap-6 max-h-[60vh] overflow-y-auto">
+        {/* Produto do bump */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-1">
+            <Typography.Text strong>
+              Produto do bump<span className="text-(--ant-color-error) ml-0.5">*</span>
+            </Typography.Text>
+            <Tooltip title={`Apenas produtos compatíveis com ${PRODUCT_TYPES[mainProduct.type]} aparecem na lista`}>
+              <HelpCircle size={14} className="text-(--ant-color-text-quaternary) cursor-help" />
+            </Tooltip>
+          </div>
+          <Select
+            value={bumpProductId}
+            onChange={(v) => {
+              setBumpProductId(v)
+              const p = findProduct(allProducts, v)
+              if (p && priceCents == null) setPriceCents(p.priceCents)
+            }}
+            placeholder="Buscar por nome ou ID do produto"
+            showSearch
+            filterOption={(input, option) => {
+              if (!option) return false
+              const q = input.toLowerCase()
+              return (option.search || option.label || '').toLowerCase().includes(q)
+            }}
+            className="w-full"
+            options={bumpOptions}
+            notFoundContent={<Typography.Text type="secondary">Nenhum produto compatível</Typography.Text>}
+          />
         </div>
-        <Select
-          value={bumpProductId}
-          onChange={(v) => {
-            setBumpProductId(v)
-            const p = findProduct(allProducts, v)
-            if (p && priceCents == null) setPriceCents(p.priceCents)
-          }}
-          placeholder="Buscar por nome ou ID do produto"
-          showSearch
-          filterOption={(input, option) => {
-            if (!option) return false
-            const q = input.toLowerCase()
-            return (option.search || option.label || '').toLowerCase().includes(q)
-          }}
-          className="w-full"
-          options={bumpOptions}
-          notFoundContent={<Typography.Text type="secondary">Nenhum produto compatível</Typography.Text>}
-        />
-      </div>
-      <div className="mx-5 border-t border-(--ant-color-split)" />
 
-      {/* Price */}
-      <div className="flex flex-col gap-1.5 px-5 py-4">
-        <div className="flex items-center gap-1">
-          <label className="font-medium text-(--ant-color-text)">
-            Preço com desconto<span className="text-(--ant-color-error) ml-0.5">*</span>
-          </label>
-          <Tooltip title="Defina um preço promocional menor que o avulso. O desconto aparece como atrativo no checkout.">
-            <HelpCircle size={14} className="text-(--ant-color-text-quaternary) cursor-help" />
-          </Tooltip>
-        </div>
-        <div className="flex items-center gap-3 flex-wrap">
-          {avulso && (
-            <Typography.Text type="secondary" className="whitespace-nowrap">
-              De <span className="line-through">{fmtBRL(avulso)}</span> por
+        {/* Preço com desconto */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-1">
+            <Typography.Text strong>
+              Preço com desconto<span className="text-(--ant-color-error) ml-0.5">*</span>
+            </Typography.Text>
+            <Tooltip title="Defina um preço promocional menor que o avulso. O desconto aparece como atrativo no checkout.">
+              <HelpCircle size={14} className="text-(--ant-color-text-quaternary) cursor-help" />
+            </Tooltip>
+          </div>
+          <div className="flex items-center gap-3 flex-wrap">
+            {avulso && (
+              <Typography.Text type="secondary" className="whitespace-nowrap">
+                De <span className="line-through">{fmtBRL(avulso)}</span> por
+              </Typography.Text>
+            )}
+            <InputNumber
+              value={priceCents != null ? priceCents / 100 : null}
+              onChange={(v) => setPriceCents(v != null ? Math.round(v * 100) : null)}
+              placeholder="0,00"
+              min={0}
+              precision={2}
+              decimalSeparator=","
+              prefix="R$"
+              className="!w-40"
+              disabled={!bumpProductId}
+            />
+            {avulso && discountPct > 0 && (
+              <Tag color="success" className="m-0">−{discountPct}% off</Tag>
+            )}
+            {avulso && discountPct < 0 && (
+              <Tag color="warning" className="m-0">+{Math.abs(discountPct)}% acima do avulso</Tag>
+            )}
+            {avulso && discountPct === 0 && priceCents != null && (
+              <Typography.Text type="secondary" className="text-xs">Sem desconto</Typography.Text>
+            )}
+          </div>
+          {bumpProductId && (
+            <Typography.Text type="secondary">
+              Use um valor menor que o avulso para gerar percepção de oferta no checkout.
             </Typography.Text>
           )}
-          <InputNumber
-            value={priceCents != null ? priceCents / 100 : null}
-            onChange={(v) => setPriceCents(v != null ? Math.round(v * 100) : null)}
-            placeholder="0,00"
-            min={0}
-            precision={2}
-            decimalSeparator=","
-            prefix="R$"
-            className="!w-40"
-            disabled={!bumpProductId}
+        </div>
+
+        {/* Limite de venda */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Switch checked={hasLimit} onChange={setHasLimit} size="small" />
+            <Typography.Text>Limitar venda a</Typography.Text>
+            <InputNumber
+              value={salesLimit}
+              onChange={setSalesLimit}
+              placeholder="100"
+              min={1}
+              disabled={!hasLimit}
+              className="!w-24"
+            />
+            <Typography.Text>unidades</Typography.Text>
+            <Tooltip title='Útil para criar escassez ("primeiras 100 unidades")'>
+              <HelpCircle size={14} className="text-(--ant-color-text-quaternary) cursor-help" />
+            </Tooltip>
+          </div>
+          {hasLimit && salesLimit && avulso && (
+            <Typography.Text type="secondary">
+              Após {salesLimit} unidades vendidas, o preço volta ao valor avulso de {fmtBRL(avulso)}.
+            </Typography.Text>
+          )}
+        </div>
+
+        {/* Descrição */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-1">
+            <Typography.Text strong>Descrição do bump</Typography.Text>
+            <Tooltip title="Aparece no checkout. Suporta negrito, itálico, sublinhado, emoji e quebra de linha.">
+              <HelpCircle size={14} className="text-(--ant-color-text-quaternary) cursor-help" />
+            </Tooltip>
+          </div>
+          <RichTextEditor
+            value={copy}
+            onChange={setCopy}
+            placeholder="Ex: Aproveite esta oferta exclusiva e complemente seu aprendizado..."
           />
-          {avulso && discountPct > 0 && (
-            <Tag color="success" className="m-0">−{discountPct}% off</Tag>
-          )}
-          {avulso && discountPct < 0 && (
-            <Tag color="warning" className="m-0">+{Math.abs(discountPct)}% acima do avulso</Tag>
-          )}
-          {avulso && discountPct === 0 && priceCents != null && (
-            <Typography.Text type="secondary" className="text-xs">Sem desconto</Typography.Text>
-          )}
         </div>
-        {bumpProductId && (
-          <Typography.Text type="secondary" className="text-xs">
-            Use um valor menor que o avulso para gerar percepção de oferta no checkout.
-          </Typography.Text>
-        )}
-      </div>
-      <div className="mx-5 border-t border-(--ant-color-split)" />
 
-      {/* Sales limit (inline phrase) */}
-      <div className="flex items-center gap-2 flex-wrap px-5 py-4">
-        <Switch checked={hasLimit} onChange={setHasLimit} size="small" />
-        <Typography.Text>Limitar venda a</Typography.Text>
-        <InputNumber
-          value={salesLimit}
-          onChange={setSalesLimit}
-          placeholder="100"
-          min={1}
-          disabled={!hasLimit}
-          className="!w-24"
-        />
-        <Typography.Text>unidades</Typography.Text>
-        <Tooltip title='Útil para criar escassez ("primeiras 100 unidades")'>
-          <HelpCircle size={14} className="text-(--ant-color-text-quaternary) cursor-help" />
-        </Tooltip>
-      </div>
-      <div className="mx-5 border-t border-(--ant-color-split)" />
-
-      {/* Copy */}
-      <div className="flex flex-col gap-1.5 px-5 py-4">
-        <div className="flex items-center gap-1">
-          <label className="font-medium text-(--ant-color-text)">
-            Descrição do bump
-          </label>
-          <Tooltip title="Aparece no checkout. Suporta negrito, itálico, sublinhado e quebra de linha.">
-            <HelpCircle size={14} className="text-(--ant-color-text-quaternary) cursor-help" />
-          </Tooltip>
+        {/* Página de obrigado */}
+        <div className="flex items-start gap-3">
+          <Switch
+            checked={includeOnThankYouPage}
+            onChange={setIncludeOnThankYouPage}
+            size="small"
+            className="mt-0.5"
+          />
+          <div className="flex-1 flex flex-col gap-0.5">
+            <Typography.Text>Incluir este bump na página de obrigado</Typography.Text>
+            <Typography.Text type="secondary">
+              Re-oferta este bump após a compra para quem não o adquiriu no checkout
+            </Typography.Text>
+          </div>
         </div>
-        <RichTextEditor
-          value={copy}
-          onChange={setCopy}
-          placeholder="Ex: Aproveite esta oferta exclusiva e complemente seu aprendizado..."
-        />
       </div>
-      <div className="mx-5 border-t border-(--ant-color-split)" />
 
-      <div className="flex items-center justify-end gap-2 px-5 py-3">
+      {/* Footer */}
+      <div className="px-6 py-4 border-t border-(--ant-color-split) flex justify-end gap-3 sticky bottom-0 bg-white z-10">
         <Button onClick={onCancel}>Cancelar</Button>
         <Button type="primary" disabled={!canSave} onClick={handleSave}>
           {editing ? 'Salvar alterações' : 'Adicionar bump'}
@@ -700,9 +764,13 @@ function SortableBumpItem({ bump, allProducts, onEdit, onRemove }) {
             </Typography.Text>
           )}
           {discountPct > 0 && <Tag color="success">-{discountPct}%</Tag>}
-          {bump.salesLimit && (
+          {bump.salesLimit ? (
             <Tag color="warning">
               {bump.salesCount || 0}/{bump.salesLimit} vendidos
+            </Tag>
+          ) : (
+            <Tag>
+              {bump.salesCount || 0} vendidos
             </Tag>
           )}
         </div>
@@ -777,6 +845,10 @@ function BumpsDetailView({ product, allProducts, onClose, onUpdateProduct }) {
     setWorkingProduct(p => ({ ...p, bumpsEnabled: enabled }))
   }
 
+  const handleToggleThankYouPage = (enabled) => {
+    setWorkingProduct(p => ({ ...p, offerOnThankYouPage: enabled }))
+  }
+
   const handleDragEnd = (event) => {
     const { active, over } = event
     if (!over || active.id === over.id) return
@@ -848,32 +920,103 @@ function BumpsDetailView({ product, allProducts, onClose, onUpdateProduct }) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-0.5">
-          <Typography.Text strong>Bumps configurados</Typography.Text>
-          <Typography.Text type="secondary">
-            {bumps.length} de {MAX_BUMPS_PER_PRODUCT} · arraste para reordenar
-          </Typography.Text>
+      {/* Thank-you page re-offer card */}
+      {bumps.length > 0 && (
+        <div className="bg-(--ant-color-fill-quaternary) rounded-lg px-5 py-4 flex items-center gap-4">
+          <div className="w-9 h-9 rounded-full bg-(--ant-color-bg-container) flex items-center justify-center shrink-0">
+            <Sparkles size={14} className="text-(--ant-color-text-secondary)" />
+          </div>
+          <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+            <Typography.Text strong className="text-sm">Re-ofertar bumps na página de obrigado</Typography.Text>
+            <Typography.Text type="secondary" className="text-xs">
+              Compradores que não adquiriram bumps no checkout veem novamente a oferta após a compra do produto principal
+            </Typography.Text>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Switch
+              checked={workingProduct.offerOnThankYouPage !== false}
+              onChange={handleToggleThankYouPage}
+            />
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
+        {/* Coluna esquerda: lista + form */}
+        <div className="flex flex-col gap-4 min-w-0">
+          <div className="flex flex-col gap-0.5">
+            <Typography.Text strong>Bumps configurados</Typography.Text>
+            <Typography.Text type="secondary">
+              {bumps.length} de {MAX_BUMPS_PER_PRODUCT} · arraste para reordenar
+            </Typography.Text>
+          </div>
+
+          {bumps.length > 0 && (
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={bumps.map(b => b.id)} strategy={verticalListSortingStrategy}>
+                <div className="flex flex-col gap-2">
+                  {bumps.map(b => (
+                    <SortableBumpItem
+                      key={b.id}
+                      bump={b}
+                      allProducts={allProducts}
+                      onEdit={(bump) => setEditing(bump)}
+                      onRemove={handleRemove}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          )}
+
+          {!atLimit && (
+            <Button
+              type="dashed"
+              block
+              icon={<Plus size={16} />}
+              onClick={() => setEditing('new')}
+              className="h-14"
+            >
+              {bumps.length === 0 ? 'Adicionar primeiro bump' : 'Adicionar outro bump'}
+            </Button>
+          )}
+
+          {atLimit && (
+            <div className="border border-dashed border-(--ant-color-border) rounded-lg p-3 bg-(--ant-color-fill-quaternary) text-center">
+              <Typography.Text type="secondary">
+                Limite de {MAX_BUMPS_PER_PRODUCT} bumps atingido
+              </Typography.Text>
+            </div>
+          )}
+
+          {bumps.length === 0 && (
+            <div className="text-center py-2">
+              <Typography.Text type="secondary">
+                Este produto ainda não tem nenhum bump configurado.
+              </Typography.Text>
+            </div>
+          )}
         </div>
 
-        {bumps.length > 0 && (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={bumps.map(b => b.id)} strategy={verticalListSortingStrategy}>
-              <div className="flex flex-col gap-2">
-                {bumps.map(b => (
-                  <SortableBumpItem
-                    key={b.id}
-                    bump={b}
-                    allProducts={allProducts}
-                    onEdit={(bump) => setEditing(bump)}
-                    onRemove={handleRemove}
-                  />
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
-        )}
+        {/* Coluna direita: preview sticky */}
+        <CheckoutPreview
+          mainProduct={workingProduct}
+          allProducts={allProducts}
+          activeBumps={workingProduct.bumpsEnabled === false ? [] : bumps}
+          draftBump={null}
+        />
+      </div>
 
+      {/* Modal de criação/edição de bump */}
+      <Modal
+        open={!!editing}
+        onCancel={() => setEditing(null)}
+        footer={null}
+        title={editing && editing !== 'new' ? 'Editar bump' : 'Novo bump'}
+        width={720}
+        destroyOnHidden
+        styles={{ body: { padding: 0 } }}
+      >
         {editing && (
           <BumpForm
             mainProduct={workingProduct}
@@ -885,43 +1028,7 @@ function BumpsDetailView({ product, allProducts, onClose, onUpdateProduct }) {
             onDraftChange={setDraft}
           />
         )}
-
-        {!editing && !atLimit && (
-          <Button
-            type="dashed"
-            block
-            icon={<Plus size={16} />}
-            onClick={() => setEditing('new')}
-            className="h-14"
-          >
-            {bumps.length === 0 ? 'Adicionar primeiro bump' : 'Adicionar outro bump'}
-          </Button>
-        )}
-
-        {atLimit && !editing && (
-          <div className="border border-dashed border-(--ant-color-border) rounded-lg p-3 bg-(--ant-color-fill-quaternary) text-center">
-            <Typography.Text type="secondary">
-              Limite de {MAX_BUMPS_PER_PRODUCT} bumps atingido
-            </Typography.Text>
-          </div>
-        )}
-
-        {bumps.length === 0 && !editing && (
-          <div className="text-center py-2">
-            <Typography.Text type="secondary">
-              Este produto ainda não tem nenhum bump configurado.
-            </Typography.Text>
-          </div>
-        )}
-      </div>
-      {/* Preview oculto — para reativar, restaurar o grid e o <CheckoutPreview /> abaixo
-      <CheckoutPreview
-        mainProduct={workingProduct}
-        allProducts={allProducts}
-        activeBumps={workingProduct.bumpsEnabled === false ? [] : bumps}
-        draftBump={workingProduct.bumpsEnabled === false ? null : draft}
-      />
-      */}
+      </Modal>
 
       {/* Sticky save bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-(--ant-color-split) px-8 py-3 flex items-center justify-end gap-2 z-20 shadow-[0_-2px_8px_rgba(0,0,0,0.04)]">

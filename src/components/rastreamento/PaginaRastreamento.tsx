@@ -10,7 +10,7 @@ import {
   Timeline,
   Typography,
 } from 'antd'
-import { Settings, Plus, History } from "lucide-react"
+import { Settings, Plus, History, AlertCircle } from "lucide-react"
 import { EduzzLogo, CheckoutSunLogo } from '../Logos'
 import ConfigurarPixelModal, { type ModalMode, type PixelProvider } from './ConfigurarPixelModal'
 
@@ -23,6 +23,8 @@ interface PaginaRastreamentoProps {
   onNavigate?: (key: 'analytics' | 'rastreamento' | 'order-bump') => void
 }
 
+type PixelStatus = 'active' | 'error'
+
 type PixelCard = {
   key: string
   provider: string
@@ -34,6 +36,8 @@ type PixelCard = {
   historico?: { data: string; descricao: string }[]
   produtosCount: number | null
   configured: boolean
+  status?: PixelStatus
+  errorMessage?: string
   detailsLabel?: string
 }
 
@@ -103,13 +107,16 @@ const pixelCardsIniciais: PixelCard[] = [
     provider: 'Google Tag Manager',
     providerKey: 'gtm',
     logo: 'https://www.gstatic.com/analytics-suite/header/suite/v2/ic_tag_manager.svg',
-    pixelId: '7644657994596',
+    pixelId: 'GTM-INVALID',
     createdAt: '09/01/2026',
     historico: [
       { data: '09/01/2026 10:30', descricao: 'Pixel criado' },
+      { data: '04/05/2026 09:12', descricao: 'Erro: falha na validação do contêiner' },
     ],
     produtosCount: 1,
     configured: true,
+    status: 'error',
+    errorMessage: 'ID do contêiner inválido — verifique o formato (GTM-XXXXXXX) e reenvie',
     detailsLabel: 'Ver todos',
   },
   {
@@ -305,15 +312,20 @@ export default function PaginaRastreamento({
                         </div>
                       ) : null}
 
-                      {pixelCards.map((card) => (
+                      {pixelCards.map((card) => {
+                        const isError = card.configured && card.status === 'error'
+                        const isNavigable = card.configured && !isError
+                        return (
                         <div
                           key={card.key}
                           className={`flex items-center p-4 border rounded-lg w-full transition-all ${
-                            card.configured
+                            isNavigable
                               ? 'border-(--ant-color-border) hover:border-(--ant-color-primary)/40 hover:shadow-sm cursor-pointer'
-                              : 'border-dashed border-(--ant-color-border) bg-(--ant-color-fill-quaternary)'
+                              : isError
+                                ? 'border-(--ant-color-error-border) bg-(--ant-color-error-bg)/30'
+                                : 'border-dashed border-(--ant-color-border) bg-(--ant-color-fill-quaternary)'
                           }`}
-                          onClick={() => card.configured && onVerDetalhes(card.providerKey)}
+                          onClick={() => isNavigable && onVerDetalhes(card.providerKey)}
                         >
                           {/* Left: Brand logo + label + created date */}
                           <div className="w-[260px] shrink-0 flex flex-col gap-1">
@@ -335,16 +347,20 @@ export default function PaginaRastreamento({
                           </div>
 
                           {/* Middle: ID + Status */}
-                          <div className="w-[200px] shrink-0 flex flex-col gap-1">
+                          <div className="w-[220px] shrink-0 flex flex-col gap-1">
                             <Typography.Text
                               className={card.configured ? '' : 'opacity-35'}
                             >
                               ID: {card.pixelId}
                             </Typography.Text>
-                            {card.configured ? (
-                              <Tag color="success" className="text-sm w-fit m-0">Ativo</Tag>
-                            ) : (
+                            {!card.configured && (
                               <Tag className="text-sm w-fit m-0 text-(--ant-color-text-quaternary)">Não configurado</Tag>
+                            )}
+                            {card.configured && card.status === 'error' && (
+                              <Tag color="error" icon={<AlertCircle size={12} className="mr-1 inline" />} className="text-sm w-fit m-0">Erro de configuração</Tag>
+                            )}
+                            {card.configured && (!card.status || card.status === 'active') && (
+                              <Tag color="success" className="text-sm w-fit m-0">Ativo</Tag>
                             )}
                           </div>
 
@@ -352,7 +368,7 @@ export default function PaginaRastreamento({
                           <div className="flex-1 flex items-center justify-end gap-3">
                             {card.produtosCount !== null && (
                               <Tag className="border-(--ant-color-border) bg-transparent m-0">
-                                {card.produtosCount} Produto(s) / Evento(s)
+                                {card.produtosCount} produto{card.produtosCount === 1 ? '' : 's'}
                               </Tag>
                             )}
 
@@ -365,7 +381,17 @@ export default function PaginaRastreamento({
                               </Button>
                             )}
 
-                            {card.configured && (
+                            {card.configured && card.status === 'error' && (
+                              <Button
+                                danger
+                                icon={<Settings size={14} />}
+                                onClick={(e) => { e.stopPropagation(); handleConfigurar(card.providerKey) }}
+                              >
+                                Corrigir
+                              </Button>
+                            )}
+
+                            {card.configured && card.status !== 'error' && (
                               <Button
                                 onClick={(e) => { e.stopPropagation(); onVerDetalhes(card.providerKey) }}
                               >
@@ -374,7 +400,8 @@ export default function PaginaRastreamento({
                             )}
                           </div>
                         </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   ),
                 },
