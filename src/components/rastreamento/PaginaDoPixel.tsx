@@ -14,7 +14,7 @@ import {
   Tooltip,
   Typography,
 } from 'antd'
-import { Home, ChevronLeft, Plus, Search, Trash2, HelpCircle, ChevronRight, Settings, BarChart3, Activity, Package, FilterX } from 'lucide-react'
+import { Home, ChevronLeft, Plus, Search, Trash2, HelpCircle, ChevronRight, Settings, BarChart3, Activity, FilterX } from 'lucide-react'
 import ConfigurarPixelModal, { type ModalMode, type PixelConfig } from './ConfigurarPixelModal'
 import { EduzzLogo, CheckoutSunLogo } from '../Logos'
 
