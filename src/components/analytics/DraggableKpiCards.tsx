@@ -49,8 +49,8 @@ function SortableCard({
       {...(isEditing ? { ...attributes, ...listeners } : {})}
       className={`flex-1 min-w-0 rounded-lg px-4 py-3 flex flex-col gap-0.5 relative transition-colors group ${
         isEditing
-          ? 'bg-[#e8edf5] cursor-grab active:cursor-grabbing'
-          : 'bg-[#f5f7fa]'
+          ? 'bg-(--ant-color-fill-tertiary) cursor-grab active:cursor-grabbing'
+          : 'bg-(--ant-color-fill-quaternary)'
       }`}
     >
       {isEditing && (

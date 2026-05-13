@@ -46,7 +46,7 @@ export function ParcelasSelecionadas() {
           <div className="flex items-center py-2.5 gap-3 border-b border-(--ant-color-split) last:border-b-0 cursor-default hover:bg-(--ant-color-fill-quaternary) rounded transition-colors">
             <div className="w-[36px] shrink-0"><Typography.Text className="whitespace-nowrap">{p.label}</Typography.Text></div>
             <div className="flex-1 h-4 bg-(--ant-color-fill-tertiary) rounded overflow-hidden min-w-[120px]">
-              <div className="h-full rounded min-w-1" style={{ width: p.percent, backgroundColor: '#2B4ACF' }} />
+              <div className="h-full rounded min-w-1 bg-(--ant-color-primary)" style={{ width: p.percent }} />
             </div>
             <div className="w-[70px] text-right shrink-0"><Typography.Text className="whitespace-nowrap">{p.percent}</Typography.Text></div>
           </div>

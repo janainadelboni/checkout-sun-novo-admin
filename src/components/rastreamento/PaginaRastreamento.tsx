@@ -12,6 +12,7 @@ import {
 } from 'antd'
 import { Settings, Plus, History, AlertCircle } from "lucide-react"
 import { EduzzLogo, CheckoutSunLogo } from '../Logos'
+import { BRAND_COLORS } from '../../constants/brand-colors'
 import ConfigurarPixelModal, { type ModalMode, type PixelProvider } from './ConfigurarPixelModal'
 
 
@@ -141,7 +142,7 @@ function BrandLogo({ card }: { card: PixelCard }) {
     return (
       <span
         className="text-2xl font-bold leading-none"
-        style={{ color: '#1877F2', fontFamily: 'Helvetica, Arial, sans-serif' }}
+        style={{ color: BRAND_COLORS.facebook }}
       >
         facebook.
       </span>
@@ -153,7 +154,7 @@ function BrandLogo({ card }: { card: PixelCard }) {
         <img src={card.logo} alt={card.provider} className="h-8 w-8 object-contain" />
         <span className="text-base font-medium text-(--ant-color-text) leading-tight">
           Google <span className="text-(--ant-color-text)">Analytics</span>{' '}
-          <span style={{ color: '#E37400' }}>4</span>
+          <span style={{ color: BRAND_COLORS.ga4 }}>4</span>
         </span>
       </div>
     )
@@ -174,7 +175,7 @@ function BrandLogo({ card }: { card: PixelCard }) {
         <img src={card.logo} alt={card.provider} className="h-8 w-8 object-contain" />
         <span
           className="text-xl font-bold leading-none"
-          style={{ color: '#FF7A59', fontFamily: 'Helvetica, Arial, sans-serif' }}
+          style={{ color: BRAND_COLORS.hubspot }}
         >
           HubSpot
         </span>

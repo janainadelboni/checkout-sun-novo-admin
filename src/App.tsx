@@ -32,14 +32,8 @@ export default function App() {
         components: {
           ...themeConfig.components,
           Segmented: {
-            // Aligns visual with DS demo: light track, white selected pill with shadow
-            trackBg: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,19,36,0.06)',
-            itemColor: isDark ? 'rgba(255,255,255,0.68)' : 'rgba(15,19,36,0.75)',
-            itemHoverBg: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(15,19,36,0.04)',
-            itemHoverColor: isDark ? '#ffffff' : '#0F1324',
-            itemSelectedBg: isDark ? '#262626' : '#ffffff',
-            itemSelectedColor: isDark ? '#ffffff' : '#0F1324',
-            trackPadding: 4,
+            ...themeConfig.components.Segmented,
+            ...(isDark ? themeConfig.componentsDark.Segmented : themeConfig.componentsLight.Segmented),
           },
         },
       }}

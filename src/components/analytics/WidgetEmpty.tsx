@@ -48,7 +48,7 @@ export function KpisEmpty() {
   return (
     <div className="flex gap-3 items-stretch">
       {kpiDescricoes.map((label, i) => (
-        <div key={i} className="flex-1 min-w-0 rounded-lg px-4 py-3 bg-[#f5f7fa] flex flex-col gap-1">
+        <div key={i} className="flex-1 min-w-0 rounded-lg px-4 py-3 bg-(--ant-color-fill-quaternary) flex flex-col gap-1">
           <Typography.Text type="secondary" >{label}</Typography.Text>
           <Typography.Text className="text-[rgba(0,0,0,0.1)]">—</Typography.Text>
         </div>

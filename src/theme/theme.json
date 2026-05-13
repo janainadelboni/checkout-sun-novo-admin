@@ -79,6 +79,29 @@
       "paddingInlineSM": 12,
       "paddingInline": 20,
       "paddingInlineLG": 24
+    },
+    "Segmented": {
+      "trackPadding": 4
+    }
+  },
+  "componentsLight": {
+    "Segmented": {
+      "trackBg": "rgba(15,19,36,0.06)",
+      "itemColor": "rgba(15,19,36,0.75)",
+      "itemHoverBg": "rgba(15,19,36,0.04)",
+      "itemHoverColor": "#0F1324",
+      "itemSelectedBg": "#ffffff",
+      "itemSelectedColor": "#0F1324"
+    }
+  },
+  "componentsDark": {
+    "Segmented": {
+      "trackBg": "rgba(255,255,255,0.08)",
+      "itemColor": "rgba(255,255,255,0.68)",
+      "itemHoverBg": "rgba(255,255,255,0.04)",
+      "itemHoverColor": "#ffffff",
+      "itemSelectedBg": "#262626",
+      "itemSelectedColor": "#ffffff"
     }
   }
 }

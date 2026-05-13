@@ -94,8 +94,8 @@ export function VisaoGeralVendas() {
         ))}
       </svg>
       <div className="flex gap-6 mt-2">
-        <div className="flex items-center gap-1.5"><div className="w-3 h-0.5 bg-[#F59E0B] rounded" /><Typography.Text type="secondary" >Valor transacionado (R$)</Typography.Text></div>
-        <div className="flex items-center gap-1.5"><div className="w-3 h-0.5 bg-[#2BBCCF] rounded" /><Typography.Text type="secondary" >Volume de transações (qtd)</Typography.Text></div>
+        <div className="flex items-center gap-1.5"><div className="w-3 h-0.5 bg-(--ant-color-warning) rounded" /><Typography.Text type="secondary" >Valor transacionado (R$)</Typography.Text></div>
+        <div className="flex items-center gap-1.5"><div className="w-3 h-0.5 bg-(--ant-cyan) rounded" /><Typography.Text type="secondary" >Volume de transações (qtd)</Typography.Text></div>
       </div>
     </div>
   )
