@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import {
   Breadcrumb,
   Button,
+  DatePicker,
   Input,
   Layout,
   Menu,
@@ -14,9 +15,13 @@ import {
   Tooltip,
   Typography,
 } from 'antd'
+import dayjs from 'dayjs'
 import { Home, ChevronLeft, Plus, Search, Trash2, HelpCircle, ChevronRight, Settings, BarChart3, Activity, FilterX } from 'lucide-react'
 import ConfigurarPixelModal, { type ModalMode, type PixelConfig } from './ConfigurarPixelModal'
 import { EduzzLogo, CheckoutSunLogo } from '../Logos'
+import { buildRangePresets } from '../../utils/datePresets'
+
+const { RangePicker } = DatePicker
 
 const { Sider, Content } = Layout
 
@@ -115,6 +120,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
   const [logEventoFilter, setLogEventoFilter] = useState<string | null>(null)
   const [logStatusFilter, setLogStatusFilter] = useState<string | null>(null)
   const [logPeriodoFilter, setLogPeriodoFilter] = useState<string | null>('ultimos_30')
+  const [logCustomRange, setLogCustomRange] = useState<[string, string] | null>(null)
   const [demoState, setDemoState] = useState<'normal' | 'no-events'>('normal')
   const [expandedId, setExpandedId] = useState<number | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
@@ -309,6 +315,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
     setLogEventoFilter(null)
     setLogStatusFilter(null)
     setLogPeriodoFilter('ultimos_30')
+    setLogCustomRange(null)
   }
 
   const hasAnyLogFilter =
@@ -316,6 +323,16 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
     logOrigemFilter !== null ||
     logEventoFilter !== null ||
     logStatusFilter !== null
+
+  const logRangePresets = buildRangePresets()
+  const logRangeValue: [dayjs.Dayjs, dayjs.Dayjs] | null =
+    logPeriodoFilter === 'personalizado' && logCustomRange
+      ? [dayjs(logCustomRange[0], 'DD/MM/YYYY'), dayjs(logCustomRange[1], 'DD/MM/YYYY')]
+      : (logRangePresets.find((p) => p.key === logPeriodoFilter)?.value ?? null)
+  const logPeriodoLabel =
+    logPeriodoFilter === 'personalizado' && logCustomRange
+      ? `${logCustomRange[0]} – ${logCustomRange[1]}`
+      : (logRangePresets.find((p) => p.key === logPeriodoFilter)?.label ?? 'Últimos 30 dias')
 
   // Datasets dependentes do estado de demo
   const logsBase = demoState === 'no-events' ? [] : logsDeEnvio
@@ -1047,17 +1064,30 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
 
                         <div className="grid grid-cols-4 gap-4">
                           <div className="flex flex-col gap-1.5">
-                            <Typography.Text type="secondary" >Periodo</Typography.Text>
-                            <Select
-                              value={logPeriodoFilter}
-                              onChange={setLogPeriodoFilter}
-                              options={[
-                                { value: 'ultimos_30', label: 'Últimos 30 dias' },
-                                { value: 'ultimos_7', label: 'Últimos 7 dias' },
-                                { value: 'hoje', label: 'Hoje' },
-                                { value: 'custom', label: 'Personalizado' },
-                              ]}
+                            <Typography.Text type="secondary" >Período</Typography.Text>
+                            <RangePicker
+                              size="middle"
+                              format="DD/MM/YYYY"
+                              presets={logRangePresets}
                               className="w-full"
+                              placeholder={['Data inicial', 'Data final']}
+                              allowClear={false}
+                              value={logRangeValue}
+                              onChange={(_dates, dateStrings) => {
+                                if (!dateStrings[0] || !dateStrings[1]) return
+                                const matched = logRangePresets.find(
+                                  (p) =>
+                                    p.value[0].format('DD/MM/YYYY') === dateStrings[0] &&
+                                    p.value[1].format('DD/MM/YYYY') === dateStrings[1],
+                                )
+                                if (matched) {
+                                  setLogPeriodoFilter(matched.key)
+                                  setLogCustomRange(null)
+                                } else {
+                                  setLogPeriodoFilter('personalizado')
+                                  setLogCustomRange([dateStrings[0], dateStrings[1]])
+                                }
+                              }}
                             />
                           </div>
                           <div className="flex flex-col gap-1.5">
@@ -1115,7 +1145,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                           ) : (
                             <Tag className="text-sm">Produtos: Todos</Tag>
                           )}
-                          <Tag className="text-sm">Últimos 30 dias</Tag>
+                          <Tag className="text-sm">{logPeriodoLabel}</Tag>
                           <Tag className="text-sm">Origem: {logOrigemFilter === 'Navegador' ? 'Pixel' : logOrigemFilter === 'Servidor' ? 'API' : 'Todos'}</Tag>
                           <Tag className="text-sm">Eventos: {logEventoFilterLabel}</Tag>
                           <Tag className="text-sm">Status: {logStatusFilter ?? 'todos'}</Tag>

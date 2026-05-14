@@ -1,10 +1,15 @@
 import { useState } from 'react'
 import { App as AntdApp, ConfigProvider, theme as antdTheme } from 'antd'
+import ptBR from 'antd/locale/pt_BR'
+import dayjs from 'dayjs'
+import 'dayjs/locale/pt-br'
 import PaginaRastreamento from './components/rastreamento/PaginaRastreamento'
 import PaginaDoPixel from './components/rastreamento/PaginaDoPixel'
 import PaginaAnalytics from './components/analytics/PaginaAnalytics'
 import PaginaOrderBump from './components/order-bump/PaginaOrderBump'
 import themeConfig from './theme/theme.json'
+
+dayjs.locale('pt-br')
 
 type NavKey = 'analytics' | 'rastreamento' | 'order-bump'
 type Page =
@@ -20,6 +25,7 @@ export default function App() {
 
   return (
     <ConfigProvider
+      locale={ptBR}
       theme={{
         cssVar: { key: 'ant' },
         hashed: false,

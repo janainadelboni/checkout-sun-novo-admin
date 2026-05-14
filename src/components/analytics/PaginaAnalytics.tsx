@@ -6,12 +6,13 @@ import {
   Layout,
   Menu,
   Modal,
-  Select,
   Tabs,
   Tag,
   TreeSelect,
   Typography,
 } from 'antd'
+import dayjs from 'dayjs'
+import { buildRangePresets } from '../../utils/datePresets'
 import { Settings, Book, Save, Trash2, Undo2 } from 'lucide-react'
 import {
   DndContext,
@@ -113,6 +114,7 @@ const PERIODOS: Record<string, string> = {
   personalizado: 'Personalizado',
 }
 
+
 // Sortable wrapper for Antd Tabs renderTabBar — clones the tab node to preserve internal layout
 function DraggableTabNode({ children, nodeKey }: { nodeKey: string; children: ReactElement }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -193,6 +195,11 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { o
     return labels
   }
   const produtoLabels = getAllLabels(produtosTree, produtoFilter)
+  const periodPresets = buildRangePresets()
+  const periodRangeValue: [dayjs.Dayjs, dayjs.Dayjs] | null =
+    periodo === 'personalizado' && customRange
+      ? [dayjs(customRange[0], 'DD/MM/YYYY'), dayjs(customRange[1], 'DD/MM/YYYY')]
+      : (periodPresets.find((p) => p.key === periodo)?.value ?? null)
   const periodoLabel = periodo === 'personalizado' && customRange
     ? `${customRange[0]} – ${customRange[1]}`
     : PERIODOS[periodo]
@@ -330,28 +337,31 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { o
                     allowClear
                   />
                 </div>
-                <div className={`flex flex-col gap-1 ${periodo === 'personalizado' ? 'w-[380px]' : 'w-[200px]'}`}>
+                <div className="flex flex-col gap-1 w-[280px]">
                   <Typography.Text type="secondary" >Período</Typography.Text>
-                  <div className="flex gap-2">
-                    <Select
-                      value={periodo}
-                      onChange={(v) => updatePeriodo(v)}
-                      className={periodo === 'personalizado' ? 'w-[160px]' : 'w-full'}
-                      options={Object.entries(PERIODOS).map(([value, label]) => ({ value, label }))}
-                    />
-                    {periodo === 'personalizado' && (
-                      <RangePicker
-                        size="middle"
-                        format="DD/MM/YYYY"
-                        className="flex-1"
-                        onChange={(_dates, dateStrings) => {
-                          if (dateStrings[0] && dateStrings[1]) {
-                            updateCustomRange([dateStrings[0], dateStrings[1]])
-                          }
-                        }}
-                      />
-                    )}
-                  </div>
+                  <RangePicker
+                    size="middle"
+                    format="DD/MM/YYYY"
+                    presets={periodPresets}
+                    className="w-full"
+                    placeholder={['Data inicial', 'Data final']}
+                    allowClear={false}
+                    value={periodRangeValue}
+                    onChange={(_dates, dateStrings) => {
+                      if (!dateStrings[0] || !dateStrings[1]) return
+                      const matched = periodPresets.find(
+                        (p) =>
+                          p.value[0].format('DD/MM/YYYY') === dateStrings[0] &&
+                          p.value[1].format('DD/MM/YYYY') === dateStrings[1],
+                      )
+                      if (matched) {
+                        updatePeriodo(matched.key)
+                      } else {
+                        updatePeriodo('personalizado')
+                        updateCustomRange([dateStrings[0], dateStrings[1]])
+                      }
+                    }}
+                  />
                 </div>
                 {/* Filtros salvos dropdown */}
                 <div className="w-[200px] flex flex-col gap-1">

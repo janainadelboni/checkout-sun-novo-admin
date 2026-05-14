@@ -574,6 +574,7 @@ export default function ConfigurarPixelModal({
                 <Typography.Text type="danger" >{errors.nomePixel}</Typography.Text>
               )}
             </div>
+            <Divider className="!my-0" />
             {/* ── RN02: ID do pixel ── */}
             <div className="flex flex-col gap-2">
               <Typography.Text strong>{providerInfo.idLabel}</Typography.Text>
@@ -599,6 +600,7 @@ export default function ConfigurarPixelModal({
                 />
               )}
             </div>
+            <Divider className="!my-0" />
             {/* ── RN04: Seleção de eventos (RF03) ── */}
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-1">
@@ -638,6 +640,8 @@ export default function ConfigurarPixelModal({
 
             {/* ── Configuração do Initiatecheckout: quando disparar ── */}
             {hasInitiateCheckout && (
+              <>
+              <Divider className="!my-0" />
               <div className="flex flex-col gap-3 p-4 border border-(--ant-color-warning-border) rounded-lg bg-(--ant-color-warning-bg)">
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-1.5">
@@ -680,10 +684,13 @@ export default function ConfigurarPixelModal({
                   </div>
                 </Radio.Group>
               </div>
+              </>
             )}
 
             {/* ── RF04: Configs avançadas de Purchase ── */}
             {hasPurchase && (
+              <>
+              <Divider className="!my-0" />
               <div className="flex flex-col gap-4">
                   <div className="flex flex-col gap-1">
                     <Typography.Text strong>Configurações de Purchase</Typography.Text>
@@ -790,7 +797,9 @@ export default function ConfigurarPixelModal({
                     )}
                   </div>
                 </div>
+              </>
             )}
+            <Divider className="!my-0" />
             {/* ── RN03: Associação a produtos (após eventos) ── */}
             <div className="flex flex-col gap-3">
               <Typography.Text strong>Vincular produto(s) / evento(s)</Typography.Text>
@@ -832,6 +841,7 @@ export default function ConfigurarPixelModal({
                 </div>
               )}
             </div>
+            <Divider className="!my-0" />
             {/* ── RN05: API de conversão ── */}
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">

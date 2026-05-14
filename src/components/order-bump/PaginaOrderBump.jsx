@@ -3,6 +3,7 @@ import {
   App as AntdApp,
   Breadcrumb,
   Button,
+  Divider,
   Input,
   InputNumber,
   Layout,
@@ -40,7 +41,6 @@ import {
   Link as LinkIcon,
   QrCode,
   ExternalLink,
-  Sparkles,
 } from 'lucide-react'
 import {
   DndContext,
@@ -403,7 +403,7 @@ function BumpCard({ bumpProduct, priceCents, copy, salesLimit, draft = false }) 
 
 // ── CHECKOUT PREVIEW (entire checkout flow for the main product) ─────
 function CheckoutPreview({ mainProduct, allProducts, activeBumps, draftBump, sticky = true }) {
-  const [device, setDevice] = useState('desktop')
+  const [device, setDevice] = useState('mobile')
   const draftProduct = draftBump?.bumpProductId ? findProduct(allProducts, draftBump.bumpProductId) : null
   const hasAnyBump = activeBumps.length > 0 || draftProduct
 
@@ -427,8 +427,8 @@ function CheckoutPreview({ mainProduct, allProducts, activeBumps, draftBump, sti
           onChange={setDevice}
           size="small"
           options={[
-            { value: 'desktop', icon: <Monitor size={14} /> },
             { value: 'mobile', icon: <Smartphone size={14} /> },
+            { value: 'desktop', icon: <Monitor size={14} /> },
           ]}
         />
       </div>
@@ -607,6 +607,8 @@ function BumpForm({ mainProduct, allProducts, existingBumpProductIds, editing, o
           />
         </div>
 
+        <Divider className="!my-0" />
+
         {/* Preço com desconto */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-1">
@@ -651,10 +653,19 @@ function BumpForm({ mainProduct, allProducts, existingBumpProductIds, editing, o
           )}
         </div>
 
+        <Divider className="!my-0" />
+
         {/* Limite de venda */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 flex-wrap">
-            <Switch checked={hasLimit} onChange={setHasLimit} size="small" />
+            <Switch
+              checked={hasLimit}
+              onChange={(checked) => {
+                setHasLimit(checked)
+                if (checked && !salesLimit) setSalesLimit(100)
+              }}
+              size="small"
+            />
             <Typography.Text>Limitar venda a</Typography.Text>
             <InputNumber
               value={salesLimit}
@@ -669,12 +680,14 @@ function BumpForm({ mainProduct, allProducts, existingBumpProductIds, editing, o
               <HelpCircle size={14} className="text-(--ant-color-text-quaternary) cursor-help" />
             </Tooltip>
           </div>
-          {hasLimit && salesLimit && avulso && (
+          {hasLimit && (salesLimit || 100) && (
             <Typography.Text type="secondary">
-              Após {salesLimit} unidades vendidas, o preço volta ao valor avulso de {fmtBRL(avulso)}.
+              Após {salesLimit || 100} unidades vendidas, o preço volta ao valor avulso{avulso ? ` de ${fmtBRL(avulso)}` : ''}.
             </Typography.Text>
           )}
         </div>
+
+        <Divider className="!my-0" />
 
         {/* Descrição */}
         <div className="flex flex-col gap-2">
@@ -690,6 +703,8 @@ function BumpForm({ mainProduct, allProducts, existingBumpProductIds, editing, o
             placeholder="Ex: Aproveite esta oferta exclusiva e complemente seu aprendizado..."
           />
         </div>
+
+        <Divider className="!my-0" />
 
         {/* Página de obrigado */}
         <div className="flex items-start gap-3">
@@ -748,10 +763,9 @@ function SortableBumpItem({ bump, allProducts, onEdit, onRemove }) {
         <div className="flex items-center gap-2 flex-wrap">
           <Typography.Text strong>
             {bumpProduct
-              ? (bumpProduct.parentName ? `${bumpProduct.parentName} — ${bumpProduct.name}` : bumpProduct.name)
-              : 'Produto removido'}
+              ? `${bump.bumpProductId} - ${bumpProduct.parentName ? `${bumpProduct.parentName} — ${bumpProduct.name}` : bumpProduct.name}`
+              : `${bump.bumpProductId} - Produto removido`}
           </Typography.Text>
-          <Typography.Text type="secondary" className="text-xs">#{bump.bumpProductId}</Typography.Text>
           <Tag>{bumpProduct ? PRODUCT_TYPES[bumpProduct.type] : '—'}</Tag>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -845,10 +859,6 @@ function BumpsDetailView({ product, allProducts, onClose, onUpdateProduct }) {
     setWorkingProduct(p => ({ ...p, bumpsEnabled: enabled }))
   }
 
-  const handleToggleThankYouPage = (enabled) => {
-    setWorkingProduct(p => ({ ...p, offerOnThankYouPage: enabled }))
-  }
-
   const handleDragEnd = (event) => {
     const { active, over } = event
     if (!over || active.id === over.id) return
@@ -905,10 +915,21 @@ function BumpsDetailView({ product, allProducts, onClose, onUpdateProduct }) {
         </div>
         <div className="flex-1 min-w-0 flex flex-col gap-0.5">
           <Typography.Text strong className="text-sm">Página de checkout</Typography.Text>
-          <Typography.Text type="secondary" className="truncate text-xs">{checkoutUrl}</Typography.Text>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <Typography.Text type="secondary" className="truncate text-xs">{checkoutUrl}</Typography.Text>
+            <Tooltip title="Copiar link">
+              <button
+                type="button"
+                onClick={handleCopyLink}
+                aria-label="Copiar link"
+                className="shrink-0 text-(--ant-color-text-tertiary) hover:text-(--ant-color-text-secondary) cursor-pointer transition-colors"
+              >
+                <Copy size={12} />
+              </button>
+            </Tooltip>
+          </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <Button size="small" icon={<Copy size={12} />} onClick={handleCopyLink}>Copiar link</Button>
           <Button size="small" icon={<QrCode size={12} />} onClick={() => setQrOpen(true)}>QR Code</Button>
           <Button
             size="small"
@@ -919,27 +940,6 @@ function BumpsDetailView({ product, allProducts, onClose, onUpdateProduct }) {
           </Button>
         </div>
       </div>
-
-      {/* Thank-you page re-offer card */}
-      {bumps.length > 0 && (
-        <div className="bg-(--ant-color-fill-quaternary) rounded-lg px-5 py-4 flex items-center gap-4">
-          <div className="w-9 h-9 rounded-full bg-(--ant-color-bg-container) flex items-center justify-center shrink-0">
-            <Sparkles size={14} className="text-(--ant-color-text-secondary)" />
-          </div>
-          <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-            <Typography.Text strong className="text-sm">Re-ofertar bumps na página de obrigado</Typography.Text>
-            <Typography.Text type="secondary" className="text-xs">
-              Compradores que não adquiriram bumps no checkout veem novamente a oferta após a compra do produto principal
-            </Typography.Text>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <Switch
-              checked={workingProduct.offerOnThankYouPage !== false}
-              onChange={handleToggleThankYouPage}
-            />
-          </div>
-        </div>
-      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
         {/* Coluna esquerda: lista + form */}
@@ -1078,7 +1078,7 @@ function BumpsDetailView({ product, allProducts, onClose, onUpdateProduct }) {
 }
 
 // ── PRODUCT ROW ──────────────────────────────────────────────────────
-function ProductRow({ product, onConfigure }) {
+function ProductRow({ product, onConfigure, onClone }) {
   const hasBumps = product.bumps.length > 0
   const bumpsEnabled = product.bumpsEnabled !== false
 
@@ -1111,6 +1111,14 @@ function ProductRow({ product, onConfigure }) {
           <Typography.Text type="secondary">Sem bump</Typography.Text>
         )}
 
+        {hasBumps && onClone && (
+          <Tooltip title="Clonar bumps para outro produto">
+            <Button
+              icon={<Copy size={14} />}
+              onClick={(e) => { e.stopPropagation(); onClone(product) }}
+            />
+          </Tooltip>
+        )}
         <Button
           type={hasBumps ? 'default' : 'primary'}
           icon={hasBumps ? <Settings size={14} /> : <Plus size={14} />}
@@ -1155,6 +1163,102 @@ function AppShell({ children }) {
         </Content>
       </Layout>
     </Layout>
+  )
+}
+
+// ── CLONE PRODUCT BUMPS MODAL ────────────────────────────────────────
+function CloneProductBumpsModal({ open, sourceProduct, allProducts, onConfirm, onCancel }) {
+  const [destinationId, setDestinationId] = useState(null)
+  const sourceBumpsCount = sourceProduct?.bumps?.length || 0
+
+  const options = allProducts
+    .filter(p => p.id !== sourceProduct?.id && (p.bumps || []).length < MAX_BUMPS_PER_PRODUCT)
+    .map(p => {
+      const bumpsCount = p.bumps?.length || 0
+      const bumpsTag = bumpsCount > 0 ? ` · ${bumpsCount}/${MAX_BUMPS_PER_PRODUCT} bumps` : ''
+      return {
+        value: p.id,
+        label: `${p.id} - ${p.name} · ${PRODUCT_TYPES[p.type]}${bumpsTag}`,
+        search: `${p.id} ${p.name} ${PRODUCT_TYPES[p.type]}`,
+      }
+    })
+
+  const destination = destinationId ? allProducts.find(p => p.id === destinationId) : null
+  const destSlotsAvailable = destination ? MAX_BUMPS_PER_PRODUCT - destination.bumps.length : 0
+  const willClone = Math.min(sourceBumpsCount, destSlotsAvailable)
+  const willTruncate = destination && sourceBumpsCount > destSlotsAvailable
+
+  const handleOk = () => {
+    if (!destinationId) return
+    onConfirm(destinationId)
+    setDestinationId(null)
+  }
+
+  const handleCancel = () => {
+    setDestinationId(null)
+    onCancel()
+  }
+
+  return (
+    <Modal
+      open={open}
+      onCancel={handleCancel}
+      title="Clonar bumps para outro produto"
+      okText={willClone > 0 ? `Clonar ${willClone} bump${willClone !== 1 ? 's' : ''}` : 'Clonar'}
+      cancelText="Cancelar"
+      onOk={handleOk}
+      okButtonProps={{ disabled: !destinationId || willClone === 0 }}
+      width={600}
+      destroyOnHidden
+    >
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <Typography.Text type="secondary" className="text-xs">Produto de origem</Typography.Text>
+          <Typography.Text strong>
+            {sourceProduct ? `${sourceProduct.id} - ${sourceProduct.name}` : '—'}
+          </Typography.Text>
+          {sourceProduct && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <Tag className="m-0">{PRODUCT_TYPES[sourceProduct.type]}</Tag>
+              <Typography.Text type="secondary">{fmtBRL(sourceProduct.priceCents)}</Typography.Text>
+              <Typography.Text type="secondary">·</Typography.Text>
+              <Typography.Text type="secondary">
+                {sourceBumpsCount} bump{sourceBumpsCount !== 1 ? 's' : ''} a clonar
+              </Typography.Text>
+            </div>
+          )}
+        </div>
+        <Divider className="!my-0" />
+        <div className="flex flex-col gap-2">
+          <label className="font-medium text-(--ant-color-text)">
+            Novo produto principal<span className="text-(--ant-color-error) ml-0.5">*</span>
+          </label>
+          <Select
+            value={destinationId}
+            onChange={setDestinationId}
+            placeholder="Buscar produto por nome ou ID"
+            showSearch
+            filterOption={(input, option) => (option?.search || '').toLowerCase().includes(input.toLowerCase())}
+            options={options}
+            className="w-full"
+            autoFocus
+            notFoundContent={
+              <Typography.Text type="secondary">
+                Nenhum produto disponível (todos os outros estão sem espaço para mais bumps).
+              </Typography.Text>
+            }
+          />
+          <Typography.Text type="secondary" className="text-xs">
+            Os bumps serão duplicados no produto escolhido. Você pode editá-los depois.
+          </Typography.Text>
+          {willTruncate && (
+            <Typography.Text type="warning" className="text-xs">
+              Limite de {MAX_BUMPS_PER_PRODUCT} bumps por produto. Apenas {willClone} dos {sourceBumpsCount} bumps serão clonados.
+            </Typography.Text>
+          )}
+        </div>
+      </div>
+    </Modal>
   )
 }
 
@@ -1243,10 +1347,34 @@ export default function PaginaOrderBump({ onNavigate }) {
   const [search, setSearch] = useState('')
   const [drawerProduct, setDrawerProduct] = useState(null)
   const [createOpen, setCreateOpen] = useState(false)
+  const [cloningProduct, setCloningProduct] = useState(null)
+  const { message: rootMessage } = AntdApp.useApp()
 
   const handleUpdateProduct = (updated) => {
     setProducts(ps => ps.map(p => p.id === updated.id ? updated : p))
     setDrawerProduct(updated)
+  }
+
+  const handleCloneProductBumps = (sourceProductId, destinationProductId) => {
+    const source = products.find(p => p.id === sourceProductId)
+    const dest = products.find(p => p.id === destinationProductId)
+    if (!source || !dest) return 0
+    const slotsAvailable = MAX_BUMPS_PER_PRODUCT - dest.bumps.length
+    if (slotsAvailable <= 0) return 0
+    const now = Date.now()
+    const clonedBumps = source.bumps.slice(0, slotsAvailable).map((b, i) => ({
+      ...b,
+      id: `b-${now}-${i}`,
+      salesCount: 0,
+    }))
+    setProducts(ps =>
+      ps.map(p =>
+        p.id === destinationProductId
+          ? { ...p, bumps: [...p.bumps, ...clonedBumps] }
+          : p,
+      ),
+    )
+    return clonedBumps.length
   }
 
   const productsWithBumps = products.filter(p => p.bumps.length > 0)
@@ -1324,6 +1452,7 @@ export default function PaginaOrderBump({ onNavigate }) {
                       key={p.id}
                       product={p}
                       onConfigure={setDrawerProduct}
+                      onClone={setCloningProduct}
                     />
                   ))}
                 </div>
@@ -1335,6 +1464,21 @@ export default function PaginaOrderBump({ onNavigate }) {
               products={products}
               onPick={(p) => { setCreateOpen(false); setDrawerProduct(p) }}
               onCancel={() => setCreateOpen(false)}
+            />
+
+            <CloneProductBumpsModal
+              open={!!cloningProduct}
+              sourceProduct={cloningProduct}
+              allProducts={products}
+              onCancel={() => setCloningProduct(null)}
+              onConfirm={(destinationId) => {
+                const cloned = handleCloneProductBumps(cloningProduct.id, destinationId)
+                const dest = products.find(p => p.id === destinationId)
+                if (cloned > 0) {
+                  rootMessage.success(`${cloned} bump${cloned !== 1 ? 's clonados' : ' clonado'} para ${dest?.name || 'o produto'}`)
+                }
+                setCloningProduct(null)
+              }}
             />
           </>
         )}
