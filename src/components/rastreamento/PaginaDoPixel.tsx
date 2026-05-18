@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import {
+  Alert,
   Breadcrumb,
   Button,
   DatePicker,
@@ -18,7 +19,7 @@ import {
 import dayjs from 'dayjs'
 import { Home, ChevronLeft, Plus, Search, Trash2, HelpCircle, ChevronRight, Settings, BarChart3, Activity, FilterX } from 'lucide-react'
 import ConfigurarPixelModal, { type ModalMode, type PixelConfig } from './ConfigurarPixelModal'
-import DemoBar from '../DemoBar'
+import DemoBar, { DemoStateSegmented, type DemoState } from '../DemoBar'
 import { EduzzLogo, CheckoutSunLogo } from '../Logos'
 import { buildRangePresets } from '../../utils/datePresets'
 
@@ -122,7 +123,51 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
   const [logStatusFilter, setLogStatusFilter] = useState<string | null>(null)
   const [logPeriodoFilter, setLogPeriodoFilter] = useState<string | null>('ultimos_30')
   const [logCustomRange, setLogCustomRange] = useState<[string, string] | null>(null)
-  const [demoState, setDemoState] = useState<'normal' | 'no-events'>('normal')
+  const [demoState, setDemoState] = useState<DemoState>('ativo')
+  const semDados = demoState !== 'ativo' && demoState !== 'erro'
+  const stateBanner = (() => {
+    if (demoState === 'nao-configurado') {
+      return (
+        <Alert
+          type="info"
+          showIcon
+          message="Pixel ainda não configurado"
+          description="Vincule produtos e eventos para começar a rastrear."
+        />
+      )
+    }
+    if (demoState === 'em-preenchimento') {
+      return (
+        <Alert
+          type="warning"
+          showIcon
+          message="Pixel em preenchimento"
+          description="Termine a configuração para ativar o rastreamento."
+        />
+      )
+    }
+    if (demoState === 'aguardando') {
+      return (
+        <Alert
+          type="info"
+          showIcon
+          message="Aguardando primeiros eventos"
+          description="O pixel está ativo. Assim que houver tráfego, os eventos começarão a aparecer aqui."
+        />
+      )
+    }
+    if (demoState === 'erro') {
+      return (
+        <Alert
+          type="error"
+          showIcon
+          message="Falhas no envio de eventos"
+          description="Alguns disparos não chegaram ao destino. Verifique os logs abaixo."
+        />
+      )
+    }
+    return null
+  })()
   const [simulateSaveError, setSimulateSaveError] = useState(false)
   const [expandedId, setExpandedId] = useState<number | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
@@ -337,7 +382,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
       : (logRangePresets.find((p) => p.key === logPeriodoFilter)?.label ?? 'Últimos 30 dias')
 
   // Datasets dependentes do estado de demo
-  const logsBase = demoState === 'no-events' ? [] : logsDeEnvio
+  const logsBase = semDados ? [] : logsDeEnvio
   const produtosBase = produtos
 
   const logsFiltrados = logsBase.filter((log) => {
@@ -490,7 +535,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
   }
 
   // Etapas do funil usando os mesmos eventos cadastráveis (topo → fundo)
-  const semDadosFunil = demoState === 'no-events'
+  const semDadosFunil = semDados
   const funilEtapas = [
     { label: 'PageView', valor: semDadosFunil ? 0 : 10200, cor: '#2B4ACF' },
     { label: 'FormInteraction', valor: semDadosFunil ? 0 : 4590, cor: 'var(--ant-color-warning)' },
@@ -610,6 +655,8 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                 </Button>
               </div>
             </div>
+
+            {stateBanner}
 
             {/* Tabs: Produtos / Logs de Eventos */}
             <Tabs
@@ -1446,19 +1493,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
       </Layout>
 
       <DemoBar>
-        <label className="flex items-center gap-2 text-xs text-slate-600">
-          <span>Estado da página:</span>
-          <Select
-            size="small"
-            value={demoState}
-            onChange={(v) => setDemoState(v)}
-            options={[
-              { value: 'normal', label: 'Estado normal' },
-              { value: 'no-events', label: 'Pixel novo (sem eventos)' },
-            ]}
-            className="!w-56"
-          />
-        </label>
+        <DemoStateSegmented value={demoState} onChange={setDemoState} />
         <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-600">
           <input
             type="checkbox"

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, createContext, useContext } from 'react'
 import {
+  Alert,
   App as AntdApp,
   Breadcrumb,
   Button,
@@ -57,7 +58,30 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { EduzzLogo, CheckoutSunLogo } from '../Logos'
-import DemoBar from '../DemoBar'
+import DemoBar, { DemoStateSegmented } from '../DemoBar'
+
+function applyDemoState(baseProducts, state) {
+  switch (state) {
+    case 'nao-configurado':
+      return baseProducts.map(p => ({ ...p, bumps: [] }))
+    case 'em-preenchimento':
+      return baseProducts.map(p =>
+        p.bumps.length > 0
+          ? { ...p, bumps: p.bumps.map(b => ({ ...b, active: false })) }
+          : p,
+      )
+    case 'aguardando':
+      return baseProducts.map(p =>
+        p.bumps.length > 0
+          ? { ...p, bumps: p.bumps.map(b => ({ ...b, salesCount: 0 })) }
+          : p,
+      )
+    case 'erro':
+    case 'ativo':
+    default:
+      return baseProducts
+  }
+}
 
 const { Sider, Content } = Layout
 
@@ -1349,8 +1373,7 @@ export default function PaginaOrderBump({ onNavigate }) {
   const [drawerProduct, setDrawerProduct] = useState(null)
   const [createOpen, setCreateOpen] = useState(false)
   const [cloningProduct, setCloningProduct] = useState(null)
-  // Demo: força a tela de "nenhum bump configurado".
-  const [emptyState, setEmptyState] = useState(false)
+  const [demoState, setDemoState] = useState('ativo')
   const { message: rootMessage } = AntdApp.useApp()
 
   const handleUpdateProduct = (updated) => {
@@ -1380,13 +1403,48 @@ export default function PaginaOrderBump({ onNavigate }) {
     return clonedBumps.length
   }
 
-  const productsWithBumps = emptyState ? [] : products.filter(p => p.bumps.length > 0)
+  const displayProducts = applyDemoState(products, demoState)
+  const productsWithBumps = displayProducts.filter(p => p.bumps.length > 0)
   const filtered = search
     ? productsWithBumps.filter(p => {
         const q = search.toLowerCase()
         return p.name.toLowerCase().includes(q) || p.id.includes(q)
       })
     : productsWithBumps
+
+  const stateBanner = (() => {
+    if (demoState === 'em-preenchimento') {
+      return (
+        <Alert
+          type="warning"
+          showIcon
+          message="Você tem order bumps em preenchimento"
+          description="Os bumps abaixo estão desativados e não estão sendo exibidos no checkout. Ative-os assim que finalizar a configuração."
+        />
+      )
+    }
+    if (demoState === 'aguardando') {
+      return (
+        <Alert
+          type="info"
+          showIcon
+          message="Aguardando primeiras vendas"
+          description="Seus order bumps já estão ativos. Assim que houver compras com bump, as métricas começarão a aparecer aqui."
+        />
+      )
+    }
+    if (demoState === 'erro') {
+      return (
+        <Alert
+          type="error"
+          showIcon
+          message="Não foi possível carregar os order bumps"
+          description="Ocorreu uma falha ao buscar seus dados. Tente novamente em instantes."
+        />
+      )
+    }
+    return null
+  })()
 
   return (
     <NavContext.Provider value={onNavigate}>
@@ -1414,7 +1472,9 @@ export default function PaginaOrderBump({ onNavigate }) {
               )}
             </div>
 
-            <KpisRow products={products} />
+            {stateBanner}
+
+            <KpisRow products={displayProducts} />
 
             {productsWithBumps.length === 0 ? (
               <div className="border border-dashed border-(--ant-color-border) rounded-lg p-12 text-center flex flex-col items-center gap-3">
@@ -1488,15 +1548,7 @@ export default function PaginaOrderBump({ onNavigate }) {
       </AppShell>
 
       <DemoBar>
-        <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-600">
-          <input
-            type="checkbox"
-            checked={emptyState}
-            onChange={(e) => setEmptyState(e.target.checked)}
-            className="accent-(--ant-color-primary)"
-          />
-          Simular sem order bumps configurados
-        </label>
+        <DemoStateSegmented value={demoState} onChange={setDemoState} />
       </DemoBar>
     </NavContext.Provider>
   )
