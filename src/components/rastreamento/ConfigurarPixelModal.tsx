@@ -139,6 +139,8 @@ interface ConfigurarPixelModalProps {
   onClose: () => void
   onSave?: (config: PixelConfig) => void
   mode?: ModalMode
+  /** Controle de demo (vem de fora da interface) — força erro no salvamento. */
+  simulateSaveError?: boolean
 }
 
 export type InitiateCheckoutTrigger = 'pageview' | 'button' | null
@@ -161,6 +163,7 @@ export default function ConfigurarPixelModal({
   onClose,
   onSave,
   mode = { type: 'new' },
+  simulateSaveError = false,
 }: ConfigurarPixelModalProps) {
   const [step, setStep] = useState<Step>('select_provider')
   const [selectedProvider, setSelectedProvider] = useState<PixelProvider | null>(null)
@@ -182,7 +185,6 @@ export default function ConfigurarPixelModal({
 
   // Estados de feedback de salvamento (item 13)
   const [saveError, setSaveError] = useState<string | null>(null)
-  const [simulateSaveError, setSimulateSaveError] = useState(false)
   const bodyRef = useRef<HTMLDivElement | null>(null)
 
   // Quando um erro aparece (banner ou de validação), sobe o scroll do modal pro topo
@@ -285,7 +287,6 @@ export default function ConfigurarPixelModal({
     setInitiateCheckoutTrigger(null)
     setErrors({})
     setSaveError(null)
-    setSimulateSaveError(false)
   }
 
   const handleClose = () => {
@@ -896,24 +897,13 @@ export default function ConfigurarPixelModal({
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 border-t border-(--ant-color-split) flex items-center justify-between gap-3 sticky bottom-0 bg-white z-10">
-            <label className="flex items-center gap-2 cursor-pointer text-xs text-(--ant-color-text-tertiary)">
-              <input
-                type="checkbox"
-                checked={simulateSaveError}
-                onChange={(e) => setSimulateSaveError(e.target.checked)}
-                className="accent-(--ant-color-primary)"
-              />
-              Demo: simular erro ao salvar
-            </label>
-            <div className="flex gap-3">
-              <Button onClick={handleClose}>Cancelar</Button>
-              <Button type="primary" onClick={handleSave}>
-                {isBulk
-                  ? `Aplicar para ${selectedProdutos.length} item(ns)`
-                  : 'Aplicar'}
-              </Button>
-            </div>
+          <div className="px-6 py-4 border-t border-(--ant-color-split) flex items-center justify-end gap-3 sticky bottom-0 bg-white z-10">
+            <Button onClick={handleClose}>Cancelar</Button>
+            <Button type="primary" onClick={handleSave}>
+              {isBulk
+                ? `Aplicar para ${selectedProdutos.length} item(ns)`
+                : 'Aplicar'}
+            </Button>
           </div>
         </div>
       )}

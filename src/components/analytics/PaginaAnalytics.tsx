@@ -30,6 +30,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { EduzzLogo, CheckoutSunLogo } from '../Logos'
+import DemoBar from '../DemoBar'
 import TabPerformance from './TabPerformance'
 import TabTransacoes from './TabTransacoes'
 import TabPagamentos from './TabPagamentos'
@@ -156,6 +157,9 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { o
   const [activeTab, setActiveTab] = useState('Performance')
   const [isEditing, setIsEditing] = useState(false)
 
+  // Demo: força o estado "sem dados" em todos os widgets das tabs.
+  const [forceEmpty, setForceEmpty] = useState(false)
+
   // --- Filters state (with localStorage persistence) ---
   const [produtoFilter, setProdutoFilter] = useState<string[]>(() => {
     try { const v = localStorage.getItem('analytics_produtoFilter'); return v ? JSON.parse(v) : ['todos'] } catch { return ['todos'] }
@@ -279,7 +283,7 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { o
             />
           </Sider>
 
-          <Content className="bg-white flex flex-col gap-0 w-full">
+          <Content className="bg-white flex flex-col gap-0 w-full pb-24">
             {/* Edit mode bar */}
             {isEditing && (
               <div className="bg-(--ant-color-fill-tertiary) border-b border-(--ant-color-split) px-8 py-3 flex items-center justify-between sticky top-0 z-20">
@@ -432,7 +436,7 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { o
                 return {
                   key: tab,
                   label: tab,
-                  children: Component ? <Component isEditing={isEditing} hasData={periodo !== 'hoje'} /> : null,
+                  children: Component ? <Component isEditing={isEditing} hasData={!forceEmpty && periodo !== 'hoje'} /> : null,
                 }
               })}
               renderTabBar={(tabBarProps, DefaultTabBar) => (
@@ -531,6 +535,18 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { o
       >
         <Typography.Text>Você está prestes a excluir um filtro salvo, tem certeza que deseja continuar?</Typography.Text>
       </Modal>
+
+      <DemoBar>
+        <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-600">
+          <input
+            type="checkbox"
+            checked={forceEmpty}
+            onChange={(e) => setForceEmpty(e.target.checked)}
+            className="accent-(--ant-color-primary)"
+          />
+          Forçar estado sem dados (widgets)
+        </label>
+      </DemoBar>
     </>
   )
 }

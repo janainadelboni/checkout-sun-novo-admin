@@ -18,6 +18,7 @@ import {
 import dayjs from 'dayjs'
 import { Home, ChevronLeft, Plus, Search, Trash2, HelpCircle, ChevronRight, Settings, BarChart3, Activity, FilterX } from 'lucide-react'
 import ConfigurarPixelModal, { type ModalMode, type PixelConfig } from './ConfigurarPixelModal'
+import DemoBar from '../DemoBar'
 import { EduzzLogo, CheckoutSunLogo } from '../Logos'
 import { buildRangePresets } from '../../utils/datePresets'
 
@@ -122,6 +123,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
   const [logPeriodoFilter, setLogPeriodoFilter] = useState<string | null>('ultimos_30')
   const [logCustomRange, setLogCustomRange] = useState<[string, string] | null>(null)
   const [demoState, setDemoState] = useState<'normal' | 'no-events'>('normal')
+  const [simulateSaveError, setSimulateSaveError] = useState(false)
   const [expandedId, setExpandedId] = useState<number | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<ModalMode>({ type: 'new' })
@@ -567,7 +569,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
           </Sider>
 
           {/* Main Content */}
-          <Content className="p-8 bg-white flex flex-col gap-6 max-w-[1280px] mx-auto w-full">
+          <Content className="p-8 pb-24 bg-white flex flex-col gap-6 max-w-[1280px] mx-auto w-full">
             {/* Breadcrumb */}
             <Breadcrumb
               items={[
@@ -599,20 +601,6 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                {/* Toggle de demo dos estados */}
-                <div className="flex items-center gap-2">
-                  <Typography.Text type="secondary" className="text-xs">Demo:</Typography.Text>
-                  <Select
-                    size="small"
-                    value={demoState}
-                    onChange={(v) => setDemoState(v)}
-                    options={[
-                      { value: 'normal', label: 'Estado normal' },
-                      { value: 'no-events', label: 'Pixel novo (sem eventos)' },
-                    ]}
-                    className="!w-56"
-                  />
-                </div>
                 <Button
                   type="primary"
                   icon={<Plus size={14} />}
@@ -1456,12 +1444,39 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
           </Content>
         </Layout>
       </Layout>
+
+      <DemoBar>
+        <label className="flex items-center gap-2 text-xs text-slate-600">
+          <span>Estado da página:</span>
+          <Select
+            size="small"
+            value={demoState}
+            onChange={(v) => setDemoState(v)}
+            options={[
+              { value: 'normal', label: 'Estado normal' },
+              { value: 'no-events', label: 'Pixel novo (sem eventos)' },
+            ]}
+            className="!w-56"
+          />
+        </label>
+        <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-600">
+          <input
+            type="checkbox"
+            checked={simulateSaveError}
+            onChange={(e) => setSimulateSaveError(e.target.checked)}
+            className="accent-(--ant-color-primary)"
+          />
+          Simular erro ao salvar no modal
+        </label>
+      </DemoBar>
+
       {/* Modal de configuracao de pixel */}
       <ConfigurarPixelModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onSave={handleSaveConfig}
         mode={modalMode}
+        simulateSaveError={simulateSaveError}
       />
 
       {/* Modal de dupla confirmação para configuração em massa */}

@@ -57,6 +57,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { EduzzLogo, CheckoutSunLogo } from '../Logos'
+import DemoBar from '../DemoBar'
 
 const { Sider, Content } = Layout
 
@@ -1158,7 +1159,7 @@ function AppShell({ children }) {
             ]}
           />
         </Sider>
-        <Content className="p-8 bg-(--ant-color-bg-container) flex flex-col gap-6 w-full">
+        <Content className="p-8 pb-24 bg-(--ant-color-bg-container) flex flex-col gap-6 w-full">
           {children}
         </Content>
       </Layout>
@@ -1348,6 +1349,8 @@ export default function PaginaOrderBump({ onNavigate }) {
   const [drawerProduct, setDrawerProduct] = useState(null)
   const [createOpen, setCreateOpen] = useState(false)
   const [cloningProduct, setCloningProduct] = useState(null)
+  // Demo: força a tela de "nenhum bump configurado".
+  const [emptyState, setEmptyState] = useState(false)
   const { message: rootMessage } = AntdApp.useApp()
 
   const handleUpdateProduct = (updated) => {
@@ -1377,7 +1380,7 @@ export default function PaginaOrderBump({ onNavigate }) {
     return clonedBumps.length
   }
 
-  const productsWithBumps = products.filter(p => p.bumps.length > 0)
+  const productsWithBumps = emptyState ? [] : products.filter(p => p.bumps.length > 0)
   const filtered = search
     ? productsWithBumps.filter(p => {
         const q = search.toLowerCase()
@@ -1483,6 +1486,18 @@ export default function PaginaOrderBump({ onNavigate }) {
           </>
         )}
       </AppShell>
+
+      <DemoBar>
+        <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-600">
+          <input
+            type="checkbox"
+            checked={emptyState}
+            onChange={(e) => setEmptyState(e.target.checked)}
+            className="accent-(--ant-color-primary)"
+          />
+          Simular sem order bumps configurados
+        </label>
+      </DemoBar>
     </NavContext.Provider>
   )
 }

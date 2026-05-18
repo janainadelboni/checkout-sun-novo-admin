@@ -14,6 +14,7 @@ import { Settings, Plus, History, AlertCircle } from "lucide-react"
 import { EduzzLogo, CheckoutSunLogo } from '../Logos'
 import { BRAND_COLORS } from '../../constants/brand-colors'
 import ConfigurarPixelModal, { type ModalMode, type PixelProvider } from './ConfigurarPixelModal'
+import DemoBar from '../DemoBar'
 
 
 const { Sider, Content } = Layout
@@ -261,7 +262,7 @@ export default function PaginaRastreamento({
           </Sider>
 
           {/* Main Content */}
-          <Content className="p-8 bg-white flex flex-col gap-6 max-w-[1280px] mx-auto w-full">
+          <Content className="p-8 pb-24 bg-white flex flex-col gap-6 max-w-[1280px] mx-auto w-full">
             {/* Title + Subtitle + Add button */}
             <div className="flex items-start justify-between">
               <div>
@@ -290,12 +291,6 @@ export default function PaginaRastreamento({
                   label: 'Pixel',
                   children: (
                     <div className="flex flex-col gap-4">
-                      {/* Toggle para demo */}
-                      <div className="flex items-center gap-2">
-                        <input type="checkbox" checked={emptyState} onChange={(e) => setEmptyState(e.target.checked)} className="accent-(--ant-color-primary)" />
-                        <Typography.Text type="secondary" >Simular primeiro acesso (sem pixels)</Typography.Text>
-                      </div>
-
                       {pixelCards.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-16 px-8 border border-dashed border-(--ant-color-border) rounded-lg bg-(--ant-color-fill-quaternary)">
                           <div className="text-4xl mb-4">📡</div>
@@ -433,6 +428,18 @@ export default function PaginaRastreamento({
           </Content>
         </Layout>
       </Layout>
+
+      <DemoBar>
+        <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-600">
+          <input
+            type="checkbox"
+            checked={emptyState}
+            onChange={(e) => setEmptyState(e.target.checked)}
+            className="accent-(--ant-color-primary)"
+          />
+          Simular primeiro acesso (sem pixels)
+        </label>
+      </DemoBar>
 
       <ConfigurarPixelModal
         open={modalOpen}
