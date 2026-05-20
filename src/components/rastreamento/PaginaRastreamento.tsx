@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import {
+  Alert,
   Button,
   Layout,
   Menu,
@@ -14,7 +15,7 @@ import { Settings, Plus, History, AlertCircle } from "lucide-react"
 import { EduzzLogo, CheckoutSunLogo } from '../Logos'
 import { BRAND_COLORS } from '../../constants/brand-colors'
 import ConfigurarPixelModal, { type ModalMode, type PixelProvider } from './ConfigurarPixelModal'
-import DemoBar from '../DemoBar'
+import DemoBar, { DemoStateSegmented, type DemoState } from '../DemoBar'
 
 
 const { Sider, Content } = Layout
@@ -207,8 +208,35 @@ export default function PaginaRastreamento({
 }: PaginaRastreamentoProps) {
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<ModalMode>({ type: 'new' })
-  const [emptyState, setEmptyState] = useState(false)
-  const pixelCards = emptyState ? [] : pixelCardsIniciais
+  const [demoState, setDemoState] = useState<DemoState>('ativo')
+  const pixelCards: PixelCard[] = (() => {
+    switch (demoState) {
+      case 'nao-configurado':
+        return []
+      case 'erro':
+        return pixelCardsIniciais.map((c) => ({
+          ...c,
+          status: 'error' as const,
+          errorMessage: c.errorMessage ?? 'Erro de configuração — verifique os dados do pixel',
+        }))
+      case 'ativo':
+      default:
+        return pixelCardsIniciais
+    }
+  })()
+  const stateBanner = (() => {
+    if (demoState === 'erro') {
+      return (
+        <Alert
+          type="error"
+          showIcon
+          message="Falha em pixels configurados"
+          description="Um ou mais pixels apresentaram erro. Revise as configurações destacadas abaixo."
+        />
+      )
+    }
+    return null
+  })()
   const [historicoModal, setHistoricoModal] = useState<{ open: boolean; card: PixelCard | null }>({ open: false, card: null })
   const [historicoPagina, setHistoricoPagina] = useState(1)
   const HISTORICO_POR_PAGINA = 10
@@ -291,6 +319,8 @@ export default function PaginaRastreamento({
                   label: 'Pixel',
                   children: (
                     <div className="flex flex-col gap-4">
+                      {stateBanner}
+
                       {pixelCards.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-16 px-8 border border-dashed border-(--ant-color-border) rounded-lg bg-(--ant-color-fill-quaternary)">
                           <div className="text-4xl mb-4">📡</div>
@@ -430,15 +460,11 @@ export default function PaginaRastreamento({
       </Layout>
 
       <DemoBar>
-        <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-600">
-          <input
-            type="checkbox"
-            checked={emptyState}
-            onChange={(e) => setEmptyState(e.target.checked)}
-            className="accent-(--ant-color-primary)"
-          />
-          Simular primeiro acesso (sem pixels)
-        </label>
+        <DemoStateSegmented
+          value={demoState}
+          onChange={setDemoState}
+          states={['nao-configurado', 'ativo', 'erro']}
+        />
       </DemoBar>
 
       <ConfigurarPixelModal

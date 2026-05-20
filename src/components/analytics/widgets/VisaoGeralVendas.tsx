@@ -74,17 +74,17 @@ export function VisaoGeralVendas() {
         {hoverIndex !== null && (() => {
           const x = toX(hoverIndex)
           const tooltipW = 200
-          const tooltipH = 52
+          const tooltipH = 56
           const tooltipX = x + tooltipW + 10 > width ? x - tooltipW - 10 : x + 10
           const tooltipY = 10
           return (
             <g>
               <rect x={tooltipX} y={tooltipY} width={tooltipW} height={tooltipH} rx="4" fill="rgba(0,0,0,0.8)" />
-              <text x={tooltipX + 8} y={tooltipY + 16} fill="#fff" fontSize="10" fontWeight="600">{meses[hoverIndex]}</text>
-              <circle cx={tooltipX + 12} cy={tooltipY + 30} r="3" fill="var(--ant-color-warning)" />
-              <text x={tooltipX + 20} y={tooltipY + 33} fill="rgba(255,255,255,0.8)" fontSize="9">Valor: {formatCurrency(valorTransacionado[hoverIndex])}</text>
-              <circle cx={tooltipX + 12} cy={tooltipY + 44} r="3" fill="#2BBCCF" />
-              <text x={tooltipX + 20} y={tooltipY + 47} fill="rgba(255,255,255,0.8)" fontSize="9">Volume: {volumeTransacoes[hoverIndex]} transações</text>
+              <text x={tooltipX + 8} y={tooltipY + 15} fill="#fff" fontSize="10" fontWeight="600">{meses[hoverIndex]}</text>
+              <circle cx={tooltipX + 12} cy={tooltipY + 29} r="3" fill="var(--ant-color-warning)" />
+              <text x={tooltipX + 20} y={tooltipY + 32} fill="rgba(255,255,255,0.8)" fontSize="9">Valor: {formatCurrency(valorTransacionado[hoverIndex])}</text>
+              <circle cx={tooltipX + 12} cy={tooltipY + 43} r="3" fill="#2BBCCF" />
+              <text x={tooltipX + 20} y={tooltipY + 46} fill="rgba(255,255,255,0.8)" fontSize="9">Volume: {volumeTransacoes[hoverIndex]} transações</text>
             </g>
           )
         })()}

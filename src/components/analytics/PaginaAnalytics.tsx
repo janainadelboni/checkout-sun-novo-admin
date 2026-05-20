@@ -1,5 +1,6 @@
 import { cloneElement, useState, type CSSProperties, type ReactElement } from 'react'
 import {
+  Alert,
   Button,
   DatePicker,
   Input,
@@ -30,7 +31,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { EduzzLogo, CheckoutSunLogo } from '../Logos'
-import DemoBar from '../DemoBar'
+import DemoBar, { DemoStateSegmented, type DemoState } from '../DemoBar'
 import TabPerformance from './TabPerformance'
 import TabTransacoes from './TabTransacoes'
 import TabPagamentos from './TabPagamentos'
@@ -157,8 +158,41 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { o
   const [activeTab, setActiveTab] = useState('Performance')
   const [isEditing, setIsEditing] = useState(false)
 
-  // Demo: força o estado "sem dados" em todos os widgets das tabs.
-  const [forceEmpty, setForceEmpty] = useState(false)
+  const [demoState, setDemoState] = useState<DemoState>('ativo')
+  const demoHasData = demoState === 'ativo' || demoState === 'erro'
+  const stateBanner = (() => {
+    if (demoState === 'nao-configurado') {
+      return (
+        <Alert
+          type="info"
+          showIcon
+          message="Nenhum produto configurado"
+          description="Configure ao menos um produto para começar a acompanhar métricas de vendas."
+        />
+      )
+    }
+    if (demoState === 'aguardando') {
+      return (
+        <Alert
+          type="info"
+          showIcon
+          message="Aguardando primeiras vendas"
+          description="Tudo pronto — assim que houver vendas, os números aparecerão aqui."
+        />
+      )
+    }
+    if (demoState === 'erro') {
+      return (
+        <Alert
+          type="error"
+          showIcon
+          message="Falha ao carregar parte das métricas"
+          description="Alguns indicadores podem estar incompletos. Tente novamente em instantes."
+        />
+      )
+    }
+    return null
+  })()
 
   // --- Filters state (with localStorage persistence) ---
   const [produtoFilter, setProdutoFilter] = useState<string[]>(() => {
@@ -427,6 +461,8 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { o
               </div>
             </div>
 
+            {stateBanner}
+
             {/* Tabs */}
             <Tabs
               activeKey={activeTab}
@@ -436,7 +472,7 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { o
                 return {
                   key: tab,
                   label: tab,
-                  children: Component ? <Component isEditing={isEditing} hasData={!forceEmpty && periodo !== 'hoje'} /> : null,
+                  children: Component ? <Component isEditing={isEditing} hasData={demoHasData && periodo !== 'hoje'} /> : null,
                 }
               })}
               renderTabBar={(tabBarProps, DefaultTabBar) => (
@@ -537,15 +573,11 @@ export default function PaginaAnalytics({ onVoltar: _onVoltar, onNavigate }: { o
       </Modal>
 
       <DemoBar>
-        <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-600">
-          <input
-            type="checkbox"
-            checked={forceEmpty}
-            onChange={(e) => setForceEmpty(e.target.checked)}
-            className="accent-(--ant-color-primary)"
-          />
-          Forçar estado sem dados (widgets)
-        </label>
+        <DemoStateSegmented
+          value={demoState}
+          onChange={setDemoState}
+          states={['nao-configurado', 'aguardando', 'ativo', 'erro']}
+        />
       </DemoBar>
     </>
   )

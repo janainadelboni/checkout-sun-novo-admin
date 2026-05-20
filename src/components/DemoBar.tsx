@@ -1,5 +1,38 @@
 import type { ReactNode } from 'react'
-import { Typography } from 'antd'
+import { Segmented, Typography } from 'antd'
+
+export const DEMO_STATES = [
+  { value: 'nao-configurado', label: 'nao-configurado' },
+  { value: 'em-preenchimento', label: 'em-preenchimento' },
+  { value: 'aguardando', label: 'aguardando' },
+  { value: 'ativo', label: 'ativo' },
+  { value: 'erro', label: 'erro' },
+] as const
+
+export type DemoState = typeof DEMO_STATES[number]['value']
+
+interface DemoStateSegmentedProps {
+  value: DemoState
+  onChange: (v: DemoState) => void
+  states?: readonly DemoState[]
+}
+
+export function DemoStateSegmented({ value, onChange, states }: DemoStateSegmentedProps) {
+  const options = states
+    ? DEMO_STATES.filter((s) => states.includes(s.value))
+    : DEMO_STATES
+  return (
+    <label className="flex items-center gap-2 text-xs text-slate-600">
+      <span>Estado:</span>
+      <Segmented
+        size="small"
+        value={value}
+        onChange={(v) => onChange(v as DemoState)}
+        options={options as unknown as { value: string; label: string }[]}
+      />
+    </label>
+  )
+}
 
 /**
  * Barra fixa no rodapé com controles de demo (não fazem parte da UI).

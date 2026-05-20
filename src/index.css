@@ -28,3 +28,8 @@
 body {
   @apply font-sans text-base m-0 p-0 tracking-wide;
 }
+
+/* Tooltip: compensa half-leading extra abaixo do descender em multi-line */
+.ant-tooltip-inner {
+  padding-block: 7px 4px;
+}

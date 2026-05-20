@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, createContext, useContext } from 'react'
 import {
+  Alert,
   App as AntdApp,
   Breadcrumb,
   Button,
@@ -41,6 +42,7 @@ import {
   Link as LinkIcon,
   QrCode,
   ExternalLink,
+  AlertCircle,
 } from 'lucide-react'
 import {
   DndContext,
@@ -57,7 +59,29 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { EduzzLogo, CheckoutSunLogo } from '../Logos'
-import DemoBar from '../DemoBar'
+import DemoBar, { DemoStateSegmented } from '../DemoBar'
+
+function applyDemoState(baseProducts, state) {
+  switch (state) {
+    case 'nao-configurado':
+      return baseProducts.map(p => ({ ...p, bumps: [] }))
+    case 'em-preenchimento':
+      return baseProducts.map(p =>
+        p.bumps.length > 0
+          ? { ...p, bumpsEnabled: false, bumps: p.bumps.map(b => ({ ...b, active: false })) }
+          : p,
+      )
+    case 'erro':
+      return baseProducts.map(p =>
+        p.bumps.length === 0
+          ? p
+          : { ...p, error: p.error ?? 'Falha ao sincronizar com o checkout. Tente novamente em instantes.' }
+      )
+    case 'ativo':
+    default:
+      return baseProducts
+  }
+}
 
 const { Sider, Content } = Layout
 
@@ -92,7 +116,9 @@ const INITIAL_PRODUCTS = [
     { id: '2030749', name: 'Acesso 12 meses', priceCents: 14700 },
     { id: '2030750', name: 'Acesso vitalício', priceCents: 24700 },
   ]},
-  { id: '2099100', name: 'Masterclass de Copywriting', type: 'infoproduto', priceCents: 6700, bumps: [], variations: [
+  { id: '2099100', name: 'Masterclass de Copywriting', type: 'infoproduto', priceCents: 6700, bumps: [
+    { id: 'b4', bumpProductId: '2112200', priceCents: 2700, salesLimit: null, salesCount: 12, copy: 'Kit de ferramentas práticas pra você aplicar o conteúdo da masterclass.', active: true, error: 'Produto vinculado a este bump foi removido. Selecione outro produto.' },
+  ], variations: [
     { id: '2099101', name: 'Lote 1 — Earlybird', priceCents: 4700 },
     { id: '2099102', name: 'Lote 2 — Padrão', priceCents: 6700 },
     { id: '2099103', name: 'Lote 3 — VIP', priceCents: 9700 },
@@ -103,7 +129,9 @@ const INITIAL_PRODUCTS = [
     { id: '2576291', name: 'Lote 1', priceCents: 12000 },
     { id: '2576292', name: 'Lote 2', priceCents: 15000 },
   ]},
-  { id: '2073334', name: 'Ebook Vendas Premium', type: 'infoproduto', priceCents: 4700, bumps: [] },
+  { id: '2073334', name: 'Ebook Vendas Premium', type: 'infoproduto', priceCents: 4700, bumpsEnabled: false, bumps: [
+    { id: 'b5', bumpProductId: '2112200', priceCents: 1900, salesLimit: 200, salesCount: 0, copy: 'Complemento perfeito pra potencializar seus resultados.', active: false },
+  ]},
   { id: '9104452', name: 'Camiseta Oficial Eduzz', type: 'fisico', priceCents: 8990, bumps: [] },
   { id: '2411153', name: 'Plano Pro Anual', type: 'assinatura', priceCents: 49700, bumps: [] },
 ]
@@ -202,13 +230,14 @@ function KpiCard({ label, value, hint }) {
 function KpisRow({ products }) {
   const withBump = products.filter(p => p.bumps.length > 0).length
   const withoutBump = products.length - withBump
+  const hasAnyBump = withBump > 0
   return (
     <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
       <KpiCard label="Produtos com bump" value={withBump} />
       <KpiCard label="Produtos sem bump" value={withoutBump} />
-      <KpiCard label="Participação nas vendas" value="12,4%" hint="Vendas com bump aceito / total de vendas (últimos 30 dias)" />
-      <KpiCard label="Taxa de aceitação" value="34,7%" hint="Compradores que aceitaram o bump quando exibido" />
-      <KpiCard label="Impacto no checkout" value="+ R$ 8.342" hint="Receita adicional gerada por bumps (últimos 30 dias)" />
+      <KpiCard label="Participação nas vendas" value={hasAnyBump ? "12,4%" : "0%"} hint="Vendas com bump aceito / total de vendas (últimos 30 dias)" />
+      <KpiCard label="Taxa de aceitação" value={hasAnyBump ? "34,7%" : "0%"} hint="Compradores que aceitaram o bump quando exibido" />
+      <KpiCard label="Impacto no checkout" value={hasAnyBump ? "+ R$ 8.342" : "R$ 0"} hint="Receita adicional gerada por bumps (últimos 30 dias)" />
     </div>
   )
 }
@@ -707,7 +736,7 @@ function BumpForm({ mainProduct, allProducts, existingBumpProductIds, editing, o
 
         <Divider className="!my-0" />
 
-        {/* Página de obrigado */}
+        {/* Bump pós-compra */}
         <div className="flex items-start gap-3">
           <Switch
             checked={includeOnThankYouPage}
@@ -716,9 +745,9 @@ function BumpForm({ mainProduct, allProducts, existingBumpProductIds, editing, o
             className="mt-0.5"
           />
           <div className="flex-1 flex flex-col gap-0.5">
-            <Typography.Text>Incluir este bump na página de obrigado</Typography.Text>
+            <Typography.Text>Bump pós-compra</Typography.Text>
             <Typography.Text type="secondary">
-              Re-oferta este bump após a compra para quem não o adquiriu no checkout
+              Re-oferta este bump na página de obrigado para quem não o adquiriu no checkout
             </Typography.Text>
           </div>
         </div>
@@ -1082,52 +1111,78 @@ function BumpsDetailView({ product, allProducts, onClose, onUpdateProduct }) {
 function ProductRow({ product, onConfigure, onClone }) {
   const hasBumps = product.bumps.length > 0
   const bumpsEnabled = product.bumpsEnabled !== false
+  const bumpsWithError = product.bumps.filter(b => b.error)
+  const hasError = !!product.error || bumpsWithError.length > 0
+
+  const statusTag = hasError
+    ? <Tag color="error" className="m-0">Com erro</Tag>
+    : <Tag color={bumpsEnabled ? 'success' : 'default'} className="m-0">{bumpsEnabled ? 'Ativo' : 'Inativo'}</Tag>
 
   return (
     <div
       onClick={() => onConfigure(product)}
-      className="border border-(--ant-color-border) rounded-lg p-4 bg-(--ant-color-bg-container) flex items-center gap-4 cursor-pointer hover:border-(--ant-color-primary) hover:shadow-(--ant-box-shadow-tertiary) transition-all"
+      className={`border rounded-lg p-4 bg-(--ant-color-bg-container) flex flex-col gap-3 cursor-pointer transition-all ${
+        hasError
+          ? 'border-(--ant-color-error-border) hover:shadow-(--ant-box-shadow-tertiary)'
+          : 'border-(--ant-color-border) hover:border-(--ant-color-primary) hover:shadow-(--ant-box-shadow-tertiary)'
+      }`}
     >
-      <div className="flex-1 min-w-0 flex flex-col gap-1">
-        <Typography.Text strong className="truncate">
-          {product.id} - {product.name}
-        </Typography.Text>
-        <div className="flex items-center gap-2 flex-wrap">
-          <Tag>{PRODUCT_TYPES[product.type]}</Tag>
-          <Typography.Text type="secondary">{fmtBRL(product.priceCents)}</Typography.Text>
+      <div className="flex items-center gap-4">
+        <div className="flex-1 min-w-0 flex flex-col gap-1">
+          <Typography.Text strong className="truncate">
+            {product.id} - {product.name}
+          </Typography.Text>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Tag>{PRODUCT_TYPES[product.type]}</Tag>
+            <Typography.Text type="secondary">{fmtBRL(product.priceCents)}</Typography.Text>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 flex-shrink-0">
+          {hasBumps ? (
+            <div className="flex items-center gap-2">
+              {statusTag}
+              <Typography.Text type="secondary">
+                {product.bumps.length} bump{product.bumps.length !== 1 ? 's' : ''}
+              </Typography.Text>
+            </div>
+          ) : (
+            <Typography.Text type="secondary">Sem bump</Typography.Text>
+          )}
+
+          {hasBumps && onClone && (
+            <Tooltip title="Clonar bumps para outro produto">
+              <Button
+                icon={<Copy size={14} />}
+                onClick={(e) => { e.stopPropagation(); onClone(product) }}
+              />
+            </Tooltip>
+          )}
+          <Button
+            type={hasBumps ? 'default' : 'primary'}
+            icon={hasBumps ? <Settings size={14} /> : <Plus size={14} />}
+            onClick={(e) => { e.stopPropagation(); onConfigure(product) }}
+          >
+            {hasBumps ? 'Gerenciar' : 'Configurar bump'}
+          </Button>
         </div>
       </div>
 
-      <div className="flex items-center gap-3 flex-shrink-0">
-        {hasBumps ? (
-          <div className="flex items-center gap-2">
-            <Tag color={bumpsEnabled ? 'success' : 'default'} className="m-0">
-              {bumpsEnabled ? 'Ativo' : 'Inativo'}
-            </Tag>
-            <Typography.Text type="secondary">
-              {product.bumps.length} bump{product.bumps.length !== 1 ? 's' : ''}
-            </Typography.Text>
+      {hasError && (
+        <div className="bg-(--ant-color-error-bg) border border-(--ant-color-error-border) rounded-md px-3 py-2 flex items-start gap-2">
+          <AlertCircle size={14} className="text-(--ant-color-error) mt-0.5 flex-shrink-0" />
+          <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+            {product.error && (
+              <Typography.Text className="!text-(--ant-color-error)">{product.error}</Typography.Text>
+            )}
+            {bumpsWithError.map(b => (
+              <Typography.Text key={b.id} className="!text-(--ant-color-error)">
+                Bump: {b.error}
+              </Typography.Text>
+            ))}
           </div>
-        ) : (
-          <Typography.Text type="secondary">Sem bump</Typography.Text>
-        )}
-
-        {hasBumps && onClone && (
-          <Tooltip title="Clonar bumps para outro produto">
-            <Button
-              icon={<Copy size={14} />}
-              onClick={(e) => { e.stopPropagation(); onClone(product) }}
-            />
-          </Tooltip>
-        )}
-        <Button
-          type={hasBumps ? 'default' : 'primary'}
-          icon={hasBumps ? <Settings size={14} /> : <Plus size={14} />}
-          onClick={(e) => { e.stopPropagation(); onConfigure(product) }}
-        >
-          {hasBumps ? 'Gerenciar' : 'Configurar bump'}
-        </Button>
-      </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -1346,11 +1401,11 @@ function CreateBumpModal({ open, products, onPick, onCancel }) {
 export default function PaginaOrderBump({ onNavigate }) {
   const [products, setProducts] = useState(INITIAL_PRODUCTS)
   const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('todos')
   const [drawerProduct, setDrawerProduct] = useState(null)
   const [createOpen, setCreateOpen] = useState(false)
   const [cloningProduct, setCloningProduct] = useState(null)
-  // Demo: força a tela de "nenhum bump configurado".
-  const [emptyState, setEmptyState] = useState(false)
+  const [demoState, setDemoState] = useState('ativo')
   const { message: rootMessage } = AntdApp.useApp()
 
   const handleUpdateProduct = (updated) => {
@@ -1380,13 +1435,36 @@ export default function PaginaOrderBump({ onNavigate }) {
     return clonedBumps.length
   }
 
-  const productsWithBumps = emptyState ? [] : products.filter(p => p.bumps.length > 0)
-  const filtered = search
-    ? productsWithBumps.filter(p => {
-        const q = search.toLowerCase()
-        return p.name.toLowerCase().includes(q) || p.id.includes(q)
-      })
-    : productsWithBumps
+  const displayProducts = applyDemoState(products, demoState)
+  const productsWithBumps = displayProducts.filter(p => p.bumps.length > 0)
+  const hasProductError = p => !!p.error || p.bumps.some(b => b.error)
+  const matchesStatus = p => {
+    if (statusFilter === 'todos') return true
+    if (statusFilter === 'erro') return hasProductError(p)
+    if (hasProductError(p)) return false
+    const isActive = p.bumpsEnabled !== false
+    return statusFilter === 'ativo' ? isActive : !isActive
+  }
+  const filtered = productsWithBumps.filter(p => {
+    if (!matchesStatus(p)) return false
+    if (!search) return true
+    const q = search.toLowerCase()
+    return p.name.toLowerCase().includes(q) || p.id.includes(q)
+  })
+
+  const stateBanner = (() => {
+    if (demoState === 'em-preenchimento') {
+      return (
+        <Alert
+          type="warning"
+          showIcon
+          message="Você tem order bumps em preenchimento"
+          description="Os bumps abaixo estão desativados e não estão sendo exibidos no checkout. Ative-os assim que finalizar a configuração."
+        />
+      )
+    }
+    return null
+  })()
 
   return (
     <NavContext.Provider value={onNavigate}>
@@ -1414,7 +1492,9 @@ export default function PaginaOrderBump({ onNavigate }) {
               )}
             </div>
 
-            <KpisRow products={products} />
+            {stateBanner}
+
+            <KpisRow products={displayProducts} />
 
             {productsWithBumps.length === 0 ? (
               <div className="border border-dashed border-(--ant-color-border) rounded-lg p-12 text-center flex flex-col items-center gap-3">
@@ -1436,6 +1516,16 @@ export default function PaginaOrderBump({ onNavigate }) {
                     onChange={e => setSearch(e.target.value)}
                     className="max-w-90"
                     allowClear
+                  />
+                  <Segmented
+                    value={statusFilter}
+                    onChange={setStatusFilter}
+                    options={[
+                      { value: 'todos', label: 'Todos' },
+                      { value: 'ativo', label: 'Ativos' },
+                      { value: 'inativo', label: 'Inativos' },
+                      { value: 'erro', label: 'Com erro' },
+                    ]}
                   />
                   <Typography.Text type="secondary">
                     {filtered.length} de {productsWithBumps.length} produto{productsWithBumps.length !== 1 ? 's' : ''} com bump
@@ -1488,15 +1578,11 @@ export default function PaginaOrderBump({ onNavigate }) {
       </AppShell>
 
       <DemoBar>
-        <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-600">
-          <input
-            type="checkbox"
-            checked={emptyState}
-            onChange={(e) => setEmptyState(e.target.checked)}
-            className="accent-(--ant-color-primary)"
-          />
-          Simular sem order bumps configurados
-        </label>
+        <DemoStateSegmented
+          value={demoState}
+          onChange={setDemoState}
+          states={['nao-configurado', 'em-preenchimento', 'ativo', 'erro']}
+        />
       </DemoBar>
     </NavContext.Provider>
   )
