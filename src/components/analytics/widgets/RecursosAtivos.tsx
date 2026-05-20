@@ -31,6 +31,12 @@ const tipoColors: Record<string, string> = {
   'Recuperação': 'blue',
 }
 
+const headerWithTooltip = (short: string, full: string) => (
+  <Tooltip title={full}>
+    <span>{short}</span>
+  </Tooltip>
+)
+
 export function RecursosAtivos() {
   const columns = [
     {
@@ -48,17 +54,17 @@ export function RecursosAtivos() {
       render: (tipo: string) => <Tag color={tipoColors[tipo] || 'default'}>{tipo}</Tag>,
     },
     {
-      title: 'Valor transacionado',
+      title: headerWithTooltip('Valor', 'Valor transacionado'),
       dataIndex: 'valorTransacionado',
       key: 'valorTransacionado',
-      width: 180,
+      width: 140,
       sorter: (a: Recurso, b: Recurso) => a.valorTransacionado - b.valorTransacionado,
       render: (valor: number) => `R$ ${valor.toLocaleString('pt-BR')}`,
     },
     {
-      title: 'Participação nas vendas',
+      title: headerWithTooltip('Participação', 'Participação nas vendas'),
       key: 'participacao',
-      width: 160,
+      width: 130,
       sorter: (a: Recurso, b: Recurso) => parseFloat(a.participacaoPercent) - parseFloat(b.participacaoPercent),
       render: (_: unknown, r: Recurso) => (
         <Tooltip title={`${r.participacaoCompras.toLocaleString('pt-BR')} compras`}>
@@ -67,10 +73,10 @@ export function RecursosAtivos() {
       ),
     },
     {
-      title: 'Taxa de aceitação',
+      title: headerWithTooltip('Aceitação', 'Taxa de aceitação'),
       dataIndex: 'taxaAceitacao',
       key: 'taxaAceitacao',
-      width: 130,
+      width: 120,
       sorter: (a: Recurso, b: Recurso) => parseFloat(a.taxaAceitacao) - parseFloat(b.taxaAceitacao),
       render: (taxa: string) => (
         <Tooltip title="das exibições">
@@ -79,10 +85,10 @@ export function RecursosAtivos() {
       ),
     },
     {
-      title: 'Impacto no checkout',
+      title: headerWithTooltip('Impacto', 'Impacto no checkout'),
       dataIndex: 'impacto',
       key: 'impacto',
-      width: 120,
+      width: 110,
       sorter: (a: Recurso, b: Recurso) => parseFloat(a.impacto) - parseFloat(b.impacto),
       render: (impacto: string) => impacto,
     },

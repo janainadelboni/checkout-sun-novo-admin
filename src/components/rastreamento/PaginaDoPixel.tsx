@@ -124,35 +124,15 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
   const [logPeriodoFilter, setLogPeriodoFilter] = useState<string | null>('ultimos_30')
   const [logCustomRange, setLogCustomRange] = useState<[string, string] | null>(null)
   const [demoState, setDemoState] = useState<DemoState>('ativo')
-  const semDados = demoState !== 'ativo' && demoState !== 'erro'
+  const semDados = demoState === 'aguardando'
   const stateBanner = (() => {
-    if (demoState === 'nao-configurado') {
-      return (
-        <Alert
-          type="info"
-          showIcon
-          message="Pixel ainda não configurado"
-          description="Vincule produtos e eventos para começar a rastrear."
-        />
-      )
-    }
-    if (demoState === 'em-preenchimento') {
-      return (
-        <Alert
-          type="warning"
-          showIcon
-          message="Pixel em preenchimento"
-          description="Termine a configuração para ativar o rastreamento."
-        />
-      )
-    }
     if (demoState === 'aguardando') {
       return (
         <Alert
           type="info"
           showIcon
           message="Aguardando primeiros eventos"
-          description="O pixel está ativo. Assim que houver tráfego, os eventos começarão a aparecer aqui."
+          description="O pixel está configurado. Assim que houver tráfego, os eventos começarão a aparecer aqui."
         />
       )
     }
@@ -535,14 +515,13 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
   }
 
   // Etapas do funil usando os mesmos eventos cadastráveis (topo → fundo)
-  const semDadosFunil = semDados
   const funilEtapas = [
-    { label: 'PageView', valor: semDadosFunil ? 0 : 10200, cor: '#2B4ACF' },
-    { label: 'FormInteraction', valor: semDadosFunil ? 0 : 4590, cor: 'var(--ant-color-warning)' },
-    { label: 'Lead', valor: semDadosFunil ? 0 : 2856, cor: '#2BBCCF' },
-    { label: 'AddPaymentInfo', valor: semDadosFunil ? 0 : 1820, cor: 'var(--ant-color-success)' },
-    { label: 'Initiatecheckout', valor: semDadosFunil ? 0 : 1224, cor: '#CF2B9E' },
-    { label: 'Purchase', valor: semDadosFunil ? 0 : 380, cor: '#6D2BCF' },
+    { label: 'PageView', valor: semDados ? 0 : 10200, cor: '#2B4ACF' },
+    { label: 'FormInteraction', valor: semDados ? 0 : 4590, cor: 'var(--ant-color-warning)' },
+    { label: 'Lead', valor: semDados ? 0 : 2856, cor: '#2BBCCF' },
+    { label: 'AddPaymentInfo', valor: semDados ? 0 : 1820, cor: 'var(--ant-color-success)' },
+    { label: 'Initiatecheckout', valor: semDados ? 0 : 1224, cor: '#CF2B9E' },
+    { label: 'Purchase', valor: semDados ? 0 : 380, cor: '#6D2BCF' },
   ]
   const funilTopo = funilEtapas[0].valor || 1
   const funilComPercent = funilEtapas.map((etapa, i) => {
@@ -753,12 +732,12 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                         <div className="flex gap-6 items-stretch">
                           {/* Funil - Esquerda */}
                           <div className="flex-1 flex flex-col justify-between">
-                            {semDadosFunil ? (
+                            {semDados ? (
                               <div className="flex flex-col items-center justify-center py-12 px-6 border border-dashed border-(--ant-color-border) rounded-lg bg-(--ant-color-fill-quaternary) h-full min-h-[280px]">
                                 <BarChart3 size={36} className="text-(--ant-color-text-quaternary) mb-3" />
-                                <Typography.Text strong className="mb-1">Sem dados no período</Typography.Text>
+                                <Typography.Text strong className="mb-1">Sem dados ainda</Typography.Text>
                                 <Typography.Text type="secondary" className="text-center max-w-[360px]">
-                                  Nenhum evento foi disparado nos últimos {funilPeriodo === 'ultimos_7' ? '7' : funilPeriodo === 'ultimos_15' ? '15' : funilPeriodo === 'ultimos_30' ? '30' : '90'} dias. Quando o pixel registrar eventos, eles aparecerão aqui.
+                                  O pixel está configurado, mas ainda não recebeu eventos. Assim que houver tráfego, o funil aparecerá aqui.
                                 </Typography.Text>
                               </div>
                             ) : (
@@ -807,7 +786,7 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
                             {/* Saúde do pixel */}
                             <div className="border border-(--ant-color-split) rounded-lg p-4 flex flex-col gap-2.5">
                               <Typography.Text type="secondary" className="font-medium">Saúde do pixel</Typography.Text>
-                              {semDadosFunil ? (
+                              {semDados ? (
                                 <div className="flex flex-col items-center gap-1.5 py-3">
                                   <Activity size={20} className="text-(--ant-color-text-quaternary)" />
                                   <Typography.Text type="secondary" className="text-center text-xs">
@@ -1493,13 +1472,18 @@ export default function PaginaDoPixel({ provider = 'ga4', onVoltar, onNavigate }
       </Layout>
 
       <DemoBar>
-        <DemoStateSegmented value={demoState} onChange={setDemoState} />
-        <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-600">
+        <DemoStateSegmented
+          value={demoState}
+          onChange={setDemoState}
+          states={['aguardando', 'ativo', 'erro']}
+        />
+        <label className={`flex items-center gap-2 text-xs ${demoState === 'erro' ? 'text-slate-400 cursor-not-allowed' : 'text-slate-600 cursor-pointer'}`}>
           <input
             type="checkbox"
             checked={simulateSaveError}
             onChange={(e) => setSimulateSaveError(e.target.checked)}
-            className="accent-(--ant-color-primary)"
+            disabled={demoState === 'erro'}
+            className="accent-(--ant-color-primary) disabled:cursor-not-allowed"
           />
           Simular erro ao salvar no modal
         </label>

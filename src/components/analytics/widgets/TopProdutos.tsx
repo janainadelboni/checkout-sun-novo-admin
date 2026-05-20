@@ -1,4 +1,4 @@
-import { Typography, Tag, Table } from 'antd'
+import { Tooltip, Typography, Tag, Table } from 'antd'
 import { Upload } from 'lucide-react'
 const topProdutos = [
   { key: '1', nome: 'Curso de Marketing Digital', tipo: 'Digital', valor: 42500, quantidade: 190, ticket: 223.68 },
@@ -36,10 +36,10 @@ export function TopProdutos() {
       render: (tipo: string) => <Tag color={tipoColors[tipo] || 'default'}>{tipo}</Tag>,
     },
     {
-      title: 'Valor transacionado',
+      title: <Tooltip title="Valor transacionado"><span>Valor</span></Tooltip>,
       dataIndex: 'valor',
       key: 'valor',
-      width: 200,
+      width: 150,
       sorter: (a: typeof topProdutos[0], b: typeof topProdutos[0]) => a.valor - b.valor,
       defaultSortOrder: 'descend' as const,
       render: (v: number) => <Typography.Text strong>R$ {v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</Typography.Text>,

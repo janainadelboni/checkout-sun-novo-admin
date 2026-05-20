@@ -213,14 +213,6 @@ export default function PaginaRastreamento({
     switch (demoState) {
       case 'nao-configurado':
         return []
-      case 'aguardando':
-        return pixelCardsIniciais.map((c) => ({
-          ...c,
-          configured: true,
-          status: 'active' as const,
-          errorMessage: undefined,
-          produtosCount: 0,
-        }))
       case 'erro':
         return pixelCardsIniciais.map((c) => ({
           ...c,
@@ -233,16 +225,6 @@ export default function PaginaRastreamento({
     }
   })()
   const stateBanner = (() => {
-    if (demoState === 'aguardando') {
-      return (
-        <Alert
-          type="info"
-          showIcon
-          message="Aguardando primeiros eventos"
-          description="Seus pixels já estão ativos. Assim que houver tráfego, os eventos começarão a aparecer aqui."
-        />
-      )
-    }
     if (demoState === 'erro') {
       return (
         <Alert
@@ -481,7 +463,7 @@ export default function PaginaRastreamento({
         <DemoStateSegmented
           value={demoState}
           onChange={setDemoState}
-          states={['nao-configurado', 'aguardando', 'ativo', 'erro']}
+          states={['nao-configurado', 'ativo', 'erro']}
         />
       </DemoBar>
 
